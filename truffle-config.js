@@ -54,7 +54,7 @@ module.exports = {
 
     kovan: {
       provider: function() {
-        return new HDWalletProvider('b917cdc9aaf65dbf5d9fb28ab9592f3730b30e6b1829e1c69abb4f798f3b39df', "https://kovan.infura.io/v3/1ed6cd5bcf5c4837b318dd08d981ba6d")
+        return new HDWalletProvider('PRIVATE KEY', "https://kovan.infura.io/v3/API KEY")
       },
       network_id: "*",
       from: "0xAEda61154aaF841250f3e0A6bb0dc12696549747"

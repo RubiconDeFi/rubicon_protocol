@@ -3,7 +3,7 @@ import json
 import time
 
 #Constants
-INFURA_URL_KOVAN = 'https://kovan.infura.io/v3/1ed6cd5bcf5c4837b318dd08d981ba6d' #HTTPProvider
+INFURA_URL_KOVAN = 'https://kovan.infura.io/v3/API KEY' #HTTPProvider
 GANACHE_CLI = 'http://127.0.0.1:8545'
 
 #Web3 Connection
