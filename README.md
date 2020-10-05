@@ -1,4 +1,3 @@
----
 The decentralized equity protocol of the Ethereum blockchain
 ---
 
