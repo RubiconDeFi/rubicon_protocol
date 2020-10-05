@@ -1,5 +1,5 @@
 ---
-description: The decentralized equity protocol of the Ethereum blockchain
+The decentralized equity protocol of the Ethereum blockchain
 ---
 
 # Rubicon Protocol
