@@ -1,14 +1,15 @@
 # Table of contents
 
 * [Rubicon Protocol](README.md)
-* [Feedback and Recommendations](feedback.md)
 
-## Contracts <a id="contracts-1"></a>
+## Contracts
 
-* [Matching Market](contracts-1/contracts.md)
-* [Untitled](contracts-1/untitled.md)
+* [Matching Market](contracts/matching-market.md)
+* [RBCN](contracts/untitled.md)
+* [Senate](contracts/senate.md)
+* [Timelock](contracts/timelock.md)
 
 ## Feedback <a id="feedback-1"></a>
 
-* [Untitled](feedback-1/untitled.md)
+* [Feedback Form and Contact Info](feedback-1/untitled.md)
 
