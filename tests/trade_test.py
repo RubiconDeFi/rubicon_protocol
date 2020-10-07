@@ -17,7 +17,7 @@ taker_adr = web3.eth.accounts[1]
 Ganache_PRVK_TKR = '0x4b6db5da457fb66d840fd41d4388ed48992c9deed8727ab69b4f3c8796c08ec8'
 maker_adr = web3.eth.accounts[2]
 Ganache_PRVK_MKR = '0xc9a52956aa938aa2f163917396e890237e0530e7ec9e314c3bf6653c75f069af'
-#deploy MatchingMarket.sol on ganache.
+#deploy RubiconMarket.sol on ganache.
 #Need to make sure the msg.sender is an admin account that is controlled by rubicon
 
 #addresses of deployed entities in test environment - CHANGES WITH RESET
@@ -30,14 +30,14 @@ MM_Adr_active = MM_Adr_G_0
 
 #*********************************STAGING**********************
 #initialize contracts...
-with open("./build/contracts/MatchingMarket.json") as mm:
+with open("./build/contracts/RubiconMarket.json") as mm:
     mm_info_json = json.load(mm)
     mm.close()
-MatchingMarket_abi = mm_info_json["abi"]
-MatchingMarket_contract = web3.eth.contract(address=MM_Adr_active,
-    abi = MatchingMarket_abi)
+RubiconMarket_abi = mm_info_json["abi"]
+RubiconMarket_contract = web3.eth.contract(address=MM_Adr_active,
+    abi = RubiconMarket_abi)
 
-print('Close time read value:', MatchingMarket_contract.functions.close_time().call())
+print('Close time read value:', RubiconMarket_contract.functions.close_time().call())
 print('\n')
 
 with open("./build/contracts/WETH9.json") as w9:
@@ -119,16 +119,16 @@ def send_transaction(encodedABI, sender, desc, to, value, sendIT, PK):
         return True
 
 #set min sell as admin_adr
-# minsellABI1 = MatchingMarket_contract.encodeABI(fn_name = 'setMinSell', args = [])
+# minsellABI1 = RubiconMarket_contract.encodeABI(fn_name = 'setMinSell', args = [])
 
 #Check Dai balance of Taker and WETH balance of Maker
 print('\n')
 print('*************Balance of participants pre trade****************')
 print('Balance of Taker in DAI:', Dai_contract.functions.balanceOf(taker_adr).call() / 1e18)
 print('Balance of Maker in WETH:', WETH_contract.functions.balanceOf(maker_adr).call() / 1e18)
-print('Is matching enabled?', MatchingMarket_contract.functions.matchingEnabled().call())
-print('Min sell for WETH:', MatchingMarket_contract.functions.getMinSell(WETH_Adr).call())
-print('Min sell for DAI:', MatchingMarket_contract.functions.getMinSell(DAI_Adr).call())
+print('Is matching enabled?', RubiconMarket_contract.functions.matchingEnabled().call())
+print('Min sell for WETH:', RubiconMarket_contract.functions.getMinSell(WETH_Adr).call())
+print('Min sell for DAI:', RubiconMarket_contract.functions.getMinSell(DAI_Adr).call())
 print('\n')
 time.sleep(2)
 #**************************TRADE TEST******************************
@@ -149,17 +149,17 @@ print('\n')
 
 time.sleep(2)
 #1. Maker places an offer on the exchange
-makerABI = MatchingMarket_contract.encodeABI(fn_name = 'offer', args = [web3.toWei(20, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0])
+makerABI = RubiconMarket_contract.encodeABI(fn_name = 'offer', args = [web3.toWei(20, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0])
 maker_success = send_transaction(makerABI, maker_adr, 'Maker places sell offer', MM_Adr_active, 0, True, Ganache_PRVK_MKR)
 print('Maker order success:', maker_success)
 print('\n')
 time.sleep(10)
 #2. Taker places a direct buy on that offer
-best_offer_id = MatchingMarket_contract.functions.getBestOffer(WETH_Adr, DAI_Adr).call()
+best_offer_id = RubiconMarket_contract.functions.getBestOffer(WETH_Adr, DAI_Adr).call()
 print('Best offer id: ', best_offer_id)
-print('Offer details:', MatchingMarket_contract.functions.getOffer(best_offer_id).call())
+print('Offer details:', RubiconMarket_contract.functions.getOffer(best_offer_id).call())
 
-takerABI = MatchingMarket_contract.encodeABI(fn_name = 'buy', args = [best_offer_id, web3.toWei(19.98, 'ether')])
+takerABI = RubiconMarket_contract.encodeABI(fn_name = 'buy', args = [best_offer_id, web3.toWei(19.98, 'ether')])
 taker_success = send_transaction(takerABI, taker_adr, 'Taker buys the makers offer',
                         MM_Adr_active, 0, True, Ganache_PRVK_TKR)
 if taker_success: print('Taker successfully bought the makers order')

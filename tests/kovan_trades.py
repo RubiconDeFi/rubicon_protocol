@@ -52,7 +52,7 @@ def send_transaction(encodedABI, sender, desc, to, value, sendIT, PK):
 with open('./frontend/packages/dapple/config.json') as f:
   data = json.load(f)
 
-MatchingMarket_Adr = data["market"]["kovan"]["address"]
+RubiconMarket_Adr = data["market"]["kovan"]["address"]
 WETH_Adr = data["tokens"]["kovan"]["W-ETH"]
 DAI_Adr = data["tokens"]["kovan"]["DAI"]
 WAYNE_Adr = data["tokens"]["kovan"]["WAYNE"]
@@ -63,7 +63,7 @@ A0_Adr = '' #Insert Kovan Main Account - do not expose on a git commit
 A0_PVK = ''
 
 
-MatchingMarket_C = load_contract('MatchingMarket', MatchingMarket_Adr)
+RubiconMarket_C = load_contract('RubiconMarket', RubiconMarket_Adr)
 WETH_C = load_contract('WETH9', WETH_Adr)
 DAI_C = load_contract("DAI", DAI_Adr)
 WAYNE_C = load_contract("WAYNE", WAYNE_Adr)

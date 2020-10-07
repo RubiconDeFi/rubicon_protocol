@@ -12,5 +12,5 @@ There are a number of key smart contracts that facilitate the governance and ope
 
 ![](.gitbook/assets/rubicon-protocol-structure-working-1-.jpg)
 
-At a high level, Rubicon revolves around a core smart contract \(MatchingMarket.sol\) that facilitates the peer-to-peer transfer of security tokens, digital assets, and any ERC-20 compliant token. Additionally, Rubicon and its governance token, RBCN, leverage a number of smart contracts to facilitate the decentralization of the protocol, community governance, and future iterations of the protocol.
+At a high level, Rubicon revolves around a core smart contract \(RubiconMarket.sol\) that facilitates the peer-to-peer transfer of security tokens, digital assets, and any ERC-20 compliant token. Additionally, Rubicon and its governance token, RBCN, leverage a number of smart contracts to facilitate the decentralization of the protocol, community governance, and future iterations of the protocol.
 

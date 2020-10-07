@@ -52,7 +52,7 @@ def send_transaction(encodedABI, sender, desc, to, value, sendIT, PK):
 with open('../frontend/packages/dapple/config.json') as f:
   data = json.load(f)
 
-MatchingMarket_Adr = data["market"]["ganache"]["address"]
+RubiconMarket_Adr = data["market"]["ganache"]["address"]
 WETH_Adr = data["tokens"]["ganache"]["W-ETH"]
 DAI_Adr = data["tokens"]["ganache"]["DAI"]
 WAYNE_Adr = data["tokens"]["ganache"]["WAYNE"]
@@ -83,7 +83,7 @@ A9_PVK = '0x80757ed7579cc732422047de25ac27597c15e75c2ec2cd9f8c6dc1f64eb9fd18'
 accounts = [[A0_Adr, A0_PVK],[A1_Adr, A1_PVK],[A2_Adr, A2_PVK],[A3_Adr, A3_PVK], [A4_Adr, A4_PVK],[A5_Adr, A5_PVK],
         [A6_Adr, A6_PVK], [A7_Adr, A7_PVK], [A8_Adr, A8_PVK], [A9_Adr, A9_PVK],]
 
-MatchingMarket_C = load_contract('MatchingMarket', MatchingMarket_Adr)
+RubiconMarket_C = load_contract('RubiconMarket', RubiconMarket_Adr)
 WETH_C = load_contract('WETH9', WETH_Adr)
 DAI_C = load_contract("DAI", DAI_Adr)
 WAYNE_C = load_contract("WAYNE", WAYNE_Adr)
@@ -114,27 +114,27 @@ STARK_C = load_contract("STARK", STARK_Adr)
 # time.sleep(2)
 #Generate some offers to populate the frontend and wait
 # print('\nBoth accounts approve their largest bid and ask:')
-# approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(110, 'ether')])
+# approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(110, 'ether')])
 # approveDaiSuccess = send_transaction(approveDaiABI, A0_Adr, "taker approving DAI TX", DAI_Adr, 0, True, A0_PVK)
 #
-# approveWETHABI = WETH_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(1, 'ether')])
+# approveWETHABI = WETH_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(1, 'ether')])
 # approveWETHSuccess = send_transaction(approveWETHABI, A1_Adr, "maker approving WETH TX", WETH_Adr, 0, True, A1_PVK)
 
 # print('\nA1 makes some bids:')
 # bid_1 = send_transaction(
-#     MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
+#     RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
 #     A1_Adr,
 #     "Maker order for 1 WETH / 100 DAI",
-#     MatchingMarket_Adr,
+#     RubiconMarket_Adr,
 #     0,
 #     True,
 #     A1_PVK
 # )
 # bid_2 = send_transaction(
-#     MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
+#     RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
 #     A1_Adr,
 #     "Maker order for 1 WETH / 100 DAI",
-#     MatchingMarket_Adr,
+#     RubiconMarket_Adr,
 #     0,
 #     True,
 #     A1_PVK
@@ -156,15 +156,15 @@ for x, account in enumerate(accounts):
         account[1]
     )
     print('Approving exhange WETH for ', account[0])
-    approveWETHABI = WETH_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(1, 'ether')])
+    approveWETHABI = WETH_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(1, 'ether')])
     approveWETHSuccess = send_transaction(approveWETHABI, account[0], "maker approving WETH TX", WETH_Adr, 0, True, account[1])
     time.sleep(1)
     print('Sending offer for', account[0])
     send_transaction(
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100 + x, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1, 'ether'), WETH_Adr, int(web3.toWei(100 + x, 'ether')), DAI_Adr, 0]),
         account[0],
         "Maker order for 1 WETH / " + str(100+x)+" DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -187,15 +187,15 @@ for x, account in enumerate(accounts):
     )
     time.sleep(1)
     print('Approving exhange DAI for ', account[0])
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(100, 'ether')])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(100, 'ether')])
     approveDaiSuccess = send_transaction(approveDaiABI, account[0], "taker approving DAI TX", DAI_Adr, 0, True, account[1])
     time.sleep(1)
     send_transaction(
-        # MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(100, 'ether')), DAI_Adr, web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr,  0]),
+        # RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(100, 'ether')), DAI_Adr, web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr,  0]),
         account[0],
         "Taker order for" + str(1 + (float(x)/10))+ " WETH / 100 DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -208,9 +208,9 @@ for x, account in enumerate(accounts):
 print("\nAccept some trades by buying WETH with DAI:")
 
 for x in range(4):
-    best_offer_id = MatchingMarket_C.functions.getBestOffer(WETH_Adr, DAI_Adr).call()
+    best_offer_id = RubiconMarket_C.functions.getBestOffer(WETH_Adr, DAI_Adr).call()
     # print('Best offer id: ', best_offer_id)
-    offer_details = MatchingMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
+    offer_details = RubiconMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
     print('Offer details:', offer_details)
     print('Aquiring DAI for ', A1_Adr)
     mint = send_transaction(
@@ -223,12 +223,12 @@ for x in range(4):
         A0_PVK
     )
     print('Approving exhange DAI for ', A1_Adr)
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, offer_details[2]])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, offer_details[2]])
     approveDaiSuccess = send_transaction(approveDaiABI, A1_Adr, "taker approving DAI TX", DAI_Adr, 0, True, A1_PVK)
 
-    takerABI = MatchingMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
+    takerABI = RubiconMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
     taker_success = send_transaction(takerABI, A1_Adr, 'Taker buys the makers offer',
-                            MatchingMarket_Adr, 0, True, A1_PVK)
+                            RubiconMarket_Adr, 0, True, A1_PVK)
     time.sleep(1)
                         # if taker_success: print('Taker successfully bought the makers order')
 #*****************WETH DAI PURCHASE ORDER BOOK ORDERS LOGIC************************
@@ -255,15 +255,15 @@ for x, account in enumerate(accounts):
     time.sleep(4)
     print('balance of', account[0])
     print(WAYNE_C.functions.balanceOf(account[0]).call())
-    approveWAYNEABI = WAYNE_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(100, "ether")])
+    approveWAYNEABI = WAYNE_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(100, "ether")])
     approveWAYNESuccess = send_transaction(approveWAYNEABI, account[0], "maker approving WAYNE TX", WAYNE_Adr, 0, True, account[1])
     time.sleep(1)
     print('Sending offer for', account[0])
     send_transaction(
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(100, "ether"), WAYNE_Adr, int(web3.toWei(220 + x, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(100, "ether"), WAYNE_Adr, int(web3.toWei(220 + x, 'ether')), DAI_Adr, 0]),
         account[0],
         "Maker order for 100 WAYNE / " + str(220+x)+" DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -286,15 +286,15 @@ for x, account in enumerate(accounts):
     )
     time.sleep(1)
     print('Approving exhange DAI for ', account[0])
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(220, 'ether')])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(220, 'ether')])
     approveDaiSuccess = send_transaction(approveDaiABI, account[0], "taker approving DAI TX", DAI_Adr, 0, True, account[1])
     time.sleep(1)
     send_transaction(
-        # MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(220, 'ether')), DAI_Adr, web3.toWei(100+x, "ether"), WAYNE_Adr,  0]),
+        # RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(220, 'ether')), DAI_Adr, web3.toWei(100+x, "ether"), WAYNE_Adr,  0]),
         account[0],
         "Taker order for" + str(100 + x)+ " WAYNE / 220 DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -307,9 +307,9 @@ for x, account in enumerate(accounts):
 print("\nAccept some trades by buying WAYNE with DAI:")
 
 for x in range(4):
-    best_offer_id = MatchingMarket_C.functions.getBestOffer(WAYNE_Adr, DAI_Adr).call()
+    best_offer_id = RubiconMarket_C.functions.getBestOffer(WAYNE_Adr, DAI_Adr).call()
     # print('Best offer id: ', best_offer_id)
-    offer_details = MatchingMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
+    offer_details = RubiconMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
     print('Offer details:', offer_details)
     print('Aquiring DAI for ', A1_Adr)
     mint = send_transaction(
@@ -322,12 +322,12 @@ for x in range(4):
         A0_PVK
     )
     print('Approving exhange DAI for ', A1_Adr)
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, offer_details[2]])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, offer_details[2]])
     approveDaiSuccess = send_transaction(approveDaiABI, A1_Adr, "taker approving DAI TX", DAI_Adr, 0, True, A1_PVK)
 
-    takerABI = MatchingMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
+    takerABI = RubiconMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
     taker_success = send_transaction(takerABI, A1_Adr, 'Taker buys the makers offer',
-                            MatchingMarket_Adr, 0, True, A1_PVK)
+                            RubiconMarket_Adr, 0, True, A1_PVK)
     time.sleep(1)
                         # if taker_success: print('Taker successfully bought the makers order')
 #*****************WAYNE DAI PURCHASE ORDER BOOK ORDERS LOGIC************************
@@ -353,15 +353,15 @@ for x, account in enumerate(accounts):
     time.sleep(4)
     print('balance of', account[0])
     print(STARK_C.functions.balanceOf(account[0]).call())
-    approveSTARKABI = STARK_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(100, "ether")])
+    approveSTARKABI = STARK_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(100, "ether")])
     approveSTARKSuccess = send_transaction(approveSTARKABI, account[0], "maker approving STARK TX", STARK_Adr, 0, True, account[1])
     time.sleep(1)
     print('Sending offer for', account[0])
     send_transaction(
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(100, "ether"), STARK_Adr, int(web3.toWei(350 + x, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(100, "ether"), STARK_Adr, int(web3.toWei(350 + x, 'ether')), DAI_Adr, 0]),
         account[0],
         "Maker order for 100 STARK / " + str(350+x)+" DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -384,15 +384,15 @@ for x, account in enumerate(accounts):
     )
     time.sleep(1)
     print('Approving exhange DAI for ', account[0])
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, web3.toWei(350, 'ether')])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, web3.toWei(350, 'ether')])
     approveDaiSuccess = send_transaction(approveDaiABI, account[0], "taker approving DAI TX", DAI_Adr, 0, True, account[1])
     time.sleep(1)
     send_transaction(
-        # MatchingMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
-        MatchingMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(350, 'ether')), DAI_Adr, web3.toWei(100+x, "ether"), STARK_Adr,  0]),
+        # RubiconMarket_C.encodeABI(fn_name = 'offer', args = [web3.toWei(1 + (float(x)/10), 'ether'), WETH_Adr, int(web3.toWei(100, 'ether')), DAI_Adr, 0]),
+        RubiconMarket_C.encodeABI(fn_name = 'offer', args = [int(web3.toWei(350, 'ether')), DAI_Adr, web3.toWei(100+x, "ether"), STARK_Adr,  0]),
         account[0],
         "Taker order for" + str(100 + x)+ " STARK / 350 DAI",
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         account[1]
@@ -405,9 +405,9 @@ for x, account in enumerate(accounts):
 print("\nAccept some trades by buying STARK with DAI:")
 
 for x in range(4):
-    best_offer_id = MatchingMarket_C.functions.getBestOffer(STARK_Adr, DAI_Adr).call()
+    best_offer_id = RubiconMarket_C.functions.getBestOffer(STARK_Adr, DAI_Adr).call()
     # print('Best offer id: ', best_offer_id)
-    offer_details = MatchingMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
+    offer_details = RubiconMarket_C.functions.getOffer(best_offer_id).call() #this is WETH then DAI
     print('Offer details:', offer_details)
     print('Aquiring DAI for ', A1_Adr)
     mint = send_transaction(
@@ -420,12 +420,12 @@ for x in range(4):
         A0_PVK
     )
     print('Approving exhange DAI for ', A1_Adr)
-    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [MatchingMarket_Adr, offer_details[2]])
+    approveDaiABI = DAI_C.encodeABI(fn_name = 'approve', args = [RubiconMarket_Adr, offer_details[2]])
     approveDaiSuccess = send_transaction(approveDaiABI, A1_Adr, "taker approving DAI TX", DAI_Adr, 0, True, A1_PVK)
 
-    takerABI = MatchingMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
+    takerABI = RubiconMarket_C.encodeABI(fn_name = 'buy', args = [best_offer_id, offer_details[0]])
     taker_success = send_transaction(takerABI, A1_Adr, 'Taker buys the makers offer',
-                            MatchingMarket_Adr, 0, True, A1_PVK)
+                            RubiconMarket_Adr, 0, True, A1_PVK)
     time.sleep(1)
                         # if taker_success: print('Taker successfully bought the makers order')
 #*****************STARK DAI PURCHASE ORDER BOOK ORDERS LOGIC************************
