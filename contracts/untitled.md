@@ -1,5 +1,5 @@
 ---
-description: Overview of Rubicoin.sol and its key functionalities
+description: Overview of RBCN.sol and its key functionalities
 ---
 
 # RBCN

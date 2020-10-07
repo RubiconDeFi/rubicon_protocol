@@ -4,7 +4,7 @@
 
 ## Contracts
 
-* [Matching Market](contracts/matching-market.md)
+* [Rubicon Market](contracts/rubicon-market.md)
 * [RBCN](contracts/untitled.md)
 * [Senate](contracts/senate.md)
 * [Timelock](contracts/timelock.md)
