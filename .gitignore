@@ -3,3 +3,5 @@ truffle-config.js
 config.json
 migrations/
 build/
+.gitbook/
+gitbook/
