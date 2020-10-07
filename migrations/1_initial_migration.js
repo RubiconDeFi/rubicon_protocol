@@ -1,7 +1,7 @@
 var Migrations = artifacts.require("./contracts/Migrations.sol");
 var SenateAlpha = artifacts.require("./contracts/SenateAlpha.sol");
 var Timelock = artifacts.require("./contracts/Timelock.sol");
-var RBCN = artifacts.require("./contracts/Rubicoin.sol");
+var RBCN = artifacts.require("./contracts/RBCN.sol");
 
 module.exports = function(deployer, network, accounts) {
   // var admin = accounts[0];

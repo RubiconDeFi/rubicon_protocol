@@ -113,7 +113,7 @@ else:
 #Check to see parameters are passing in constructors
 SenateAlpha_C = load_contract('SenateAlpha', SenateAlpha_Adr)
 Timelock_C = load_contract('Timelock', Timelock_Adr)
-RBCN_C = load_contract('Rubicoin', RBCN_Adr)
+RBCN_C = load_contract('RBCN', RBCN_Adr)
 RubiconMarket_C = load_contract('RubiconMarket', RubiconMarket_Adr)
 
 print('\nSet Admin of Timelock as Senate:')

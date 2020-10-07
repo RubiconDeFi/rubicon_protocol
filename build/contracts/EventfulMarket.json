@@ -1476,7 +1476,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 17049,
+                          "referencedDeclaration": 17033,
                           "src": "1849:4:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_DSAuth_$5360",
@@ -16173,7 +16173,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 17059,
+                                "referencedDeclaration": 17043,
                                 "src": "11820:4:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SimpleMarket_$6501",
@@ -21802,7 +21802,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "17688:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -22987,7 +22987,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19010:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -23512,7 +23512,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19385:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -24186,7 +24186,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19981:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -35641,7 +35641,7 @@
                             "name": "super",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 17068,
+                            "referencedDeclaration": 17052,
                             "src": "31108:5:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -40842,7 +40842,7 @@
                                 "name": "super",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 17068,
+                                "referencedDeclaration": 17052,
                                 "src": "36042:5:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -41440,7 +41440,7 @@
                           "name": "super",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 17068,
+                          "referencedDeclaration": 17052,
                           "src": "36833:5:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -48128,7 +48128,7 @@
                           "name": "this",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 17049,
+                          "referencedDeclaration": 17033,
                           "src": "1849:4:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_DSAuth_$5360",
@@ -62825,7 +62825,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 17059,
+                                "referencedDeclaration": 17043,
                                 "src": "11820:4:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SimpleMarket_$6501",
@@ -68454,7 +68454,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "17688:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -69639,7 +69639,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19010:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -70164,7 +70164,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19385:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -70838,7 +70838,7 @@
                         "name": "super",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 17068,
+                        "referencedDeclaration": 17052,
                         "src": "19981:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -82293,7 +82293,7 @@
                             "name": "super",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 17068,
+                            "referencedDeclaration": 17052,
                             "src": "31108:5:8",
                             "typeDescriptions": {
                               "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -87494,7 +87494,7 @@
                                 "name": "super",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 17068,
+                                "referencedDeclaration": 17052,
                                 "src": "36042:5:8",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -88092,7 +88092,7 @@
                           "name": "super",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 17068,
+                          "referencedDeclaration": 17052,
                           "src": "36833:5:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_super$_RubiconMarket_$8680",
@@ -93589,7 +93589,7 @@
   },
   "networks": {},
   "schemaVersion": "3.1.0",
-  "updatedAt": "2020-10-07T18:33:42.247Z",
+  "updatedAt": "2020-10-07T18:38:04.382Z",
   "devdoc": {
     "methods": {}
   },
