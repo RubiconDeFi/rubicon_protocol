@@ -90,7 +90,7 @@ Migrations_Adr = '0x53d65f3a43fef6FD3095A7b77054895cEa5293d5'
 RBCN_Adr = '0x6baeEfF13E0FC9bE030bD857018afFA8e19855Cc'
 Timelock_Adr = '0x7aAfc1AC36a3159450C5f65fd10672FD02ccB744'
 SenateAlpha_Adr = '0x802bF11CF1955ceBcc3C52bd64C936a116165415'
-MatchingMarket_Adr = '0x450C5368A2f39cb89F1266AE0B8c425167c0095f'
+RubiconMarket_Adr = '0x450C5368A2f39cb89F1266AE0B8c425167c0095f'
 # WETH_Adr = '0x0f5AdE274ce583f556fEE7506f1F4F9344dD57B5'
 # DAI_Adr = '0xF5502A83edd6a945a71fA6AE743E6fCEd4bE7A15'
 
@@ -124,8 +124,8 @@ else:
 #Check to see parameters are passing in constructors
 SenateAlpha_C = load_contract('SenateAlpha', SenateAlpha_Adr)
 Timelock_C = load_contract('Timelock', Timelock_Adr)
-RBCN_C = load_contract('Rubicoin', RBCN_Adr)
-MatchingMarket_C = load_contract('MatchingMarket', MatchingMarket_Adr)
+RBCN_C = load_contract('RBCN', RBCN_Adr)
+RubiconMarket_C = load_contract('RubiconMarket', RubiconMarket_Adr)
 
 print('\nSet Admin of Timelock as Senate:')
 #First, need admin to queue and execute a setPending call directly on timelock_
@@ -161,16 +161,16 @@ time.sleep(5)
 if a_success == True: print('accept Senate as admin successfully executed')
 
 setAdmin_MM = send_transaction(
-        MatchingMarket_C.encodeABI(fn_name = 'setOwner', args = [Timelock_Adr]),
+        RubiconMarket_C.encodeABI(fn_name = 'setOwner', args = [Timelock_Adr]),
         A0_Adr,
         'set admin of Matching market as timelock',
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         A0_PVK)
 time.sleep(5)
 
-if (MatchingMarket_C.functions.owner().call() == Timelock_Adr):
+if (RubiconMarket_C.functions.owner().call() == Timelock_Adr):
     print('Matching Market owner is Timelock, correctly implemented into Auth Scheme')
 else:
     print('FAIL - owner of Matching Market is not Timelock')

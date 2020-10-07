@@ -1,3 +1,6 @@
 node_modules/
 truffle-config.js
 config.json
+migrations/
+.gitbook/
+gitbook/

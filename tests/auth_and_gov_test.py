@@ -84,7 +84,7 @@ Migrations_Adr = '0xdf1568512a59Cc07369Dd4E463fA2e0e334c786D'
 RBCN_Adr = '0x7f651DE312C8F1F7A42D2C4c5f70d29abf780C71'
 Timelock_Adr = '0x4169db3c8Bf65E487d3e7a8b8269DaB0F6a6D166'
 SenateAlpha_Adr = '0x86852Cbe4260c0958b2da1cE9938E6dD91f62ea2'
-MatchingMarket_Adr = '0xF0d4c69516EA72a69BBf2A30aAbaA77D454B74c1'
+RubiconMarket_Adr = '0xF0d4c69516EA72a69BBf2A30aAbaA77D454B74c1'
 WETH_Adr = '0xAc4a1dac75eaF7Ba035f50C609A0884D7a240E0c'
 DAI_Adr = '0x8f27F4D6FA6BB073791660Ae82EB6EC8cB8dbfe8'
 
@@ -113,8 +113,8 @@ else:
 #Check to see parameters are passing in constructors
 SenateAlpha_C = load_contract('SenateAlpha', SenateAlpha_Adr)
 Timelock_C = load_contract('Timelock', Timelock_Adr)
-RBCN_C = load_contract('Rubicoin', RBCN_Adr)
-MatchingMarket_C = load_contract('MatchingMarket', MatchingMarket_Adr)
+RBCN_C = load_contract('RBCN', RBCN_Adr)
+RubiconMarket_C = load_contract('RubiconMarket', RubiconMarket_Adr)
 
 print('\nSet Admin of Timelock as Senate:')
 #First, need admin to queue and execute a setPending call directly on timelock_
@@ -148,14 +148,14 @@ a_success = send_transaction(
 if a_success == True: print('accept Senate as admin successfully executed')
 
 setAdmin_MM = send_transaction(
-        MatchingMarket_C.encodeABI(fn_name = 'setOwner', args = [Timelock_Adr]),
+        RubiconMarket_C.encodeABI(fn_name = 'setOwner', args = [Timelock_Adr]),
         A0_Adr,
         'set admin of Matching market as timelock',
-        MatchingMarket_Adr,
+        RubiconMarket_Adr,
         0,
         True,
         A0_PVK)
-if (MatchingMarket_C.functions.owner().call() == Timelock_Adr):
+if (RubiconMarket_C.functions.owner().call() == Timelock_Adr):
     print('Matching Market owner is Timelock, correctly implemented into Auth Scheme')
 else:
     print('FAIL - owner of Matching Market is not Timelock')
@@ -190,7 +190,7 @@ print('\n***** Governance Test *****')
 
 #1. Have holders of RBCN create a proposal to change
 print('\nHolders of RBCN, in this case admin, make proposal to change buyEnabled')
-print('Current status of buyEnabled:', MatchingMarket_C.functions.buyEnabled().call())
+print('Current status of buyEnabled:', RubiconMarket_C.functions.buyEnabled().call())
 print('RBCN getCurrentVotes of Admin: ', "{0:,}".format(RBCN_C.functions.getCurrentVotes(A0_Adr).call()/1e18))
 delegateSelf = send_transaction(RBCN_C.encodeABI(fn_name="delegate", args = [A0_Adr]),
     A0_Adr,
@@ -207,11 +207,11 @@ time.sleep(1)
 #
 propose_tx = send_transaction_returnHash(
     SenateAlpha_C.encodeABI(fn_name = 'propose', args = [
-        [MatchingMarket_Adr], #Targets
+        [RubiconMarket_Adr], #Targets
         [0],#Values
         ["setBuyEnabled(bool)"],
-        [MatchingMarket_C.encodeABI(fn_name="setBuyEnabled", args = [False])],
-        'A proposal to disable the parameter buyEnabled on MatchingMarket'
+        [RubiconMarket_C.encodeABI(fn_name="setBuyEnabled", args = [False])],
+        'A proposal to disable the parameter buyEnabled on RubiconMarket'
     ]),
     A0_Adr,
     'make proposal',
@@ -271,8 +271,8 @@ time.sleep(3)
 # push_to_next_block3 = send_transaction(0, A1_Adr, 'flip to next block', A2_Adr, 1, True, A1_PVK)
 
 #5. Check to see if worked...:
-print('Current status of buyEnabled:', MatchingMarket_C.functions.buyEnabled().call())
-if (str(MatchingMarket_C.functions.buyEnabled().call()) == 'False'):
+print('Current status of buyEnabled:', RubiconMarket_C.functions.buyEnabled().call())
+if (str(RubiconMarket_C.functions.buyEnabled().call()) == 'False'):
     print('\nProposal worked as expected and buyEnabled now False!!!')
 else:
     print('FAIL - buyEnabled unchanged')
