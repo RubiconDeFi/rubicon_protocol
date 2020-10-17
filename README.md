@@ -4,7 +4,9 @@ description: The decentralized equity protocol
 
 # Rubicon Protocol
 
-Rubicon is the first decentralized protocol that is aimed at developing and ushering in the emergence of equity markets on the Ethereum blockchain. The inefficiencies that exist between firms and capital in traditional finance pose a key problem that Rubicon aims to solve. Rubicon replaces traditional intermediaries and costly third parties with open-source code in order to democratize, open, and accelerate global equity markets.
+Rubicon is the first decentralized protocol that is aimed at developing and ushering in the emergence of equity markets on the Ethereum blockchain. The inefficiencies that exist between firms and capital in traditional finance pose a key problem that Rubicon aims to solve. Rubicon replaces traditional intermediaries and costly third parties with open-source code in order to democratize, open, and accelerate global equity markets. This is achieved through the deployment, development, and management of the Rubicon protocol of smart contracts which are described throughout these docs.
+
+The Rubicon protocol aims to launch on the mainnet in or before December of 2020. At that time, the community distribution of our governance token RBCN will be live and the first on-chain equities will be trading on Ethereum. If you are interested in joining our team, learning more, or want to contact Rubicon please feel free to reach us at contact@rubicon.finance - we would love to hear from you!
 
 ## Protocol Overview
 
