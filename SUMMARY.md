@@ -8,6 +8,7 @@
 * [RBCN](contracts/untitled.md)
 * [Senate](contracts/senate.md)
 * [Timelock](contracts/timelock.md)
+* [Kovan Deployments](contracts/kovan-deployments.md)
 
 ## Feedback <a id="feedback-1"></a>
 
