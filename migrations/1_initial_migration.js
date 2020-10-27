@@ -5,7 +5,7 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 
 module.exports = function(deployer, network, accounts) {
   // var admin = accounts[0];
-  var admin = "0xAEda61154aaF841250f3e0A6bb0dc12696549747";
+  var admin = "";
   
 
   // deployer.deploy(Migrations).then(function() {

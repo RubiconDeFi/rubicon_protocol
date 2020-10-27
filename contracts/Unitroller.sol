@@ -1,6 +1,7 @@
 /**
  *Submitted for verification at Etherscan.io on 2019-05-07
 */
+import "hardhat/console.sol";
 
 // File: contracts/ErrorReporter.sol
 

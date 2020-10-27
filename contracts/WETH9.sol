@@ -1,6 +1,7 @@
 /**
  *Submitted for verification at Etherscan.io on 2017-12-12
 */
+import "hardhat/console.sol";
 
 // Copyright (C) 2015, 2016, 2017 Dapphub
 

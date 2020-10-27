@@ -1,6 +1,7 @@
 /**
  *Submitted for verification at Etherscan.io on 2019-10-11
 */
+import "hardhat/console.sol";
 
 // File: contracts/SafeMath.sol
 

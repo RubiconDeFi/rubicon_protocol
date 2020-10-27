@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import "hardhat/console.sol";
 
 // https://github.com/ethereum/eips/issues/1404
 // contract ERC1404 is ERC20 {
