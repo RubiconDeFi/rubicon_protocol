@@ -19,6 +19,7 @@ At a high level, Rubicon revolves around a core smart contract \(RubiconMarket.s
 # For Devs: Start Rubicon Protocol Locally
 
 ```bash
+$ git clone https://www.github.com/RubiconDeFi/rubicon_protocol.git   
 $ cd rubicon_protocol && npm i
 $ npm i --save-dev hardhat
 $ npm i --save-dev openzeppelin-solidity@2.5.1
