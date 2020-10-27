@@ -1,7 +1,6 @@
 /**
  *Submitted for verification at Etherscan.io on 2019-11-14
 */
-import "hardhat/console.sol";
 
 // hevm: flattened sources of /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/dai.sol
 pragma solidity ^0.5.12;
