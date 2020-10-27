@@ -1,0 +1,1322 @@
+[
+    {
+        "issues": [
+            {
+                "swcID": "SWC-103",
+                "swcTitle": "Floating Pragma",
+                "description": {
+                    "head": "A floating pragma is set.",
+                    "tail": "The current pragma Solidity directive is \"\"^0.5.16\"\". It is recommended to specify a fixed compiler version to ensure that the bytecode produced does not vary between builds. This is especially important if you rely on bytecode-level verification of the code."
+                },
+                "severity": "Low",
+                "locations": [
+                    {
+                        "sourceMap": "66:24:0",
+                        "sourceType": "solidity-file",
+                        "sourceFormat": "text",
+                        "sourceList": [
+                            "browser/RBCN.sol"
+                        ]
+                    }
+                ],
+                "extra": {
+                    "discoveryTime": 984497149
+                },
+                "decodedLocations": [
+                    [
+                        {
+                            "line": 4,
+                            "column": 0
+                        },
+                        {
+                            "line": 4,
+                            "column": 24
+                        },
+                        false
+                    ]
+                ]
+            },
+            {
+                "swcID": "SWC-120",
+                "swcTitle": "Weak Sources of Randomness from Chain Attributes",
+                "description": {
+                    "head": "Potential use of \"block.number\" as source of randonmness.",
+                    "tail": "The environment variable \"block.number\" looks like it might be used as a source of randomness. Note that the values of variables like coinbase, gaslimit, block number and timestamp are predictable and can be manipulated by a malicious miner. Also keep in mind that attackers know hashes of earlier blocks. Don't use any of those environment variables as sources of randomness and be aware that use of these variables introduces a certain level of trust into miners."
+                },
+                "severity": "Low",
+                "locations": [
+                    {
+                        "sourceMap": "8213:12:0",
+                        "sourceType": "solidity-file",
+                        "sourceFormat": "text",
+                        "sourceList": [
+                            "browser/RBCN.sol"
+                        ]
+                    }
+                ],
+                "extra": {
+                    "discoveryTime": 1089913001
+                },
+                "decodedLocations": [
+                    [
+                        {
+                            "line": 193,
+                            "column": 30
+                        },
+                        {
+                            "line": 193,
+                            "column": 42
+                        },
+                        false
+                    ]
+                ]
+            },
+            {
+                "swcID": "SWC-120",
+                "swcTitle": "Weak Sources of Randomness from Chain Attributes",
+                "description": {
+                    "head": "Potential use of \"block.number\" as source of randonmness.",
+                    "tail": "The environment variable \"block.number\" looks like it might be used as a source of randomness. Note that the values of variables like coinbase, gaslimit, block number and timestamp are predictable and can be manipulated by a malicious miner. Also keep in mind that attackers know hashes of earlier blocks. Don't use any of those environment variables as sources of randomness and be aware that use of these variables introduces a certain level of trust into miners."
+                },
+                "severity": "Low",
+                "locations": [
+                    {
+                        "sourceMap": "11344:12:0",
+                        "sourceType": "solidity-file",
+                        "sourceFormat": "text",
+                        "sourceList": [
+                            "browser/RBCN.sol"
+                        ]
+                    }
+                ],
+                "extra": {
+                    "discoveryTime": 1089930601
+                },
+                "decodedLocations": [
+                    [
+                        {
+                            "line": 266,
+                            "column": 34
+                        },
+                        {
+                            "line": 266,
+                            "column": 46
+                        },
+                        false
+                    ]
+                ]
+            },
+            {
+                "swcID": "SWC-128",
+                "swcTitle": "DoS With Block Gas Limit",
+                "description": {
+                    "head": "Potentially unbounded data structure passed to builtin.",
+                    "tail": "Gas consumption in function \"delegateBySig\" in contract \"RBCN\" depends on the size of data structures that may grow unboundedly. Specifically the \"1-st\" argument to builtin \"keccak256\" may be able to grow unboundedly causing the builtin to consume more gas than the block gas limit, effectively causing a denial-of-service condition.Consider that an attacker might attempt to cause this condition on purpose."
+                },
+                "severity": "Low",
+                "locations": [
+                    {
+                        "sourceMap": "6658:22:0",
+                        "sourceType": "solidity-file",
+                        "sourceFormat": "text",
+                        "sourceList": [
+                            "browser/RBCN.sol"
+                        ]
+                    }
+                ],
+                "extra": {
+                    "discoveryTime": 911090292
+                },
+                "decodedLocations": [
+                    [
+                        {
+                            "line": 165,
+                            "column": 72
+                        },
+                        {
+                            "line": 165,
+                            "column": 94
+                        },
+                        false
+                    ]
+                ]
+            },
+            {
+                "swcID": "SWC-128",
+                "swcTitle": "DoS With Block Gas Limit",
+                "description": {
+                    "head": "Loop over unbounded data structure.",
+                    "tail": "Gas consumption in function \"getPriorVotes\" in contract \"RBCN\" depends on the size of data structures or values that may grow unboundedly. If the data structure grows too large, the gas required to execute the code will exceed the block gas limit, effectively causing a denial-of-service condition. Consider that an attacker might attempt to cause this condition on purpose."
+                },
+                "severity": "Low",
+                "locations": [
+                    {
+                        "sourceMap": "8813:13:0",
+                        "sourceType": "solidity-file",
+                        "sourceFormat": "text",
+                        "sourceList": [
+                            "browser/RBCN.sol"
+                        ]
+                    }
+                ],
+                "extra": {
+                    "discoveryTime": 922137855
+                },
+                "decodedLocations": [
+                    [
+                        {
+                            "line": 212,
+                            "column": 15
+                        },
+                        {
+                            "line": 212,
+                            "column": 28
+                        },
+                        false
+                    ]
+                ]
+            }
+        ],
+        "sourceType": "solidity-file",
+        "sourceFormat": "text",
+        "sourceList": [
+            "browser/RBCN.sol"
+        ],
+        "meta": {
+            "selectedCompiler": "Unknown",
+            "logs": [],
+            "InstructionCoverageOverTime": [
+                {
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 2142
+                },
+                {
+                    "x": 7,
+                    "y": 2846
+                },
+                {
+                    "x": 11,
+                    "y": 2846
+                },
+                {
+                    "x": 15,
+                    "y": 2846
+                },
+                {
+                    "x": 18,
+                    "y": 2846
+                },
+                {
+                    "x": 22,
+                    "y": 2846
+                },
+                {
+                    "x": 26,
+                    "y": 2846
+                },
+                {
+                    "x": 30,
+                    "y": 2846
+                },
+                {
+                    "x": 33,
+                    "y": 2853
+                },
+                {
+                    "x": 37,
+                    "y": 2853
+                },
+                {
+                    "x": 41,
+                    "y": 2853
+                },
+                {
+                    "x": 45,
+                    "y": 2853
+                },
+                {
+                    "x": 48,
+                    "y": 2853
+                },
+                {
+                    "x": 52,
+                    "y": 2853
+                },
+                {
+                    "x": 56,
+                    "y": 2853
+                },
+                {
+                    "x": 60,
+                    "y": 2853
+                },
+                {
+                    "x": 63,
+                    "y": 2853
+                },
+                {
+                    "x": 67,
+                    "y": 2853
+                },
+                {
+                    "x": 71,
+                    "y": 2853
+                },
+                {
+                    "x": 75,
+                    "y": 2853
+                },
+                {
+                    "x": 79,
+                    "y": 2853
+                },
+                {
+                    "x": 82,
+                    "y": 2853
+                },
+                {
+                    "x": 86,
+                    "y": 2853
+                },
+                {
+                    "x": 90,
+                    "y": 2853
+                },
+                {
+                    "x": 94,
+                    "y": 2853
+                },
+                {
+                    "x": 97,
+                    "y": 2853
+                },
+                {
+                    "x": 101,
+                    "y": 2853
+                },
+                {
+                    "x": 105,
+                    "y": 2853
+                },
+                {
+                    "x": 109,
+                    "y": 2853
+                },
+                {
+                    "x": 112,
+                    "y": 2853
+                },
+                {
+                    "x": 116,
+                    "y": 2853
+                },
+                {
+                    "x": 120,
+                    "y": 2853
+                },
+                {
+                    "x": 124,
+                    "y": 2853
+                },
+                {
+                    "x": 127,
+                    "y": 2853
+                },
+                {
+                    "x": 131,
+                    "y": 2932
+                },
+                {
+                    "x": 135,
+                    "y": 2932
+                },
+                {
+                    "x": 139,
+                    "y": 2932
+                },
+                {
+                    "x": 142,
+                    "y": 2932
+                },
+                {
+                    "x": 146,
+                    "y": 2932
+                },
+                {
+                    "x": 150,
+                    "y": 2932
+                },
+                {
+                    "x": 154,
+                    "y": 2932
+                },
+                {
+                    "x": 158,
+                    "y": 2932
+                },
+                {
+                    "x": 161,
+                    "y": 2932
+                },
+                {
+                    "x": 165,
+                    "y": 2932
+                },
+                {
+                    "x": 169,
+                    "y": 2932
+                },
+                {
+                    "x": 173,
+                    "y": 2932
+                },
+                {
+                    "x": 176,
+                    "y": 2932
+                },
+                {
+                    "x": 180,
+                    "y": 2932
+                },
+                {
+                    "x": 184,
+                    "y": 2932
+                },
+                {
+                    "x": 188,
+                    "y": 2932
+                },
+                {
+                    "x": 191,
+                    "y": 2932
+                },
+                {
+                    "x": 195,
+                    "y": 2932
+                },
+                {
+                    "x": 199,
+                    "y": 2932
+                },
+                {
+                    "x": 203,
+                    "y": 2932
+                },
+                {
+                    "x": 206,
+                    "y": 2932
+                },
+                {
+                    "x": 210,
+                    "y": 2932
+                },
+                {
+                    "x": 214,
+                    "y": 2932
+                },
+                {
+                    "x": 218,
+                    "y": 2932
+                },
+                {
+                    "x": 221,
+                    "y": 2958
+                },
+                {
+                    "x": 225,
+                    "y": 2958
+                },
+                {
+                    "x": 229,
+                    "y": 2958
+                },
+                {
+                    "x": 233,
+                    "y": 2958
+                },
+                {
+                    "x": 237,
+                    "y": 2958
+                },
+                {
+                    "x": 240,
+                    "y": 2958
+                },
+                {
+                    "x": 244,
+                    "y": 2958
+                },
+                {
+                    "x": 248,
+                    "y": 2958
+                },
+                {
+                    "x": 252,
+                    "y": 2958
+                },
+                {
+                    "x": 255,
+                    "y": 2958
+                },
+                {
+                    "x": 259,
+                    "y": 2958
+                },
+                {
+                    "x": 263,
+                    "y": 2958
+                },
+                {
+                    "x": 267,
+                    "y": 2958
+                },
+                {
+                    "x": 270,
+                    "y": 2958
+                },
+                {
+                    "x": 274,
+                    "y": 2958
+                },
+                {
+                    "x": 278,
+                    "y": 2958
+                },
+                {
+                    "x": 282,
+                    "y": 2958
+                },
+                {
+                    "x": 285,
+                    "y": 2958
+                },
+                {
+                    "x": 289,
+                    "y": 2958
+                },
+                {
+                    "x": 293,
+                    "y": 2958
+                },
+                {
+                    "x": 297,
+                    "y": 2958
+                },
+                {
+                    "x": 300,
+                    "y": 2958
+                },
+                {
+                    "x": 304,
+                    "y": 2958
+                },
+                {
+                    "x": 308,
+                    "y": 2958
+                },
+                {
+                    "x": 312,
+                    "y": 2958
+                },
+                {
+                    "x": 316,
+                    "y": 2958
+                },
+                {
+                    "x": 319,
+                    "y": 2958
+                },
+                {
+                    "x": 323,
+                    "y": 2958
+                },
+                {
+                    "x": 327,
+                    "y": 2958
+                },
+                {
+                    "x": 331,
+                    "y": 2958
+                },
+                {
+                    "x": 334,
+                    "y": 2958
+                },
+                {
+                    "x": 338,
+                    "y": 2958
+                },
+                {
+                    "x": 342,
+                    "y": 2958
+                },
+                {
+                    "x": 346,
+                    "y": 2958
+                },
+                {
+                    "x": 349,
+                    "y": 2958
+                },
+                {
+                    "x": 353,
+                    "y": 2958
+                },
+                {
+                    "x": 357,
+                    "y": 2958
+                },
+                {
+                    "x": 361,
+                    "y": 2958
+                },
+                {
+                    "x": 364,
+                    "y": 2958
+                },
+                {
+                    "x": 368,
+                    "y": 2958
+                },
+                {
+                    "x": 372,
+                    "y": 2958
+                },
+                {
+                    "x": 376,
+                    "y": 2958
+                },
+                {
+                    "x": 380,
+                    "y": 3007
+                }
+            ],
+            "PercentageCoverageOverTime": [
+                {
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 51
+                },
+                {
+                    "x": 7,
+                    "y": 68
+                },
+                {
+                    "x": 11,
+                    "y": 68
+                },
+                {
+                    "x": 15,
+                    "y": 68
+                },
+                {
+                    "x": 18,
+                    "y": 68
+                },
+                {
+                    "x": 22,
+                    "y": 68
+                },
+                {
+                    "x": 26,
+                    "y": 68
+                },
+                {
+                    "x": 30,
+                    "y": 68
+                },
+                {
+                    "x": 33,
+                    "y": 68
+                },
+                {
+                    "x": 37,
+                    "y": 68
+                },
+                {
+                    "x": 41,
+                    "y": 68
+                },
+                {
+                    "x": 45,
+                    "y": 68
+                },
+                {
+                    "x": 48,
+                    "y": 68
+                },
+                {
+                    "x": 52,
+                    "y": 68
+                },
+                {
+                    "x": 56,
+                    "y": 68
+                },
+                {
+                    "x": 60,
+                    "y": 68
+                },
+                {
+                    "x": 63,
+                    "y": 68
+                },
+                {
+                    "x": 67,
+                    "y": 68
+                },
+                {
+                    "x": 71,
+                    "y": 68
+                },
+                {
+                    "x": 75,
+                    "y": 68
+                },
+                {
+                    "x": 79,
+                    "y": 68
+                },
+                {
+                    "x": 82,
+                    "y": 68
+                },
+                {
+                    "x": 86,
+                    "y": 68
+                },
+                {
+                    "x": 90,
+                    "y": 68
+                },
+                {
+                    "x": 94,
+                    "y": 68
+                },
+                {
+                    "x": 97,
+                    "y": 68
+                },
+                {
+                    "x": 101,
+                    "y": 68
+                },
+                {
+                    "x": 105,
+                    "y": 68
+                },
+                {
+                    "x": 109,
+                    "y": 68
+                },
+                {
+                    "x": 112,
+                    "y": 68
+                },
+                {
+                    "x": 116,
+                    "y": 68
+                },
+                {
+                    "x": 120,
+                    "y": 68
+                },
+                {
+                    "x": 124,
+                    "y": 68
+                },
+                {
+                    "x": 127,
+                    "y": 68
+                },
+                {
+                    "x": 131,
+                    "y": 70
+                },
+                {
+                    "x": 135,
+                    "y": 70
+                },
+                {
+                    "x": 139,
+                    "y": 70
+                },
+                {
+                    "x": 142,
+                    "y": 70
+                },
+                {
+                    "x": 146,
+                    "y": 70
+                },
+                {
+                    "x": 150,
+                    "y": 70
+                },
+                {
+                    "x": 154,
+                    "y": 70
+                },
+                {
+                    "x": 158,
+                    "y": 70
+                },
+                {
+                    "x": 161,
+                    "y": 70
+                },
+                {
+                    "x": 165,
+                    "y": 70
+                },
+                {
+                    "x": 169,
+                    "y": 70
+                },
+                {
+                    "x": 173,
+                    "y": 70
+                },
+                {
+                    "x": 176,
+                    "y": 70
+                },
+                {
+                    "x": 180,
+                    "y": 70
+                },
+                {
+                    "x": 184,
+                    "y": 70
+                },
+                {
+                    "x": 188,
+                    "y": 70
+                },
+                {
+                    "x": 191,
+                    "y": 70
+                },
+                {
+                    "x": 195,
+                    "y": 70
+                },
+                {
+                    "x": 199,
+                    "y": 70
+                },
+                {
+                    "x": 203,
+                    "y": 70
+                },
+                {
+                    "x": 206,
+                    "y": 70
+                },
+                {
+                    "x": 210,
+                    "y": 70
+                },
+                {
+                    "x": 214,
+                    "y": 70
+                },
+                {
+                    "x": 218,
+                    "y": 70
+                },
+                {
+                    "x": 221,
+                    "y": 70
+                },
+                {
+                    "x": 225,
+                    "y": 70
+                },
+                {
+                    "x": 229,
+                    "y": 70
+                },
+                {
+                    "x": 233,
+                    "y": 70
+                },
+                {
+                    "x": 237,
+                    "y": 70
+                },
+                {
+                    "x": 240,
+                    "y": 70
+                },
+                {
+                    "x": 244,
+                    "y": 70
+                },
+                {
+                    "x": 248,
+                    "y": 70
+                },
+                {
+                    "x": 252,
+                    "y": 70
+                },
+                {
+                    "x": 255,
+                    "y": 70
+                },
+                {
+                    "x": 259,
+                    "y": 70
+                },
+                {
+                    "x": 263,
+                    "y": 70
+                },
+                {
+                    "x": 267,
+                    "y": 70
+                },
+                {
+                    "x": 270,
+                    "y": 70
+                },
+                {
+                    "x": 274,
+                    "y": 70
+                },
+                {
+                    "x": 278,
+                    "y": 70
+                },
+                {
+                    "x": 282,
+                    "y": 70
+                },
+                {
+                    "x": 285,
+                    "y": 70
+                },
+                {
+                    "x": 289,
+                    "y": 70
+                },
+                {
+                    "x": 293,
+                    "y": 70
+                },
+                {
+                    "x": 297,
+                    "y": 70
+                },
+                {
+                    "x": 300,
+                    "y": 70
+                },
+                {
+                    "x": 304,
+                    "y": 70
+                },
+                {
+                    "x": 308,
+                    "y": 70
+                },
+                {
+                    "x": 312,
+                    "y": 70
+                },
+                {
+                    "x": 316,
+                    "y": 70
+                },
+                {
+                    "x": 319,
+                    "y": 70
+                },
+                {
+                    "x": 323,
+                    "y": 70
+                },
+                {
+                    "x": 327,
+                    "y": 70
+                },
+                {
+                    "x": 331,
+                    "y": 70
+                },
+                {
+                    "x": 334,
+                    "y": 70
+                },
+                {
+                    "x": 338,
+                    "y": 70
+                },
+                {
+                    "x": 342,
+                    "y": 70
+                },
+                {
+                    "x": 346,
+                    "y": 70
+                },
+                {
+                    "x": 349,
+                    "y": 70
+                },
+                {
+                    "x": 353,
+                    "y": 70
+                },
+                {
+                    "x": 357,
+                    "y": 70
+                },
+                {
+                    "x": 361,
+                    "y": 70
+                },
+                {
+                    "x": 364,
+                    "y": 70
+                },
+                {
+                    "x": 368,
+                    "y": 70
+                },
+                {
+                    "x": 372,
+                    "y": 70
+                },
+                {
+                    "x": 376,
+                    "y": 70
+                },
+                {
+                    "x": 380,
+                    "y": 71
+                }
+            ],
+            "LineCoverage": "{\"browser/RBCN.sol\": {\"6\": 0, \"7\": 0, \"8\": 0, \"9\": 39111356, \"10\": 0, \"11\": 0, \"12\": 2206044508, \"13\": 0, \"14\": 0, \"15\": 514597997, \"16\": 0, \"17\": 0, \"18\": 108340863, \"19\": 0, \"20\": 0, \"21\": 0, \"22\": 0, \"23\": 0, \"24\": 0, \"25\": 0, \"26\": 0, \"27\": 217071929, \"28\": 0, \"29\": 0, \"30\": 0, \"31\": 0, \"32\": 0, \"33\": 0, \"34\": 0, \"35\": 0, \"36\": 5169930043, \"37\": 0, \"38\": 0, \"39\": 134177064, \"40\": 0, \"41\": 0, \"42\": 108340863, \"43\": 0, \"44\": 0, \"45\": 1523723756, \"46\": 0, \"47\": 0, \"48\": 266429005, \"49\": 0, \"50\": 0, \"51\": 0, \"52\": 0, \"53\": 0, \"54\": 0, \"55\": 0, \"56\": 0, \"57\": 0, \"58\": 0, \"59\": 0, \"60\": 0, \"61\": 0, \"62\": 0, \"63\": 0, \"64\": 0, \"65\": 0, \"66\": 0, \"67\": 0, \"68\": 0, \"69\": 0, \"70\": 0, \"71\": 0, \"72\": 0, \"73\": 0, \"74\": 0, \"75\": 0, \"76\": 0, \"77\": 4588407368, \"78\": 4588407368, \"79\": 1549068352, \"80\": 0, \"81\": 0, \"82\": 0, \"83\": 0, \"84\": 0, \"85\": 0, \"86\": 0, \"87\": 0, \"88\": 0, \"89\": 197108197, \"90\": 197108197, \"91\": 197108197, \"92\": 197108197, \"93\": 197108197, \"94\": 197108197, \"95\": 197108197, \"96\": 108340863, \"97\": 197108197, \"98\": 108340863, \"99\": 197108197, \"100\": 197108197, \"101\": 108340863, \"102\": 0, \"103\": 0, \"104\": 0, \"105\": 0, \"106\": 0, \"107\": 0, \"108\": 116502258, \"109\": 116502258, \"110\": 116502258, \"111\": 0, \"112\": 0, \"113\": 0, \"114\": 0, \"115\": 0, \"116\": 0, \"117\": 0, \"118\": 913480245, \"119\": 913480245, \"120\": 913480245, \"121\": 1475577595, \"122\": 262957864, \"123\": 0, \"124\": 0, \"125\": 0, \"126\": 0, \"127\": 0, \"128\": 0, \"129\": 0, \"130\": 0, \"131\": 213563688, \"132\": 213563688, \"133\": 213563688, \"134\": 213563688, \"135\": 24423585, \"136\": 213563688, \"137\": 213563688, \"138\": 213563688, \"139\": 213563688, \"140\": 213563688, \"141\": 213563688, \"142\": 24423585, \"143\": 213563688, \"144\": 4734186466, \"145\": 24423585, \"146\": 0, \"147\": 0, \"148\": 0, \"149\": 0, \"150\": 0, \"151\": 116502258, \"152\": 116502258, \"153\": 116502258, \"154\": 0, \"155\": 0, \"156\": 0, \"157\": 0, \"158\": 0, \"159\": 0, \"160\": 0, \"161\": 0, \"162\": 0, \"163\": 0, \"164\": 766206329, \"165\": 4516825434, \"166\": 4516825434, \"167\": 4516825434, \"168\": 4516825434, \"169\": 4516825434, \"170\": 129744189100, \"171\": 220706139487, \"172\": 220706139487, \"173\": 766206329, \"174\": 0, \"175\": 0, \"176\": 0, \"177\": 0, \"178\": 0, \"179\": 0, \"180\": 167962958, \"181\": 167962958, \"182\": 167962958, \"183\": 167962958, \"184\": 0, \"185\": 0, \"186\": 0, \"187\": 0, \"188\": 0, \"189\": 0, \"190\": 0, \"191\": 0, \"192\": 920164123, \"193\": 213563688, \"194\": 167962958, \"195\": 3344700776, \"196\": 3344700776, \"197\": 3344700776, \"198\": 3344700776, \"199\": 167962958, \"200\": 167962958, \"204\": 167962958, \"205\": 167962958, \"209\": 167962958, \"224\": 167962958, \"225\": 0, \"226\": 716949155, \"227\": 716949155, \"228\": 716949155, \"229\": 716949155, \"230\": 716949155, \"231\": 716949155, \"232\": 716949155, \"233\": 716949155, \"234\": 716949155, \"235\": 0, \"236\": 213563688, \"237\": 213563688, \"238\": 913480245, \"239\": 213563688, \"240\": 1475577595, \"241\": 1475577595, \"242\": 1475577595, \"243\": 213563688, \"244\": 716949155, \"245\": 213563688, \"246\": 0, \"247\": 716949155, \"248\": 716949155, \"255\": 716949155, \"262\": 716949155, \"263\": 716949155, \"264\": 0, \"277\": 0, \"282\": 0, \"283\": 197108197, \"284\": 197108197, \"285\": 197108197, \"286\": 197108197, \"287\": 0, \"288\": 1475577595, \"289\": 1475577595, \"290\": 1475577595, \"291\": 1475577595, \"292\": 1475577595, \"293\": 0, \"294\": 213563688, \"295\": 213563688, \"296\": 213563688, \"297\": 213563688, \"298\": 0, \"299\": 4516825434, \"300\": 4516825434, \"301\": 4516825434, \"302\": 4516825434, \"303\": 4516825434, \"304\": 0}}",
+            "mythril_execution_info": {},
+            "InstructionCoverageOverTimeUnit": "seconds",
+            "PercentageCoverageOverTimeUnit": "seconds",
+            "lineCoverage": {
+                "browser/RBCN.sol": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            }
+        }
+    }
+]

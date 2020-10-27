@@ -1,7 +1,6 @@
 /**
  *Submitted for verification at Etherscan.io on 2020-02-04
 */
-import "hardhat/console.sol";
 
 /// matching_market.sol
 
