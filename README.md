@@ -16,3 +16,26 @@ There are a number of key smart contracts that facilitate the governance and ope
 
 At a high level, Rubicon revolves around a core smart contract \(RubiconMarket.sol\) that facilitates the peer-to-peer transfer of security tokens, digital assets, and any ERC-20 compliant token. Additionally, Rubicon and its governance token, RBCN, leverage a number of smart contracts to facilitate the decentralization of the protocol, community governance, and future iterations of the protocol.
 
+# For Devs: Start Rubicon Protocol Locally
+
+```bash
+$ cd rubicon_protocol && npm i
+$ npm i --save-dev hardhat
+$ npm i --save-dev openzeppelin-solidity@2.5.1
+$ truffle init
+$ 'n' for overwriting contracts
+$ 'n' for overwriting migrations
+$ (in separate tab) ganache-cli
+```
+Also make sure that you comment out the lines in truffle-config.js
+that say 'development: ' and includes localhost under networks, so that you can connect to Ganache. 
+
+```bash
+$ truffle migrate -- deploys contracts to development network, i.e. localhost
+$ truffle console to interact with contracts deployed
+```
+ 
+ # For Devs: Local Testing
+ ```bash
+$ npx hardhat test
+ ```
