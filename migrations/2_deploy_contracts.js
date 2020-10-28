@@ -8,8 +8,8 @@ const BigNumber = require('bignumber.js');
 
 //accounts[0] must act as admin to deploy all contracts and recieve all RBCN, RBCN
 module.exports = function(deployer, network, accounts) {
-  // var admin = accounts[0];
-  var admin = "0xAEda61154aaF841250f3e0A6bb0dc12696549747";
+  var admin = accounts[0];
+  //var admin = "0xAEda61154aaF841250f3e0A6bb0dc12696549747";
 
   deployer.deploy(RubiconMarket, 1735693261, {
     from: accounts[0]
