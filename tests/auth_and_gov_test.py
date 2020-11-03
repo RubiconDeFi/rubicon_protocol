@@ -92,12 +92,15 @@ DAI_Adr = '0x8f27F4D6FA6BB073791660Ae82EB6EC8cB8dbfe8'
 #INTERNAL ADMIN:
 A0_Adr = web3.eth.accounts[0]
 A0_PVK = '01a54d7d0bef86e46ed186accfd8d5ccd84e0c5f6eaf309aa77d49977bcfc45a'
-
+A0_publicAddr="0x517299A1b7a8b0Fa58ab893EDd67dA576885Cc23"; # adding publicAddr
 A1_Adr = web3.eth.accounts[1]
+A1_publicAddr="0x6c6B7401e07c5C252B9873847600C4e17ba7bBA9"; # adding publicAddr
 A1_PVK = '97727e44d37ba8862a110d69fab070c303217084409ddaa6bccbdc2f5f6ccee5'
 A2_Adr = web3.eth.accounts[2]
+A2_publicAddr ="0x6Df805BEff333979F3d4571EaABf617Cf2887523" # adding publicAddr
 A2_PVK = 'c26f5b6489cb496d4926e09cc9f813bde04cec8aac2ebca54e5babedb4c75f77'
 A3_Adr = web3.eth.accounts[3]
+A3_publicAddr="0x621e3C493E70C261A0a7940Af11D205daBB4d974" # adding publicAddr
 A3_PVK = '2d9d5f49f2ccbcf64a5630d127264cffc2157243fbf4279c0b87acdd71b77ed4'
 
 print('\n***** Check of Auth Scheme and Balances *****')
