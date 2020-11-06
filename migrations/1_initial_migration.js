@@ -6,7 +6,7 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 module.exports = function(deployer, network, accounts) {
   var admin = accounts[0];
   //var admin = "0xAEda61154aaF841250f3e0A6bb0dc12696549747";
-  
+
 
   // deployer.deploy(Migrations).then(function() {
   // return deployer.deploy(Timelock, Migrations.address, 0).then(function(){   // Takes admin and initial delay that must exceed the minimum delay... ZERO FOR TESTING NOT PRODUCTION READY
