@@ -8,13 +8,13 @@ Current deployments on Kovan are listed below. These contracts can be viewed on 
 
 ## 10/23/2020 Kovan deployments:
 
-Migrations Contract = '0xaddaC8c84a9Fe96609091D73470228E36cec8F3a'   
-RBCN Token = '0xf872fA4E5cf0BB9b22B8a5ae1f792d3aa2C3d18d'   
-Timelock = '0x83Fc272340a79e6bC27f2Ed74a79b9704D6f5Aa7'   
-SenateAlpha = '0x009eE21995d1245Bb249d3402C4eD49EB3f0c19d'   
-RubiconMarket = '0x9C735089059689803F507DAAad78c6970468124d'   
-WETH = '0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1'   
-DAI = '0x122a661afaA721ad91634577b818db2299822ec3'   
-WAYNE = '0xC61812684385910CF8E93Fa0B04c572E6051F679'   
-STARK = '0x4Ff66BDa878d0A656d4a292cD7FBd0A8E1Dc1C8c'
+Migrations Contract = [0xaddaC8c84a9Fe96609091D73470228E36cec8F3a](https://kovan.etherscan.io/address/0xaddaC8c84a9Fe96609091D73470228E36cec8F3a)  
+RBCN Token = [0xf872fA4E5cf0BB9b22B8a5ae1f792d3aa2C3d18d](https://kovan.etherscan.io/address/0xf872fa4e5cf0bb9b22b8a5ae1f792d3aa2c3d18d)   
+Timelock = [0x83Fc272340a79e6bC27f2Ed74a79b9704D6f5Aa7](https://kovan.etherscan.io/address/0x83fc272340a79e6bc27f2ed74a79b9704d6f5aa7)   
+SenateAlpha = [0x009eE21995d1245Bb249d3402C4eD49EB3f0c19d](https://kovan.etherscan.io/address/0x009eE21995d1245Bb249d3402C4eD49EB3f0c19d)  
+RubiconMarket = [0x9C735089059689803F507DAAad78c6970468124d](https://kovan.etherscan.io/address/0x9c735089059689803f507daaad78c6970468124d)   
+WETH = [0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1](https://kovan.etherscan.io/address/0x772c16c1dd9cc51fe601b6ba8c8b2fef074528f1)   
+DAI = [0x122a661afaA721ad91634577b818db2299822ec3](https://kovan.etherscan.io/address/0x122a661afaa721ad91634577b818db2299822ec3)  
+WAYNE = [0xC61812684385910CF8E93Fa0B04c572E6051F679](https://kovan.etherscan.io/address/0xc61812684385910cf8e93fa0b04c572e6051f679)  
+STARK = [0x4Ff66BDa878d0A656d4a292cD7FBd0A8E1Dc1C8c](https://kovan.etherscan.io/address/0x4Ff66BDa878d0A656d4a292cD7FBd0A8E1Dc1C8c)
 
