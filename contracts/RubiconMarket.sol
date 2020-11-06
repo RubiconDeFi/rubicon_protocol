@@ -1,8 +1,8 @@
 /**
- *Submitted for verification at Etherscan.io on 2020-02-04
+ *Submitted for verification at Etherscan.io on 2020-11-06
 */
 
-/// matching_market.sol
+/// RubiconMarket.sol
 
 //
 // This program is free software: you can redistribute it and/or modify
@@ -57,20 +57,16 @@ contract DSAuth is DSAuthEvents {
     }
 
     modifier auth {
-        require(isAuthorized(msg.sender, msg.sig), "ds-auth-unauthorized");
+        require(isAuthorized(msg.sender), "ds-auth-unauthorized");
         _;
     }
 
-    function isAuthorized(address src, bytes4 sig) internal view returns (bool) {
+    function isAuthorized(address src) internal view returns (bool) {
         if (src == address(this)) {
             return true;
         } else if (src == owner) {
             return true;
-        } // else if (authority == DSAuthority(0)) {
-        //     return false;
-        // } else {
-        //     return authority.canCall(src, address(this), sig);
-        // }
+        }
         else {
           return false;
         }
