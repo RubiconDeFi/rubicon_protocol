@@ -1,6 +1,5 @@
 node_modules/
 config.json
-migrations/
 .gitbook/
 gitbook/
 build/

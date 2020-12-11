@@ -3,7 +3,7 @@
 */
 
 pragma solidity ^0.5.16;
-pragma experimental ABIEncoderV2;
+// pragma experimental ABIEncoderV2;
 
 contract RBCN {
     /// @notice EIP-20 token name for this token
@@ -17,6 +17,17 @@ contract RBCN {
 
     /// @notice Total number of tokens in circulation
     uint public constant totalSupply = 1000000000e18; // 1 billion RBCN
+
+    /// @notice The Unix Timestamp to begin RBCN public distribution
+    uint public distStartTime;
+
+    /// @ notice The rate of RBCN per unit of Unix time (millisecond) distributed
+    ///          to the community
+    /// Selected Number: https://www.wolframalpha.com/input/?i=%281%2C000%2C000%2C000*%28.51%29%29%2F%28365*x*24*60*60*1000%29+%3D+%284044409199048374+%2F+1e18%29
+    /// Rate calculation: https://www.wolframalpha.com/input/?i=%281%2C000%2C000%2C000*.51%29%2F1.261e%2B11
+    /// Rate = 4044409199048374 / 1e18
+    uint public constant distRate = 4044409199048374; //Distribution rate Wad
+    /// True rate of RBCN per millisecond is distRate / 1e18
 
     /// @notice Allowance amounts on behalf of others
     mapping (address => mapping (address => uint96)) internal allowances;
@@ -65,8 +76,17 @@ contract RBCN {
      * @param account The initial account to grant all the tokens
      */
     constructor(address account) public {
+        // balances[account] = uint96(totalSupply * (49e16));
+        // emit Transfer(address(0), account, totalSupply);
+        //
+        // // Need to transfer 51% to wherever community RBCN will be stored
+        // balances[publicDistHolder] = uint96(totalSupply * (51e16));
+        // emit Transfer(address(0), account, totalSupply);
+
         balances[account] = uint96(totalSupply);
         emit Transfer(address(0), account, totalSupply);
+
+        distStartTime = now;
     }
 
     /**
@@ -222,6 +242,14 @@ contract RBCN {
             }
         }
         return checkpoints[account][lower].votes;
+    }
+
+    function getDistStartTime() external view returns (uint) {
+      return distStartTime;
+    }
+
+    function getDistRate() external pure returns (uint) {
+      return distRate;
     }
 
     function _delegate(address delegator, address delegatee) internal {

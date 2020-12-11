@@ -20,6 +20,8 @@
 
 pragma solidity ^0.5.12;
 
+import "./RBCN.sol";
+
 contract DSAuthority {
     function canCall(
         address src, address dst, bytes4 sig
@@ -527,9 +529,13 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint => uint) public _near;         //next unsorted offer id
     uint _head;                                 //first unsorted offer id
     uint public dustId;                         // id of the latest offer marked as dust
+    uint public timeOfLastRBCNDist;             // the unix timestamp of the last RBCN distribution
+    //TODO: build setPropToMakers auth function!
+    uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
+    address public RBCNAddress;
 
-
-    constructor(uint64 close_time) ExpiringMarket(close_time) public {
+    constructor(uint64 close_time, address RBCN) ExpiringMarket(close_time) public {
+      RBCNAddress = RBCN;
     }
 
     // After close, anyone can cancel an offer
@@ -1144,4 +1150,53 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         _near[id] = 0;                  //delete order from unsorted order list
         return true;
     }
+
+    //**********RBCN Distribution Logic*********
+    //Get RBCN address
+    function getRBCNAddress() public view returns (address) {
+      return RBCNAddress;
+    }
+
+    // Should return the proportion of RBCN distribution per block that
+    // is allocated to a Maker of a trade
+    // The allocation that goes to the Taker is 1 - % to Maker
+    function getPropToMakers() internal view returns(uint) {
+      return propToMakers;
+    }
+
+    function setPropToMakers(uint newProp) external auth synchronized returns(bool){
+      propToMakers = newProp;
+      return true;
+    }
+    //This function should distribute a time-weighted RBCN allocation
+    function distributeRBCN(address maker, address taker) internal returns (bool) {
+      require(!locked);
+      require(timeOfLastRBCNDist < block.timestamp);
+
+      // retreive distStartTime from RBCN contract
+      RBCN liveRBCN = RBCN(getRBCNAddress());
+      uint RBCNdistStartTime = liveRBCN.getDistStartTime();
+      // uint RBCNdistRate = liveRBCN.getDistRate();
+
+      //calculate delta
+      uint delta = sub(block.timestamp, timeOfLastRBCNDist);
+
+      //calculate quantity to sendmaker
+      uint distQuanityMaker = (getPropToMakers() / 100) * (delta) * liveRBCN.getDistRate();
+      uint distQuanityTaker = ((100 - getPropToMakers()) / 100) * (delta) * liveRBCN.getDistRate();
+
+      //send quantities to maker and taker respectively
+      //send to Maker distQuanityMaker
+      liveRBCN.transfer(maker, distQuanityMaker);
+
+      //send to Taker distQuanityTaker
+      liveRBCN.transfer(taker, distQuanityTaker);
+      
+      //time of timeOfLastRBCNDist is set immediately after distribution is made
+      timeOfLastRBCNDist = block.timestamp;
+
+      return true;
+    }
+
+
 }
