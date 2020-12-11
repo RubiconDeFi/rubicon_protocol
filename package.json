@@ -1,6 +1,8 @@
 {
   "devDependencies": {
     "bignumber.js": "^9.0.1",
+    "hardhat": "^2.0.5",
     "openzeppelin-solidity": "^2.5.1"
-  }
+  },
+  "dependencies": {}
 }
