@@ -292,7 +292,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
         synchronized
         returns (bool)
     {
-        //TO DO: Add fee functionality
+        //TO DO: Add fee functionality ...
+        
         OfferInfo memory offer = offers[id];
         uint spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
 
