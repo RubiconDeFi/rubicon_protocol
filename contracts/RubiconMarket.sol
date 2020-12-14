@@ -21,6 +21,7 @@
 pragma solidity ^0.5.12;
 
 import "./RBCN.sol";
+import "./IWETH.sol";
 
 contract DSAuthority {
     function canCall(
@@ -291,6 +292,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         synchronized
         returns (bool)
     {
+        //TO DO: Add fee functionality
         OfferInfo memory offer = offers[id];
         uint spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
 
@@ -533,9 +535,18 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //TODO: build setPropToMakers auth function!
     uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
     address public RBCNAddress;
+    //TODO: build correct logic to handle various WETH addresses
+    address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    constructor(uint64 close_time, address RBCN) ExpiringMarket(close_time) public {
-      RBCNAddress = RBCN;
+
+    constructor(uint64 close_time, address RBCN_Address) ExpiringMarket(close_time) public {
+      RBCNAddress = RBCN_Address;
+
+    // TO DO: Think through the below
+    //   RBCN liveRBCN = RBCN(getRBCNAddress());
+    //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
+    //   timeOfLastRBCNDist = RBCNdistStartTime;
+        timeOfLastRBCNDist = now;
     }
 
     // After close, anyone can cancel an offer
@@ -568,6 +579,25 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     function kill(bytes32 id) public {
         require(cancel(uint256(id)));
+    }
+
+    // Routing function to make a trade where the user is sending Native ETH
+    function offerInETH(
+        uint buy_amt,    //taker (ask) buy how much
+        ERC20 buy_gem    //taker (ask) buy which token
+        ) public payable returns (uint) {
+        require(!locked, "Reentrancy attempt");
+        
+        //Convert to Weth: basically pay.amt = msg.value
+
+        //******NEED TO LOAD IN WETH MARKET ADDRESS CORRECTLY*****
+        IWETH(WETHAddress).deposit.value(msg.value);
+
+        ERC20 WETH = ERC20(WETHAddress);
+
+        //Push Normal Order with WETH
+        super.offer(msg.value, WETH, buy_amt, buy_gem);
+
     }
 
     // Make a new offer. Takes funds from the caller into market escrow.
@@ -1174,9 +1204,9 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
       require(timeOfLastRBCNDist < block.timestamp);
 
       // retreive distStartTime from RBCN contract
+      //TODO is this redundant due to constructor?
       RBCN liveRBCN = RBCN(getRBCNAddress());
       uint RBCNdistStartTime = liveRBCN.getDistStartTime();
-      // uint RBCNdistRate = liveRBCN.getDistRate();
 
       //calculate delta
       uint delta = sub(block.timestamp, timeOfLastRBCNDist);
