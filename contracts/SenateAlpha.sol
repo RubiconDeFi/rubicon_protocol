@@ -7,13 +7,13 @@ pragma experimental ABIEncoderV2;
 
 contract SenateAlpha {
     /// @notice The name of this contract
-    string public constant name = "Rubicon Senate Alpha";
+    string public constant name = "Rubicon Senate";
 
     /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
-    function quorumVotes() public pure returns (uint) { return 400000e18; } // 400,000 = 4% of RBCN
+    function quorumVotes() public pure returns (uint) { return 30000000e18; } // 30,000,000 = 3% of RBCN
 
     /// @notice The number of votes required in order for a voter to become a proposer
-    function proposalThreshold() public pure returns (uint) { return 100000e18; } // 100,000 = 1% of RBCN
+    function proposalThreshold() public pure returns (uint) { return 5000000e18; } // 5,000,000 = 0.5% of RBCN
 
     /// @notice The maximum number of actions that can be included in a proposal
     function proposalMaxOperations() public pure returns (uint) { return 10; } // 10 actions
@@ -23,7 +23,7 @@ contract SenateAlpha {
 
     /// @notice The duration of voting on a proposal, in blocks
     /// @notice LOWERED FOR TESTING PURPOSES NOT LAUNCH READY
-    function votingPeriod() public pure returns (uint) { return 1; } // ~3 days in blocks (assuming 15s blocks)
+    function votingPeriod() public pure returns (uint) { return 28800; } // ~5 days in blocks (assuming 15s blocks)
 
     /// @notice The address of the Rubicon Protocol Timelock
     TimelockInterface public timelock;
