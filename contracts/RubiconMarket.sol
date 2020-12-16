@@ -210,6 +210,20 @@ contract EventfulMarket {
         uint128           buy_amt,
         uint64            timestamp
     );
+
+    //** Added Fee Event */
+    event FeeTake(        
+        bytes32           id,
+        bytes32  indexed  pair,
+        address  indexed  maker,
+        ERC20             pay_gem,
+        ERC20             buy_gem,
+        address  indexed  taker,
+        uint128           take_amt,
+        uint128           give_amt,
+        uint              feeAmt,
+        uint64            timestamp
+    );
 }
 
 contract SimpleMarket is EventfulMarket, DSMath {
@@ -219,6 +233,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
     mapping (uint => OfferInfo) public offers;
 
     bool locked;
+
+    // 20 Basis Point Fee on Taker Trades
+    uint internal feeBPS = 20;
+
+    address internal feeTo = 0xF7EEea13cd2A0231C2A95a7f21FB47dBBe2FC60a;
 
     struct OfferInfo {
         uint     pay_amt;
@@ -292,8 +311,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
         synchronized
         returns (bool)
     {
-        //TO DO: Add fee functionality ...
-        
         OfferInfo memory offer = offers[id];
         uint spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
 
@@ -306,6 +323,13 @@ contract SimpleMarket is EventfulMarket, DSMath {
         {
             return false;
         }
+
+        // ******Added Fee Functionality *******
+        // Get fee from user - feeBPS in basis points
+        uint fee = mul(spend, feeBPS) / 10000;
+        require( offer.buy_gem.transferFrom(msg.sender, feeTo, fee), "Insufficient funds to cover fee" );
+        // ******************************************
+
 
         offers[id].pay_amt = sub(offer.pay_amt, quantity);
         offers[id].buy_amt = sub(offer.buy_amt, spend);
@@ -322,6 +346,18 @@ contract SimpleMarket is EventfulMarket, DSMath {
             msg.sender,
             uint128(quantity),
             uint128(spend),
+            uint64(now)
+        );
+        emit FeeTake(    
+            bytes32(id),
+            keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
+            offer.owner,
+            offer.pay_gem,
+            offer.buy_gem,
+            msg.sender,
+            uint128(quantity),
+            uint128(spend),
+            fee,
             uint64(now)
         );
         emit LogTrade(quantity, address(offer.pay_gem), spend, address(offer.buy_gem));
@@ -431,6 +467,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
     {
         last_offer_id++; return last_offer_id;
     }
+
+    // Fee logic
+    function getFeeBPS() internal view returns (uint) {
+        return feeBPS;
+    }
 }
 
 // Simple Market with a market lifetime. When the close_time has been reached,
@@ -538,7 +579,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     address public RBCNAddress;
     //TODO: build correct logic to handle various WETH addresses
     address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
 
     constructor(uint64 close_time, address RBCN_Address) ExpiringMarket(close_time) public {
       RBCNAddress = RBCN_Address;
@@ -1182,6 +1222,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 
+    // Set Fee
+    function setFeeBPS(uint _newFeeBPS) public auth returns(bool) {
+        feeBPS = _newFeeBPS;
+        return true;
+    }
+
     //**********RBCN Distribution Logic*********
     //Get RBCN address
     function getRBCNAddress() public view returns (address) {
@@ -1207,7 +1253,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
       // retreive distStartTime from RBCN contract
       //TODO is this redundant due to constructor?
       RBCN liveRBCN = RBCN(getRBCNAddress());
-      uint RBCNdistStartTime = liveRBCN.getDistStartTime();
+    //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
 
       //calculate delta
       uint delta = sub(block.timestamp, timeOfLastRBCNDist);
