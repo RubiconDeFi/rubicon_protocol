@@ -26,10 +26,4 @@ module.exports = function(deployer, network, accounts) {
       });
     });
   });
-
-  //Timelock admin should be SenateAlpha... first action taken by Senate should be to make itself admin of Timelock.. better way to do this??
-  // deployer.deploy(Timelock, Migrations.address, 0).then(function(){   // Takes admin and initial delay that must exceed the minimum delay... ZERO FOR TESTING NOT PRODUCTION READY
-  //   //Give admin token balance and set total supply
-  //   return deployer.deploy(SenateAlpha, Timelock.address, RBCN.address, admin); //gaurdian of senate is admin
-  // });
 };
