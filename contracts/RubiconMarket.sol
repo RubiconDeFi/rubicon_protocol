@@ -21,6 +21,7 @@
 pragma solidity ^0.5.12;
 
 import "./RBCN.sol";
+import "./Aqueduct.sol";
 import "./IWETH.sol";
 
 contract DSAuthority {
@@ -348,6 +349,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
             uint128(spend),
             uint64(now)
         );
+        // Added Fee Event
         emit FeeTake(    
             bytes32(id),
             keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
@@ -713,7 +715,15 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     {
         require(!locked, "Reentrancy attempt");
         function (uint256,uint256) returns (bool) fn = matchingEnabled ? _buys : super.buy;  //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
-        return fn(id, amount);
+        
+        fn(id, amount);
+                
+        //Added RBCN distribution on the trade
+        distributeRBCN(offers[id].owner, msg.sender);
+
+        return true;
+        //OLD return
+        // return fn(id, amount);
     }
 
     // Cancel an offer. Refunds offer maker.
@@ -962,6 +972,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
             }
         }
         require(super.buy(id, amount));
+
+        //Added RBCN distribution on the trade
+        distributeRBCN(offers[id].owner, msg.sender);
+
         // If offer has become dust during buy, we cancel it
         if (isActive(id) && offers[id].pay_amt < _dust[address(offers[id].pay_gem)]) {
             dustId = id; //enable current msg.sender to call cancel(id)
@@ -1251,9 +1265,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
       require(timeOfLastRBCNDist < block.timestamp);
 
       // retreive distStartTime from RBCN contract
-      //TODO is this redundant due to constructor?
       RBCN liveRBCN = RBCN(getRBCNAddress());
-    //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
 
       //calculate delta
       uint delta = sub(block.timestamp, timeOfLastRBCNDist);
@@ -1262,15 +1274,31 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
       uint distQuanityMaker = (getPropToMakers() / 100) * (delta) * liveRBCN.getDistRate();
       uint distQuanityTaker = ((100 - getPropToMakers()) / 100) * (delta) * liveRBCN.getDistRate();
 
-      //send quantities to maker and taker respectively
+    // Drip needed quantity from Aqueduct
+        
+
+    //   //send quantities to maker and taker respectively
+    //   //send to Maker distQuanityMaker
+    //   liveRBCN.transfer(maker, distQuanityMaker);
+
+    //   //send to Taker distQuanityTaker
+    //   liveRBCN.transfer(taker, distQuanityTaker);
+
+      //Aqueduct Logic
+      //TOO: Add correct logic address
+      Aqueduct liveAqueduct = Aqueduct(0xdDC12b03CCaE6fE5639dE5D9beed22688DE07d3e);
+
+      // TODO: w/ Aqueduct logic the Aqueduct will send the RBCN to correct addresses
       //send to Maker distQuanityMaker
-      liveRBCN.transfer(maker, distQuanityMaker);
+      liveAqueduct.distributeGovernanceToken(maker, distQuanityMaker);
 
       //send to Taker distQuanityTaker
-      liveRBCN.transfer(taker, distQuanityTaker);
-      
+      liveAqueduct.distributeGovernanceToken(taker, distQuanityTaker);
+
       //time of timeOfLastRBCNDist is set immediately after distribution is made
       timeOfLastRBCNDist = block.timestamp;
+
+    //TODO: Emit an event log here
 
       return true;
     }
