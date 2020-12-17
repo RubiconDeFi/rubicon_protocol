@@ -4,7 +4,6 @@
 const BN = require('bn.js');
 const BigNumber = require('bignumber.js');
 
-
 const Migrations = artifacts.require("Migrations");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const Timelock = artifacts.require("Timelock");
@@ -13,7 +12,6 @@ const RBCN = artifacts.require("RBCN");
 const Aqueduct = artifacts.require("Aqueduct");
 const TokenVesting1 = artifacts.require("TokenVesting1");
 const TokenVesting2 = artifacts.require("TokenVesting2");
-
 
 let migrationsInstance;
 let rubiconMarketInstance;
@@ -151,6 +149,4 @@ contract("Rubicon Migrations Test", async function(accounts) {
             assert.equal((await RBCNInstance.balanceOf(tokenVesting2Instance.address)).toString(), Founder2Tokens);
         });
     });
-    
-
 });

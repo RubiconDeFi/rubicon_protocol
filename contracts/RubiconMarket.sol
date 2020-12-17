@@ -1266,7 +1266,8 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
       // retreive distStartTime from RBCN contract
       RBCN liveRBCN = RBCN(getRBCNAddress());
-
+    
+    require(block.timestamp <= liveRBCN.distEndTime());
       //calculate delta
       uint delta = sub(block.timestamp, timeOfLastRBCNDist);
 
@@ -1276,7 +1277,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     // Drip needed quantity from Aqueduct
         
-
+    // TO DO: Extrapolate everything to Aqueduct?
     //   //send quantities to maker and taker respectively
     //   //send to Maker distQuanityMaker
     //   liveRBCN.transfer(maker, distQuanityMaker);
