@@ -73,19 +73,19 @@ contract RBCN {
 
     /**
      * @notice Construct a new RBCN token
-     * @param account The initial account to grant all the tokens
+     * @param aqueduct The holder of all community tokens
+     * @param admin The recipient of non-community tokens
      */
-    constructor(address account) public {
-        // balances[account] = uint96(totalSupply * (49e16));
-        // emit Transfer(address(0), account, totalSupply);
-        //
-        // // Need to transfer 51% to wherever community RBCN will be stored
-        // balances[publicDistHolder] = uint96(totalSupply * (51e16));
-        // emit Transfer(address(0), account, totalSupply);
+    constructor(address aqueduct, address admin) public {
+        // 51% to community
+        balances[aqueduct] = uint96(510000000e18);
+        emit Transfer(address(0), aqueduct, uint(1000000000e18));
+        
+        // 49% to admin. See distribution here:
+        balances[admin] = uint96(490000000e18);
+        emit Transfer(address(0), admin, uint96(490000000e18));
 
-        balances[account] = uint96(totalSupply);
-        emit Transfer(address(0), account, totalSupply);
-
+        // Start distributing RBCN to community at launch
         distStartTime = now;
     }
 
