@@ -238,7 +238,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
     // 20 Basis Point Fee on Taker Trades
     uint internal feeBPS = 20;
 
-    address internal feeTo = 0xF7EEea13cd2A0231C2A95a7f21FB47dBBe2FC60a;
+    address internal feeTo;
 
     struct OfferInfo {
         uint     pay_amt;
@@ -247,6 +247,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20    buy_gem;
         address  owner;
         uint64   timestamp;
+    }
+
+    constructor(address _feeTo) public
+    {
+        feeTo = _feeTo;
     }
 
     modifier can_buy(uint id) {
@@ -315,8 +320,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
         OfferInfo memory offer = offers[id];
         uint spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
 
-        require(uint128(spend) == spend);
-        require(uint128(quantity) == quantity);
+        require(uint128(spend) == spend, "spend is not an int");
+        require(uint128(quantity) == quantity, "quantity is not an int");
 
         // For backwards semantic compatibility.
         if (quantity == 0 || spend == 0 ||
@@ -334,8 +339,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
         offers[id].pay_amt = sub(offer.pay_amt, quantity);
         offers[id].buy_amt = sub(offer.buy_amt, spend);
-        require( offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) );
-        require( offer.pay_gem.transfer(msg.sender, quantity) );
+        require( offer.buy_gem.transferFrom(msg.sender, offer.owner, spend),"offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) failed" );
+        require( offer.pay_gem.transfer(msg.sender, quantity), "offer.pay_gem.transfer(msg.sender, quantity) failed");
 
         emit LogItemUpdate(id);
         emit LogTake(
@@ -579,17 +584,22 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //TODO: build setPropToMakers auth function!
     uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
     address public RBCNAddress;
+    address public AqueductAddress;
+    
+    /// @notice The address of the Rubicon governance token
+    RBCNInterface public RBCN;
     //TODO: build correct logic to handle various WETH addresses
     address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    constructor(uint64 close_time, address RBCN_Address) ExpiringMarket(close_time) public {
+    constructor(uint64 close_time, address RBCN_Address, address aqueduct, address _feeTo) ExpiringMarket(close_time) SimpleMarket(_feeTo) public {
       RBCNAddress = RBCN_Address;
-
+        AqueductAddress = aqueduct;
     // TO DO: Think through the below
-    //   RBCN liveRBCN = RBCN(getRBCNAddress());
+    //   RBCN RBCN = RBCN(getRBCNAddress());
     //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
     //   timeOfLastRBCNDist = RBCNdistStartTime;
         timeOfLastRBCNDist = now;
+        RBCN = RBCNInterface(RBCN_Address);
     }
 
     // After close, anyone can cancel an offer
@@ -707,6 +717,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return super.offer(pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
+    // TODO: Add a buy in ETH functionality
     //Transfers funds from caller to offer maker, and from market to caller.
     function buy(uint id, uint amount)
         public
@@ -714,16 +725,22 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         returns (bool)
     {
         require(!locked, "Reentrancy attempt");
+        distributeRBCN(getOwner(id), msg.sender);
+        // address offerOwner = offers[id].owner;
+        // require(offerOwner != address(0), "owner error");
+        // require(offerOwner == getOwner(id), "owner error");
+
+
         function (uint256,uint256) returns (bool) fn = matchingEnabled ? _buys : super.buy;  //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
         
-        fn(id, amount);
-                
-        //Added RBCN distribution on the trade
-        distributeRBCN(offers[id].owner, msg.sender);
+        // fn(id, amount);      
 
-        return true;
+        //Added RBCN distribution on the trade
+        
+
+        // return true;
         //OLD return
-        // return fn(id, amount);
+        return fn(id, amount);
     }
 
     // Cancel an offer. Refunds offer maker.
@@ -1261,19 +1278,20 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     }
     //This function should distribute a time-weighted RBCN allocation
     function distributeRBCN(address maker, address taker) internal returns (bool) {
-      require(!locked);
-      require(timeOfLastRBCNDist < block.timestamp);
+      require(timeOfLastRBCNDist <= block.timestamp, "timeOfLastRBCNDist < block.timestamp");
+      require(taker != address(0), "taker is zero address");
+      require(maker != address(0), "maker is zero address");
 
       // retreive distStartTime from RBCN contract
-      RBCN liveRBCN = RBCN(getRBCNAddress());
+
     
-    require(block.timestamp <= liveRBCN.distEndTime());
+      require(block.timestamp <= RBCN.getDistEndTime(), "RBCN Distribution is over");
       //calculate delta
       uint delta = sub(block.timestamp, timeOfLastRBCNDist);
 
       //calculate quantity to sendmaker
-      uint distQuanityMaker = (getPropToMakers() / 100) * (delta) * liveRBCN.getDistRate();
-      uint distQuanityTaker = ((100 - getPropToMakers()) / 100) * (delta) * liveRBCN.getDistRate();
+      uint distQuanityMaker = (getPropToMakers() / 100) * (delta) * RBCN.getDistRate();
+      uint distQuanityTaker = ((100 - getPropToMakers()) / 100) * (delta) * RBCN.getDistRate();
 
     // Drip needed quantity from Aqueduct
         
@@ -1287,14 +1305,14 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
       //Aqueduct Logic
       //TOO: Add correct logic address
-      Aqueduct liveAqueduct = Aqueduct(0xdDC12b03CCaE6fE5639dE5D9beed22688DE07d3e);
+    //   Aqueduct(liveRBCN.aqueduct());
 
       // TODO: w/ Aqueduct logic the Aqueduct will send the RBCN to correct addresses
       //send to Maker distQuanityMaker
-      liveAqueduct.distributeGovernanceToken(maker, distQuanityMaker);
+      require(Aqueduct(AqueductAddress).distributeGovernanceToken(maker, distQuanityMaker), "distribution to maker failed");
 
       //send to Taker distQuanityTaker
-      liveAqueduct.distributeGovernanceToken(taker, distQuanityTaker);
+      Aqueduct(AqueductAddress).distributeGovernanceToken(taker, distQuanityTaker);
 
       //time of timeOfLastRBCNDist is set immediately after distribution is made
       timeOfLastRBCNDist = block.timestamp;
@@ -1304,5 +1322,11 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
       return true;
     }
 
+}
 
+interface RBCNInterface {
+    function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
+    function getDistRate() external pure returns (uint);
+    function getDistStartTime() external view returns (uint);
+    function getDistEndTime() external view returns (uint);
 }

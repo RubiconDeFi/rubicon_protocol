@@ -6,6 +6,7 @@ const Aqueduct = artifacts.require("Aqueduct");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 
+const helper = require('../testHelpers/timeHelper.js');
 
 function logIndented(...args) {
     console.log("       ", ...args); 
@@ -29,7 +30,7 @@ contract("RBCN Public Allocations Test", async function(accounts) {
             logIndented("Admin / Account 0: " + accounts[0]);
             logIndented("Trader 1 / Maker / Account 3: " + accounts[3]);
             logIndented("Trader 2 / Taker / Account 4: " + accounts[4]);
-            logIndented("Migrations: " + aqueductInstance.address);
+            logIndented("Aqueduct: " + aqueductInstance.address);
             logIndented("RubiconMarket: " + rubiconMarketInstance.address);
             logIndented("RBCN: " + RBCNInstance.address);
             logIndented("DAI: " + DAIInstance.address);
@@ -57,19 +58,37 @@ contract("RBCN Public Allocations Test", async function(accounts) {
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
             // console.log("balance check", (await WETHInstance.balanceOf(accounts[3])).toString());
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
-            const makerTradeID = await rubiconMarketInstance.offer(web3.utils.toWei((0.5).toString(), "ether"), WETHInstance.address, web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, {from: accounts[3]});        
-            assert.equal(makerTradeID, 1);
+            await rubiconMarketInstance.offer(web3.utils.toWei((0.5).toString(), "ether"), WETHInstance.address, web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, 1, {from: accounts[3]});        
+            await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address).toString();
+            // assert.equal(makerTradeID., 1);
+        });
+        it("Aqueduct has right params", async function() {
+            await aqueductInstance.setDistributionParams(RBCNInstance.address, rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RubiconMarketAddress(), rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RBCNAddress(), RBCNInstance.address);
         });
         it("Taker can take the offer while paying the taker fee", async function() {
-            await DAIInstance.faucet.call({from: accounts[4]});
-            await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((55).toString()));
-            await rubiconMarketInstance.buy(makerTradeID, web3.utils.toWei((0.5).toString(), "ether")).call({from: accounts[4]});
-
+            await DAIInstance.faucet({from: accounts[4]});
+            await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((55).toString()), {from: accounts[4]});
+            const tradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address));
+            const tradeDetails = (await rubiconMarketInstance.getOffer(tradeID));
+            // // console.log("tradeID", tradeID.toString());
+            // console.log("tradeDetails", tradeDetails[0].toString());
+            // console.log("address", (await aqueductInstance.RubiconMarketAddress()));
+            await helper.advanceTimeAndBlock(100);
+            await rubiconMarketInstance.buy(tradeID, tradeDetails[0].toString(), {from: accounts[4]});
         });
         it("RBCN was correctly accrued", async function() {
-            const RBCNAccruedMaker = RBCNInstance.balanceOf(accounts[3]);
-            const RBCNAccruedTaker = RBCNInstance.balanceOf(accounts[4]);
-            assert.equal(RBCNAccruedMaker + RBCNAccruedTaker, )
+            const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3]));
+            // console.log("RBCNAccrued Maker", RBCNAccruedMaker.toString());
+            const RBCNAccruedTaker = (await RBCNInstance.balanceOf(accounts[4]));
+            assert(RBCNAccruedMaker.gt(0));
+            assert(RBCNAccruedTaker.gt(0));
+        });
+        it("Fee was correctly paid to admin account", async function() {
+            const feeAmount = web3.utils.toWei((50 * 0.002).toString(), "ether");
+            console.log("fee anoiuybt", feeAmount);
+            assert.equal(feeAmount.toString(), (await DAIInstance.balanceOf(accounts[0])).toString())
         });
     });
 });

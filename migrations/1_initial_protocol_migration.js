@@ -8,7 +8,7 @@ var TokenVesting1 = artifacts.require("./contracts/TokenVesting1");
 var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
 
 
-const FOUR_YEARS = 126227808000; // four years in unix time
+const FOUR_YEARS = 126227808000; // four years in unix time TODO convert to seconds
 
 module.exports = function(deployer, network, accounts) {
   var admin = accounts[0];
@@ -33,7 +33,7 @@ module.exports = function(deployer, network, accounts) {
       return deployer.deploy(Timelock, Migrations.address, 0).then(function(){   // Takes admin and initial delay that must exceed the minimum delay... ZERO FOR TESTING NOT PRODUCTION READY
         //Give admin token balance and set total supply
         return deployer.deploy(SenateAlpha, Timelock.address, RBCN.address, admin).then(function(){ //gaurdian of senate is admin
-          return deployer.deploy(RubiconMarket, 1735693261, RBCN.address);
+          return deployer.deploy(RubiconMarket, 1735693261, RBCN.address, Aqueduct.address, admin);
         });
       });
     });

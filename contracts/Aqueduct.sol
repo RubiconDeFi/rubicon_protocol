@@ -39,13 +39,13 @@ contract Aqueduct {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyExchange() {
-        require(isExchange(), "Ownable: caller is not the owner");
+        require(isExchange(), "Caller is not the Rubicon Market");
         _;
     }
 
-    /**
-     * @dev Returns true if the caller is the current owner.
-     */
+    // /**
+    //  * @dev Returns true if the caller is the current owner.
+    //  */
     function isExchange() public view returns (bool) {
         return msg.sender == RubiconMarketAddress;
     }
@@ -57,7 +57,7 @@ contract Aqueduct {
 
 
     function distributeGovernanceToken(address recipient, uint amount) public onlyExchange returns (bool) {
-        require(RBCN(RBCNAddress).transfer(recipient, amount));
+        require(RBCN(RBCNAddress).transfer(recipient, amount), "transfer of token failed");
         return true;
     }
 

@@ -24,6 +24,9 @@ contract RBCN {
     /// @notice The Unix Timestamp to begin RBCN public distribution
     uint public distEndTime;
     
+    /// @notice The contract that holds the RBCN public distribution
+    address public aqueduct;
+    
     /// @ notice The rate of RBCN per unit of Unix time (millisecond) distributed
     ///          to the community
     /// Selected Number: https://www.wolframalpha.com/input/?i=%281%2C000%2C000%2C000*%28.51%29%29%2F%28365*x*24*60*60%29+%3D+%284044409199048374306+%2F+1e18%29 
@@ -250,6 +253,10 @@ contract RBCN {
 
     function getDistStartTime() external view returns (uint) {
       return distStartTime;
+    }
+
+    function getDistEndTime() external view returns (uint) {
+      return distEndTime;
     }
 
     function getDistRate() external pure returns (uint) {

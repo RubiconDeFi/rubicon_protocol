@@ -122,6 +122,13 @@ contract("Rubicon Migrations Test", async function(accounts) {
             assert.equal(await senateAlphaInstance.guardian(), "0x0000000000000000000000000000000000000000");
         });
 
+        
+        it("can set distribution params on Aqueduct", async function() {
+            await aqueductInstance.setDistributionParams(RBCNInstance.address, rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RubiconMarketAddress(), rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RBCNAddress(), RBCNInstance.address);
+        });
+
     });
 
     describe("Timelock and Rubicon Market Admin Check", async function() {
