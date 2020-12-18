@@ -1278,7 +1278,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     }
     //This function should distribute a time-weighted RBCN allocation
     function distributeRBCN(address maker, address taker) internal returns (bool) {
-      require(timeOfLastRBCNDist <= block.timestamp, "timeOfLastRBCNDist < block.timestamp");
+      require(timeOfLastRBCNDist < block.timestamp, "timeOfLastRBCNDist < block.timestamp");
       require(taker != address(0), "taker is zero address");
       require(maker != address(0), "maker is zero address");
 
