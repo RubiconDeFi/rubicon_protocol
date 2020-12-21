@@ -1,4 +1,4 @@
-const BN = require('bn.js');
+// const BN = require('bn.js');
 
 const RubiconMarket = artifacts.require("RubiconMarket");
 const RBCN = artifacts.require("RBCN");
@@ -13,8 +13,10 @@ function logIndented(...args) {
 }
 
 const FOUR_YEARS_SECONDS = "126144000";
+//store the start time of RBCN distribution on RubiconMarket
+var oldTimeofRBCN;
 
-contract("RBCN Public Allocations Test", async function(accounts) {
+contract("RBCN Public Allocation and Trade Test", async function(accounts) {
     describe("Deployment", async function() {
         it("is deployed", async function() {
             rubiconMarketInstance = await RubiconMarket.deployed();
@@ -40,10 +42,10 @@ contract("RBCN Public Allocations Test", async function(accounts) {
         });
     });
 
-    // Check distribution values and log them
+    // Check distribution values
     describe("RBCN Distribution", async function() {
         it("has a four-year distribution window", async function() {
-            logIndented("Distribution window of RBCN", ((await RBCNInstance.distEndTime()) - (await RBCNInstance.distStartTime())).toString());
+            logIndented("Distribution window of RBCN in seconds:", ((await RBCNInstance.distEndTime()) - (await RBCNInstance.distStartTime())).toString());         
             assert.equal(((await RBCNInstance.distEndTime()) - (await RBCNInstance.distStartTime())).toString(), FOUR_YEARS_SECONDS);
         });
         it("has nearly correct per second rate (close enough to millions)", async function() {
@@ -51,16 +53,14 @@ contract("RBCN Public Allocations Test", async function(accounts) {
         });
     });
 
-
     // Test a single trade after X amount of seconds that checks if correct amount of RBCN is deployed
     describe("Trade Test", async function() {
         it("Maker can place an offer to sell 50 DAI for 0.5 WETH", async function() {
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
-            // console.log("balance check", (await WETHInstance.balanceOf(accounts[3])).toString());
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
             await rubiconMarketInstance.offer(web3.utils.toWei((0.5).toString(), "ether"), WETHInstance.address, web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, 1, {from: accounts[3]});        
-            await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address).toString();
-            // assert.equal(makerTradeID., 1);
+            const makerTradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address)).toString();   
+            assert.equal(makerTradeID, '1');
         });
         it("Aqueduct has right params", async function() {
             await aqueductInstance.setDistributionParams(RBCNInstance.address, rubiconMarketInstance.address);
@@ -69,25 +69,30 @@ contract("RBCN Public Allocations Test", async function(accounts) {
         });
         it("Taker can take the offer while paying the taker fee", async function() {
             await DAIInstance.faucet({from: accounts[4]});
+            const timeOfLastRBCN = (await rubiconMarketInstance.timeOfLastRBCNDist());
+            oldTimeofRBCN = parseFloat(timeOfLastRBCN.toString());
+
+            // Time increase for testing purposes of distribution
+            // await helper.advanceTimeAndBlock(100);
+
             await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((55).toString()), {from: accounts[4]});
             const tradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address));
             const tradeDetails = (await rubiconMarketInstance.getOffer(tradeID));
-            // // console.log("tradeID", tradeID.toString());
-            // console.log("tradeDetails", tradeDetails[0].toString());
-            // console.log("address", (await aqueductInstance.RubiconMarketAddress()));
-            await helper.advanceTimeAndBlock(100);
             await rubiconMarketInstance.buy(tradeID, tradeDetails[0].toString(), {from: accounts[4]});
         });
-        it("RBCN was correctly accrued", async function() {
+        it("RBCN was distributed with the right Maker/Taker ratio", async function() {
             const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3]));
-            // console.log("RBCNAccrued Maker", RBCNAccruedMaker.toString());
             const RBCNAccruedTaker = (await RBCNInstance.balanceOf(accounts[4]));
-            assert(RBCNAccruedMaker.gt(0));
-            assert(RBCNAccruedTaker.gt(0));
+            assert.equal(1.5, parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")) / parseFloat(web3.utils.fromWei(RBCNAccruedTaker.toString(), "ether")));
+
+        });
+        it("RBCN was accrued with the right rate", async function() {
+            const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3])); 
+            const expectedMaker = ((await web3.eth.getBlock('latest'))['timestamp'] - oldTimeofRBCN) * 4.04441 * (3/5);
+            assert.equal(expectedMaker.toFixed(3), parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")).toFixed(3));
         });
         it("Fee was correctly paid to admin account", async function() {
             const feeAmount = web3.utils.toWei((50 * 0.002).toString(), "ether");
-            console.log("fee anoiuybt", feeAmount);
             assert.equal(feeAmount.toString(), (await DAIInstance.balanceOf(accounts[0])).toString())
         });
     });

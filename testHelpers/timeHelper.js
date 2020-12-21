@@ -11,7 +11,7 @@ advanceTime = (time) => {
             jsonrpc: "2.0",
             method: "evm_increaseTime",
             params: [time],
-            id: new Date().getTime()
+            id: new Date().getSeconds()
         }, (err, result) => {
             if (err) { return reject(err); }
             return resolve(result);
@@ -24,7 +24,8 @@ advanceBlock = () => {
         web3.currentProvider.send({
             jsonrpc: "2.0",
             method: "evm_mine",
-            id: new Date().getTime()
+            params: [],
+            id: new Date().getSeconds()
         }, (err, result) => {
             if (err) { return reject(err); }
             const newBlockHash = web3.eth.getBlock('latest').hash;

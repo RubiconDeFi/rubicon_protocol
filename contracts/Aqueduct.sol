@@ -13,11 +13,12 @@ contract Aqueduct {
 
     address public owner;
 
+    event Distribution( address recipient, uint amount, uint timestamp);
+
     constructor(uint communityDuration, address _owner) public {
         require(communityDuration > block.timestamp);
         owner = _owner;
         distributionDuration = communityDuration;
-
     }
     
     /**
@@ -36,16 +37,16 @@ contract Aqueduct {
     }
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * @dev Throws if called by any account other than the Rubicon Exchange.
      */
     modifier onlyExchange() {
         require(isExchange(), "Caller is not the Rubicon Market");
         _;
     }
 
-    // /**
-    //  * @dev Returns true if the caller is the current owner.
-    //  */
+    /**
+     * @dev Returns true if the caller is the current Rubicon Exchange.
+     */
     function isExchange() public view returns (bool) {
         return msg.sender == RubiconMarketAddress;
     }
@@ -57,7 +58,9 @@ contract Aqueduct {
 
 
     function distributeGovernanceToken(address recipient, uint amount) public onlyExchange returns (bool) {
+        require(msg.sender == RubiconMarketAddress, "caller is not Rubicon Market");
         require(RBCN(RBCNAddress).transfer(recipient, amount), "transfer of token failed");
+        emit Distribution(recipient, amount, block.timestamp);
         return true;
     }
 
