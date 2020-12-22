@@ -584,7 +584,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint => uint) public _near;         //next unsorted offer id
     uint _head;                                 //first unsorted offer id
     uint public dustId;                         // id of the latest offer marked as dust
-    uint public timeOfLastRBCNDist;             // the unix timestamp of the last RBCN distribution
+    // uint public timeOfLastRBCNDist;             // the unix timestamp of the last RBCN distribution
     //TODO: build setPropToMakers auth function!
     uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
     address public RBCNAddress;
@@ -597,13 +597,13 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     constructor(uint64 close_time, address RBCN_Address, address aqueduct, address _feeTo) ExpiringMarket(close_time) SimpleMarket(_feeTo) public {
       RBCNAddress = RBCN_Address;
-        AqueductAddress = aqueduct;
+      AqueductAddress = aqueduct;
     // TO DO: Think through the below
     //   RBCN RBCN = RBCN(getRBCNAddress());
     //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
     //   timeOfLastRBCNDist = RBCNdistStartTime;
-        timeOfLastRBCNDist = now;
-        RBCN = RBCNInterface(RBCN_Address);
+        // timeOfLastRBCNDist = now;
+      RBCN = RBCNInterface(RBCN_Address);
     }
 
     // After close, anyone can cancel an offer
@@ -732,7 +732,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(!locked, "Reentrancy attempt");
        
         //RBCN distribution on the trade
-        distributeRBCN(getOwner(id), msg.sender);
+        Aqueduct(AqueductAddress).distributeToMakerAndTaker(getOwner(id), msg.sender);
 
         function (uint256,uint256) returns (bool) fn = matchingEnabled ? _buys : super.buy;  //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
           
@@ -1247,62 +1247,16 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 
-    // Set Fee
+    // TODO: Set Fee - how to auth this
     function setFeeBPS(uint _newFeeBPS) public auth returns(bool) {
         feeBPS = _newFeeBPS;
         return true;
     }
-
-    //**********RBCN Distribution Logic*********
-    //Get RBCN address
-    function getRBCNAddress() public view returns (address) {
-      return RBCNAddress;
-    }
-
-    // Should return the proportion of RBCN distribution per block that
-    // is allocated to a Maker of a trade
-    // The allocation that goes to the Taker is 1 - % to Maker
-    function getPropToMakers() internal view returns(uint) {
-      return propToMakers;
-    }
-
-    function setPropToMakers(uint newProp) external auth synchronized returns(bool){
-      propToMakers = newProp;
-      return true;
-    }
-
-    //This function should distribute a time-weighted RBCN allocation
-    function distributeRBCN(address maker, address taker) internal returns (bool) {
-      require(timeOfLastRBCNDist < block.timestamp, "timeOfLastRBCNDist < block.timestamp");
-      require(taker != address(0), "taker is zero address");
-      require(maker != address(0), "maker is zero address");
-      require(block.timestamp <= RBCN.getDistEndTime(), "RBCN Distribution is over");
-
-      //calculate change in time from last distribution to now
-      uint delta = sub(block.timestamp, timeOfLastRBCNDist);
-
-      //calculate quantity to sendmaker
-      uint distQuanityMaker = (getPropToMakers() * (delta) * RBCN.getDistRate()) / 100;
-      uint distQuanityTaker = ((100 - getPropToMakers())) * (delta) * RBCN.getDistRate() / 100;
-
-      // TO DO: Extrapolate everything to Aqueduct?
-      //send to Maker distQuanityMaker
-      require(Aqueduct(AqueductAddress).distributeGovernanceToken(maker, distQuanityMaker), "distribution to maker failed");
-
-      //send to Taker distQuanityTaker
-      require(Aqueduct(AqueductAddress).distributeGovernanceToken(taker, distQuanityTaker), "distribution to taker failed");
-
-      //time of timeOfLastRBCNDist is set immediately after distribution is made
-      timeOfLastRBCNDist = block.timestamp;
-
-      return true;
-    }
-
 }
 
-interface RBCNInterface {
-    function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
-    function getDistRate() external pure returns (uint);
-    function getDistStartTime() external view returns (uint);
-    function getDistEndTime() external view returns (uint);
-}
+// interface RBCNInterface {
+//     function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
+//     function getDistRate() external pure returns (uint);
+//     function getDistStartTime() external view returns (uint);
+//     function getDistEndTime() external view returns (uint);
+// }

@@ -69,8 +69,8 @@ contract("RBCN Public Allocation and Trade Test", async function(accounts) {
         });
         it("Taker can take the offer while paying the taker fee", async function() {
             await DAIInstance.faucet({from: accounts[4]});
-            const timeOfLastRBCN = (await rubiconMarketInstance.timeOfLastRBCNDist());
-            oldTimeofRBCN = parseFloat(timeOfLastRBCN.toString());
+            const timeOfRBCNStart = (await aqueductInstance.timeOfLastRBCNDist());
+            oldTimeofRBCN = parseFloat(timeOfRBCNStart.toString());
 
             // Time increase for testing purposes of distribution
             // await helper.advanceTimeAndBlock(100);
@@ -84,11 +84,10 @@ contract("RBCN Public Allocation and Trade Test", async function(accounts) {
             const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3]));
             const RBCNAccruedTaker = (await RBCNInstance.balanceOf(accounts[4]));
             assert.equal(1.5, parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")) / parseFloat(web3.utils.fromWei(RBCNAccruedTaker.toString(), "ether")));
-
         });
         it("RBCN was accrued with the right rate", async function() {
             const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3])); 
-            const expectedMaker = ((await web3.eth.getBlock('latest'))['timestamp'] - oldTimeofRBCN) * 4.04441 * (3/5);
+            const expectedMaker = ((await web3.eth.getBlock('latest'))['timestamp'] - oldTimeofRBCN) * 4.0444092 * (3/5);
             assert.equal(expectedMaker.toFixed(3), parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")).toFixed(3));
         });
         it("Fee was correctly paid to admin account", async function() {
