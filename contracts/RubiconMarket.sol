@@ -592,18 +592,18 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     
     /// @notice The address of the Rubicon governance token
     RBCNInterface public RBCN;
-    //TODO: build correct logic to handle various WETH addresses
-    address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
-    constructor(uint64 close_time, address RBCN_Address, address aqueduct, address _feeTo) ExpiringMarket(close_time) SimpleMarket(_feeTo) public {
+    //TODO: for Mainnnet deployment, WETH address will be hard coded as below
+    // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public WETHAddress;
+
+    constructor(uint64 close_time, address RBCN_Address, address aqueduct, address _feeTo, /*For Testing Only:*/address WETH) ExpiringMarket(close_time) SimpleMarket(_feeTo) public {
       RBCNAddress = RBCN_Address;
       AqueductAddress = aqueduct;
-    // TO DO: Think through the below
-    //   RBCN RBCN = RBCN(getRBCNAddress());
-    //   uint RBCNdistStartTime = liveRBCN.getDistStartTime();
-    //   timeOfLastRBCNDist = RBCNdistStartTime;
-        // timeOfLastRBCNDist = now;
       RBCN = RBCNInterface(RBCN_Address);
+
+      /*For Testing Only:*/
+      WETHAddress = WETH;
     }
 
     // After close, anyone can cancel an offer
@@ -638,7 +638,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(cancel(uint256(id)));
     }
 
-    // TODO: build and test offer/buy in native ETH functions
     // Routing function to make a trade where the user is sending Native ETH
     function offerInETH(
         uint buy_amt,    //taker (ask) buy how much
@@ -646,18 +645,26 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ) public payable returns (uint) {
         require(!locked, "Reentrancy attempt");
         
-        //Convert to Weth: basically pay.amt = msg.value
-
-        //******NEED TO LOAD IN WETH MARKET ADDRESS CORRECTLY*****
         IWETH(WETHAddress).deposit.value(msg.value);
 
         ERC20 WETH = ERC20(WETHAddress);
 
         //Push Normal Order with WETH
         super.offer(msg.value, WETH, buy_amt, buy_gem);
-
     }
 
+    function buyInETH(uint id)
+        public payable
+        can_buy(id)
+        returns (bool)
+    {
+        require(!locked, "Reentrancy attempt");
+        ERC20 WETH = ERC20(WETHAddress);
+        require(offers[id].buy_gem == WETH, 'offer you buy must be in WETH');
+        IWETH(WETHAddress).deposit.value(msg.value);
+        
+        super.buy(id, msg.value);
+    }
     // Make a new offer. Takes funds from the caller into market escrow.
     //
     // If matching is enabled:

@@ -16,7 +16,7 @@ const FOUR_YEARS_SECONDS = "126144000";
 //store the start time of RBCN distribution on RubiconMarket
 var oldTimeofRBCN;
 
-contract("RBCN Public Allocation and Trade Test", async function(accounts) {
+contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
     describe("Deployment", async function() {
         it("is deployed", async function() {
             rubiconMarketInstance = await RubiconMarket.deployed();
@@ -51,6 +51,11 @@ contract("RBCN Public Allocation and Trade Test", async function(accounts) {
         it("has nearly correct per second rate (close enough to millions)", async function() {
             assert.equal(Math.round((((await RBCNInstance.distRate()) / 1e18) * FOUR_YEARS_SECONDS) / 1000000) * 1000000, 510000000);
         });
+        it("Aqueduct has right params", async function() {
+            await aqueductInstance.setDistributionParams(RBCNInstance.address, rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RubiconMarketAddress(), rubiconMarketInstance.address);
+            assert.equal(await aqueductInstance.RBCNAddress(), RBCNInstance.address);
+        });
     });
 
     // Test a single trade after X amount of seconds that checks if correct amount of RBCN is deployed
@@ -61,11 +66,6 @@ contract("RBCN Public Allocation and Trade Test", async function(accounts) {
             await rubiconMarketInstance.offer(web3.utils.toWei((0.5).toString(), "ether"), WETHInstance.address, web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, 1, {from: accounts[3]});        
             const makerTradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address)).toString();   
             assert.equal(makerTradeID, '1');
-        });
-        it("Aqueduct has right params", async function() {
-            await aqueductInstance.setDistributionParams(RBCNInstance.address, rubiconMarketInstance.address);
-            assert.equal(await aqueductInstance.RubiconMarketAddress(), rubiconMarketInstance.address);
-            assert.equal(await aqueductInstance.RBCNAddress(), RBCNInstance.address);
         });
         it("Taker can take the offer while paying the taker fee", async function() {
             await DAIInstance.faucet({from: accounts[4]});
@@ -93,6 +93,37 @@ contract("RBCN Public Allocation and Trade Test", async function(accounts) {
         it("Fee was correctly paid to admin account", async function() {
             const feeAmount = web3.utils.toWei((50 * 0.002).toString(), "ether");
             assert.equal(feeAmount.toString(), (await DAIInstance.balanceOf(accounts[0])).toString())
+        });
+    });
+
+    describe("Trade Test", async function() {
+        it("Maker can place an offer to sell 50 DAI for 0.5 ~Native ETH~", async function() {
+            // await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
+            // await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
+            await rubiconMarketInstance.offerInETH(web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, {from: accounts[3],value: web3.utils.toWei((0.5).toString())});        
+            const makerTradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address)).toString();   
+            assert.equal(makerTradeID, '1');
+        });
+        it("Taker can take the offer in DAI while paying the taker fee", async function() {
+            await DAIInstance.faucet({from: accounts[4]});
+            await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((55).toString()), {from: accounts[4]});
+            const tradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address));
+            const tradeDetails = (await rubiconMarketInstance.getOffer(tradeID));
+            await rubiconMarketInstance.buy(tradeID, tradeDetails[0].toString(), {from: accounts[4]});
+        });
+        it("Maker can place an offer to sell 50 DAI for 0.5 ~Native ETH~", async function() {
+            // await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
+            // await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
+            await rubiconMarketInstance.offerInETH(web3.utils.toWei((50).toString(), "ether"), DAIInstance.address, 1, {from: accounts[3],value: web3.utils.toWei((0.5).toString())});        
+            const makerTradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address)).toString();   
+            assert.equal(makerTradeID, '1');
+        });
+        it("Taker can take the offer in ~Native ETH~ while paying the taker fee in WETH", async function() {
+            await DAIInstance.faucet({from: accounts[4]});
+            await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((55).toString()), {from: accounts[4]});
+            const tradeID = (await rubiconMarketInstance.getBestOffer(WETHInstance.address,DAIInstance.address));
+            const tradeDetails = (await rubiconMarketInstance.getOffer(tradeID));
+            await rubiconMarketInstance.buy(tradeID, tradeDetails[0].toString(), {from: accounts[4]});
         });
     });
 });

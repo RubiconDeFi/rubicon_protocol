@@ -6,15 +6,17 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 var Aqueduct = artifacts.require("./contracts/Aqueduct.sol");
 var TokenVesting1 = artifacts.require("./contracts/TokenVesting1");
 var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
+var WETH = artifacts.require("./contracts/WETH9.sol");
 
-
-const FOUR_YEARS = 126227808000; // four years in unix time TODO convert to seconds
+const FOUR_YEARS = 126144000; // four years in unix time TODO convert to seconds
 
 module.exports = function(deployer, network, accounts) {
   var admin = accounts[0];
   const Founder1 = accounts[1];
   const Founder2 = accounts[2]; 
 
+  deployer.deploy(WETH);
+  
   // 1. [TODO] Deploy Aqueduct - auth'd to admin
   // 2. [TODO] Deploy Token Vesting Contract(s)
   // 3. ***Migrations below run*** -> RBCN can send community proportion to Aqueduct
@@ -33,7 +35,7 @@ module.exports = function(deployer, network, accounts) {
       return deployer.deploy(Timelock, Migrations.address, 0).then(function(){   // Takes admin and initial delay that must exceed the minimum delay... ZERO FOR TESTING NOT PRODUCTION READY
         //Give admin token balance and set total supply
         return deployer.deploy(SenateAlpha, Timelock.address, RBCN.address, admin).then(function(){ //gaurdian of senate is admin
-          return deployer.deploy(RubiconMarket, 1735693261, RBCN.address, Aqueduct.address, admin);
+          return deployer.deploy(RubiconMarket, 1735693261, RBCN.address, Aqueduct.address, admin, /* Testing only */ WETH.address);
         });
       });
     });
