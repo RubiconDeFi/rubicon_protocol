@@ -645,12 +645,21 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ) public payable returns (uint) {
         require(!locked, "Reentrancy attempt");
         
-        IWETH(WETHAddress).deposit.value(msg.value);
+        IWETH(WETHAddress).deposit.value(msg.value)();
+        // IWETH(WETHAddress).approve(address(this), msg.value);
+        IWETH(WETHAddress).transfer(msg.sender, msg.value);
 
         ERC20 WETH = ERC20(WETHAddress);
 
+        // Not sure which route to use here...
         //Push Normal Order with WETH
-        super.offer(msg.value, WETH, buy_amt, buy_gem);
+        // function (uint256,ERC20,uint256,ERC20) returns (uint256) fn = matchingEnabled ? _offeru : super.offer;
+        // return fn(msg.value, WETH, buy_amt, buy_gem);
+
+        if (matchingEnabled) {
+          return _matcho(msg.value, WETH, buy_amt, buy_gem, 0, true);
+        }
+        return super.offer(msg.value, WETH, buy_amt, buy_gem);
     }
 
     function buyInETH(uint id)
@@ -661,10 +670,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(!locked, "Reentrancy attempt");
         ERC20 WETH = ERC20(WETHAddress);
         require(offers[id].buy_gem == WETH, 'offer you buy must be in WETH');
-        IWETH(WETHAddress).deposit.value(msg.value);
+        IWETH(WETHAddress).deposit.value(msg.value)();
+        IWETH(WETHAddress).transfer(msg.sender, msg.value);
         
         super.buy(id, msg.value);
     }
+    
     // Make a new offer. Takes funds from the caller into market escrow.
     //
     // If matching is enabled:
