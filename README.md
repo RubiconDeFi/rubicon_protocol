@@ -1,4 +1,4 @@
-https://img.shields.io/github/license/RubiconDeFi/rubicon_protocol
+![GitHub](https://img.shields.io/github/license/RubiconDeFi/rubicon_protocol)
 
 # Rubicon Protocol
 
