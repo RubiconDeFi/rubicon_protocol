@@ -64,10 +64,10 @@ contract WETH9 {
         public
         returns (bool)
     {
-        require(balanceOf[src] >= wad);
+        require(balanceOf[src] >= wad, "balance check failed");
 
         if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            require(allowance[src][msg.sender] >= wad);
+            require(allowance[src][msg.sender] >= wad, "not allowed to transfer");
             allowance[src][msg.sender] -= wad;
         }
 

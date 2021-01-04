@@ -20,6 +20,10 @@
 
 pragma solidity ^0.5.12;
 
+import "./RBCN.sol";
+import "./Aqueduct.sol";
+import "./IWETH.sol";
+
 contract DSAuthority {
     function canCall(
         address src, address dst, bytes4 sig
@@ -207,6 +211,23 @@ contract EventfulMarket {
         uint128           buy_amt,
         uint64            timestamp
     );
+
+    event LogInt(string lol, uint input);
+
+    //** Added Fee Event */
+    event FeeTake(        
+        bytes32           id,
+        bytes32  indexed  pair,
+        address  indexed  maker,
+        ERC20             pay_gem,
+        ERC20             buy_gem,
+        address  indexed  taker,
+        uint128           take_amt,
+        uint128           give_amt,
+        uint              feeAmt,
+        address           feeTo,
+        uint64            timestamp
+    );
 }
 
 contract SimpleMarket is EventfulMarket, DSMath {
@@ -217,6 +238,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
     bool locked;
 
+    // 20 Basis Point Fee on Taker Trades
+    uint internal feeBPS = 20;
+
+    address internal feeTo;
+
     struct OfferInfo {
         uint     pay_amt;
         ERC20    pay_gem;
@@ -224,6 +250,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20    buy_gem;
         address  owner;
         uint64   timestamp;
+    }
+
+    constructor(address _feeTo) public
+    {
+        feeTo = _feeTo;
     }
 
     modifier can_buy(uint id) {
@@ -292,8 +323,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
         OfferInfo memory offer = offers[id];
         uint spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
 
-        require(uint128(spend) == spend);
-        require(uint128(quantity) == quantity);
+        require(uint128(spend) == spend, "spend is not an int");
+        require(uint128(quantity) == quantity, "quantity is not an int");
 
         // For backwards semantic compatibility.
         if (quantity == 0 || spend == 0 ||
@@ -302,10 +333,17 @@ contract SimpleMarket is EventfulMarket, DSMath {
             return false;
         }
 
+        // ******Added Fee Functionality *******
+        // Get fee from user - feeBPS in basis points
+        uint fee = mul(spend, feeBPS) / 10000;
+        require( offer.buy_gem.transferFrom(msg.sender, feeTo, fee), "Insufficient funds to cover fee" );
+        // ******************************************
+
+
         offers[id].pay_amt = sub(offer.pay_amt, quantity);
         offers[id].buy_amt = sub(offer.buy_amt, spend);
-        require( offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) );
-        require( offer.pay_gem.transfer(msg.sender, quantity) );
+        require( offer.buy_gem.transferFrom(msg.sender, offer.owner, spend),"offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) failed" );
+        require( offer.pay_gem.transfer(msg.sender, quantity), "offer.pay_gem.transfer(msg.sender, quantity) failed");
 
         emit LogItemUpdate(id);
         emit LogTake(
@@ -317,6 +355,20 @@ contract SimpleMarket is EventfulMarket, DSMath {
             msg.sender,
             uint128(quantity),
             uint128(spend),
+            uint64(now)
+        );
+        // Added Fee Event
+        emit FeeTake(    
+            bytes32(id),
+            keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
+            offer.owner,
+            offer.pay_gem,
+            offer.buy_gem,
+            msg.sender,
+            uint128(quantity),
+            uint128(spend),
+            fee,
+            feeTo,
             uint64(now)
         );
         emit LogTrade(quantity, address(offer.pay_gem), spend, address(offer.buy_gem));
@@ -426,6 +478,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
     {
         last_offer_id++; return last_offer_id;
     }
+
+    // Fee logic
+    function getFeeBPS() internal view returns (uint) {
+        return feeBPS;
+    }
 }
 
 // Simple Market with a market lifetime. When the close_time has been reached,
@@ -527,9 +584,26 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint => uint) public _near;         //next unsorted offer id
     uint _head;                                 //first unsorted offer id
     uint public dustId;                         // id of the latest offer marked as dust
+    // uint public timeOfLastRBCNDist;             // the unix timestamp of the last RBCN distribution
+    //TODO: build setPropToMakers auth function!
+    uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
+    address public RBCNAddress;
+    address public AqueductAddress;
+    
+    /// @notice The address of the Rubicon governance token
+    RBCNInterface public RBCN;
 
+    //TODO: for Mainnnet deployment, WETH address will be hard coded as below
+    // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public WETHAddress;
 
-    constructor(uint64 close_time) ExpiringMarket(close_time) public {
+    constructor(uint64 close_time, address RBCN_Address, address aqueduct, address _feeTo, /*For Testing Only:*/address WETH) ExpiringMarket(close_time) SimpleMarket(_feeTo) public {
+      RBCNAddress = RBCN_Address;
+      AqueductAddress = aqueduct;
+      RBCN = RBCNInterface(RBCN_Address);
+
+      /*For Testing Only:*/
+      WETHAddress = WETH;
     }
 
     // After close, anyone can cancel an offer
@@ -564,6 +638,44 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(cancel(uint256(id)));
     }
 
+    // Routing function to make a trade where the user is sending Native ETH
+    function offerInETH(
+        uint buy_amt,    //taker (ask) buy how much
+        ERC20 buy_gem    //taker (ask) buy which token
+        ) public payable returns (uint) {
+        require(!locked, "Reentrancy attempt");
+        
+        IWETH(WETHAddress).deposit.value(msg.value)();
+        // IWETH(WETHAddress).approve(address(this), msg.value);
+        IWETH(WETHAddress).transfer(msg.sender, msg.value);
+
+        ERC20 WETH = ERC20(WETHAddress);
+
+        // Not sure which route to use here...
+        //Push Normal Order with WETH
+        // function (uint256,ERC20,uint256,ERC20) returns (uint256) fn = matchingEnabled ? _offeru : super.offer;
+        // return fn(msg.value, WETH, buy_amt, buy_gem);
+
+        if (matchingEnabled) {
+          return _matcho(msg.value, WETH, buy_amt, buy_gem, 0, true);
+        }
+        return super.offer(msg.value, WETH, buy_amt, buy_gem);
+    }
+
+    function buyInETH(uint id)
+        public payable
+        can_buy(id)
+        returns (bool)
+    {
+        require(!locked, "Reentrancy attempt");
+        ERC20 WETH = ERC20(WETHAddress);
+        require(offers[id].buy_gem == WETH, 'offer you buy must be in WETH');
+        IWETH(WETHAddress).deposit.value(msg.value)();
+        IWETH(WETHAddress).transfer(msg.sender, msg.value);
+        
+        super.buy(id, msg.value);
+    }
+    
     // Make a new offer. Takes funds from the caller into market escrow.
     //
     // If matching is enabled:
@@ -628,6 +740,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return super.offer(pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
+    // TODO: Add a buy in ETH functionality
     //Transfers funds from caller to offer maker, and from market to caller.
     function buy(uint id, uint amount)
         public
@@ -635,7 +748,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         returns (bool)
     {
         require(!locked, "Reentrancy attempt");
+       
+        //RBCN distribution on the trade
+        Aqueduct(AqueductAddress).distributeToMakerAndTaker(getOwner(id), msg.sender);
+
         function (uint256,uint256) returns (bool) fn = matchingEnabled ? _buys : super.buy;  //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
+          
         return fn(id, amount);
     }
 
@@ -884,7 +1002,9 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
                 _hide(id);
             }
         }
+
         require(super.buy(id, amount));
+
         // If offer has become dust during buy, we cancel it
         if (isActive(id) && offers[id].pay_amt < _dust[address(offers[id].pay_gem)]) {
             dustId = id; //enable current msg.sender to call cancel(id)
@@ -1144,4 +1264,17 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         _near[id] = 0;                  //delete order from unsorted order list
         return true;
     }
+
+    // TODO: Set Fee - how to auth this
+    function setFeeBPS(uint _newFeeBPS) public auth returns(bool) {
+        feeBPS = _newFeeBPS;
+        return true;
+    }
 }
+
+// interface RBCNInterface {
+//     function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
+//     function getDistRate() external pure returns (uint);
+//     function getDistStartTime() external view returns (uint);
+//     function getDistEndTime() external view returns (uint);
+// }

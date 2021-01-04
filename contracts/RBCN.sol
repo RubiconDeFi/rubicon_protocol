@@ -3,7 +3,7 @@
 */
 
 pragma solidity ^0.5.16;
-pragma experimental ABIEncoderV2;
+// pragma experimental ABIEncoderV2;
 
 contract RBCN {
     /// @notice EIP-20 token name for this token
@@ -17,6 +17,23 @@ contract RBCN {
 
     /// @notice Total number of tokens in circulation
     uint public constant totalSupply = 1000000000e18; // 1 billion RBCN
+
+    /// @notice The Unix Timestamp to begin RBCN public distribution
+    uint public distStartTime;
+
+    /// @notice The Unix Timestamp to begin RBCN public distribution
+    uint public distEndTime;
+    
+    /// @notice The contract that holds the RBCN public distribution
+    address public aqueduct;
+    
+    /// @ notice The rate of RBCN per unit of Unix time (millisecond) distributed
+    ///          to the community
+    /// Selected Number: https://www.wolframalpha.com/input/?i=%281%2C000%2C000%2C000*%28.51%29%29%2F%28365*x*24*60*60%29+%3D+%284044409199048374306+%2F+1e18%29 
+    /// Rate calculation: https://www.wolframalpha.com/input/?i=%281%2C000%2C000%2C000*.51%29%2F1.261e%2B8 
+    /// Rate = 4044409199048374 / 1e18 = 4.044409199...
+    uint public constant distRate = 4044409199048374306; //Distribution rate Wad in SECONDS
+    /// True rate of RBCN per second is distRate / 1e18
 
     /// @notice Allowance amounts on behalf of others
     mapping (address => mapping (address => uint96)) internal allowances;
@@ -62,11 +79,21 @@ contract RBCN {
 
     /**
      * @notice Construct a new RBCN token
-     * @param account The initial account to grant all the tokens
+     * @param aqueduct The holder of all community tokens
+     * @param admin The recipient of non-community tokens
      */
-    constructor(address account) public {
-        balances[account] = uint96(totalSupply);
-        emit Transfer(address(0), account, totalSupply);
+    constructor(address aqueduct, address admin) public {
+        // 51% to community
+        balances[aqueduct] = uint96(510000000e18);
+        emit Transfer(address(0), aqueduct, uint(1000000000e18));
+        
+        // 49% to admin. See distribution here:
+        balances[admin] = uint96(490000000e18);
+        emit Transfer(address(0), admin, uint96(490000000e18));
+
+        // Start distributing RBCN to community at launch
+        distStartTime = now;
+        distEndTime = now + (4 * 365 days);
     }
 
     /**
@@ -222,6 +249,18 @@ contract RBCN {
             }
         }
         return checkpoints[account][lower].votes;
+    }
+
+    function getDistStartTime() external view returns (uint) {
+      return distStartTime;
+    }
+
+    function getDistEndTime() external view returns (uint) {
+      return distEndTime;
+    }
+
+    function getDistRate() external pure returns (uint) {
+      return distRate;
     }
 
     function _delegate(address delegator, address delegatee) internal {

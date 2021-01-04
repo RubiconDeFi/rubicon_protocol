@@ -37,6 +37,7 @@ def send_transaction(encodedABI, sender, desc, to, value, sendIT, PK):
         'gasPrice': web3.toWei('20', 'gwei')
     }
 
+
         # GAS CHECK
     # try:
     #     print('Estimated Gas for' + desc, web3.eth.estimateGas(txData))
