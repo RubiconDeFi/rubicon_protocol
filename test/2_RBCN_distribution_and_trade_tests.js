@@ -83,7 +83,7 @@ contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
         it("RBCN was distributed with the right Maker/Taker ratio", async function() {
             const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3]));
             const RBCNAccruedTaker = (await RBCNInstance.balanceOf(accounts[4]));
-            assert.equal(1.5, parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")) / parseFloat(web3.utils.fromWei(RBCNAccruedTaker.toString(), "ether")));
+            assert.equal(1.5, (parseFloat(web3.utils.fromWei(RBCNAccruedMaker.toString(), "ether")) / parseFloat(web3.utils.fromWei(RBCNAccruedTaker.toString(), "ether"))).toFixed(1));
         });
         it("RBCN was accrued with the right rate", async function() {
             const RBCNAccruedMaker = (await RBCNInstance.balanceOf(accounts[3])); 
