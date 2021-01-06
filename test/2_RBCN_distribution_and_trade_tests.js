@@ -6,7 +6,7 @@ const Aqueduct = artifacts.require("Aqueduct");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 
-const helper = require('../testHelpers/timeHelper.js');
+const helper = require('./testHelpers/timeHelper.js');
 
 function logIndented(...args) {
     console.log("       ", ...args); 
