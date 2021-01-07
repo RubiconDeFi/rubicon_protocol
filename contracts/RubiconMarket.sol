@@ -584,13 +584,8 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint => uint) public _near;         //next unsorted offer id
     uint _head;                                 //first unsorted offer id
     uint public dustId;                         // id of the latest offer marked as dust
-    // uint public timeOfLastRBCNDist;             // the unix timestamp of the last RBCN distribution
-    //TODO: build setPropToMakers auth function!
-    uint public propToMakers = 60;                   // the number out of 100 that represents proportion of an RBCN trade distribution to go to Maker vs. Taker
     address public RBCNAddress;
     address public AqueductAddress;
-    
-    /// @notice The address of the Rubicon governance token
     RBCNInterface public RBCN;
 
     //TODO: for Mainnnet deployment, WETH address will be hard coded as below
@@ -740,7 +735,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return super.offer(pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
-    // TODO: Add a buy in ETH functionality
     //Transfers funds from caller to offer maker, and from market to caller.
     function buy(uint id, uint amount)
         public

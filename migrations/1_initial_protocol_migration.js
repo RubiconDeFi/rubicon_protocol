@@ -8,7 +8,7 @@ var TokenVesting1 = artifacts.require("./contracts/TokenVesting1");
 var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
 var WETH = artifacts.require("./contracts/WETH9.sol");
 
-const FOUR_YEARS = 126144000; // four years in unix time TODO convert to seconds
+const FOUR_YEARS = 126144000; // four years in unix time
 
 module.exports = function(deployer, network, accounts) {
   var admin = accounts[0];
@@ -17,18 +17,9 @@ module.exports = function(deployer, network, accounts) {
 
   deployer.deploy(WETH);
   
-  // 1. [TODO] Deploy Aqueduct - auth'd to admin
-  // 2. [TODO] Deploy Token Vesting Contract(s)
-  // 3. ***Migrations below run*** -> RBCN can send community proportion to Aqueduct
-  //    -> RBCN can send founder amounts to Token Vesting Contracts
-  //    -> RBCN can send Rubicon Team proportion to the correct address
-  // 4. [TODO] Call function on Aqueduct to give it exchange and RBCN address --> **Add this to Auth Deploy**
-  // deployer.deploy(Aqueduct, FOUR_YEARS, admin);
   deployer.deploy(TokenVesting1, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
   deployer.deploy(TokenVesting2, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
 
-  //TO DO: Send Community Proportion of RBCN to Migrations then to Exchange
-  //TO DO: Build logic in Migrations/RBCN to handle that
   deployer.deploy(Migrations).then(function() {
     return deployer.deploy(Aqueduct, FOUR_YEARS, admin).then(function() {
     return deployer.deploy(RBCN, Aqueduct.address, admin).then(function() {
