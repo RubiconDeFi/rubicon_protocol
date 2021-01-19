@@ -4,8 +4,8 @@ var Timelock = artifacts.require("./contracts/Timelock.sol");
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var RBCN = artifacts.require("./contracts/RBCN.sol");
 var Aqueduct = artifacts.require("./contracts/Aqueduct.sol");
-var TokenVesting1 = artifacts.require("./contracts/TokenVesting1");
-var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
+var TokenVesting = artifacts.require("./contracts/TokenVesting1");
+// var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
 var WETH = artifacts.require("./contracts/WETH9.sol");
 
 const FOUR_YEARS = 126144000; // four years in unix time
@@ -17,8 +17,8 @@ module.exports = function(deployer, network, accounts) {
 
   deployer.deploy(WETH);
   
-  deployer.deploy(TokenVesting1, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
-  deployer.deploy(TokenVesting2, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
+  deployer.deploy(TokenVesting, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
+  deployer.deploy(TokenVesting, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
 
   deployer.deploy(Migrations).then(function() {
     return deployer.deploy(Aqueduct, FOUR_YEARS, admin).then(function() {
