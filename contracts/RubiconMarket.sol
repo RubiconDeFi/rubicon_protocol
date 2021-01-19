@@ -7,7 +7,6 @@
 
 pragma solidity ^0.5.12;
 
-import "./RBCN.sol";
 import "./Aqueduct.sol";
 import "./peripheral_contracts/IWETH.sol";
 
@@ -590,9 +589,8 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint256 => uint256) public _near; //next unsorted offer id
     uint256 _head; //first unsorted offer id
     uint256 public dustId; // id of the latest offer marked as dust
-    address public RBCNAddress;
     address public AqueductAddress;
-    RBCNInterface public RBCN;
+    bool public AqueductDistributionLive;
 
     //TODO: for Mainnnet deployment, WETH address will be hard coded as below
     // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -600,16 +598,14 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     constructor(
         uint64 close_time,
-        address RBCN_Address,
         address aqueduct,
+        bool RBCNDist,
         address _feeTo,
         /*For Testing Only:*/
         address WETH
     ) public ExpiringMarket(close_time) SimpleMarket(_feeTo) {
-        RBCNAddress = RBCN_Address;
         AqueductAddress = aqueduct;
-        RBCN = RBCNInterface(RBCN_Address);
-
+        AqueductDistributionLive = RBCNDist;
         /*For Testing Only:*/
         WETHAddress = WETH;
     }
@@ -736,11 +732,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(!locked, "Reentrancy attempt");
 
         //RBCN distribution on the trade
-        Aqueduct(AqueductAddress).distributeToMakerAndTaker(
-            getOwner(id),
-            msg.sender
-        );
-
+        if (AqueductDistributionLive) {
+            Aqueduct(AqueductAddress).distributeToMakerAndTaker(
+                getOwner(id),
+                msg.sender
+            );
+        }
         function(uint256, uint256) returns (bool) fn =
             matchingEnabled ? _buys : super.buy; //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
 
@@ -1300,11 +1297,9 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         feeBPS = _newFeeBPS;
         return true;
     }
-}
 
-// interface RBCNInterface {
-//     function getPriorVotes(address account, uint blockNumber) external view returns (uint96);
-//     function getDistRate() external pure returns (uint);
-//     function getDistStartTime() external view returns (uint);
-//     function getDistEndTime() external view returns (uint);
-// }
+    function setAqueductDistributionLive(bool live) public auth returns (bool) {
+        AqueductDistributionLive = live;
+        return true;
+    }
+}

@@ -1,7 +1,7 @@
 // var WETH = artifacts.require("./contracts/WETH9.sol");
-var DAI = artifacts.require("./contracts/DaiWithFaucet.sol");
-var WAYNE = artifacts.require("./contracts/EquityToken.sol");
-var STARK = artifacts.require("./contracts/EquityToken.sol");
+var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
+var WAYNE = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
+var STARK = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
 const BigNumber = require('bignumber.js');
 
 module.exports = function(deployer, network, accounts) {
