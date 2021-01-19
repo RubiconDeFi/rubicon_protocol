@@ -34,8 +34,8 @@ contract TokenVesting2 is Ownable {
 
     bool private _revocable;
 
-    mapping (address => uint256) private _released;
-    mapping (address => bool) private _revoked;
+    mapping(address => uint256) private _released;
+    mapping(address => bool) private _revoked;
 
     /**
      * @dev Creates a vesting contract that vests its balance of any ERC20 token to the
@@ -47,13 +47,28 @@ contract TokenVesting2 is Ownable {
      * @param duration duration in seconds of the period in which the tokens will vest
      * @param revocable whether the vesting is revocable or not
      */
-    constructor (address beneficiary, uint256 start, uint256 cliffDuration, uint256 duration, bool revocable) public {
-        require(beneficiary != address(0), "TokenVesting: beneficiary is the zero address");
+    constructor(
+        address beneficiary,
+        uint256 start,
+        uint256 cliffDuration,
+        uint256 duration,
+        bool revocable
+    ) public {
+        require(
+            beneficiary != address(0),
+            "TokenVesting: beneficiary is the zero address"
+        );
         // solhint-disable-next-line max-line-length
-        require(cliffDuration <= duration, "TokenVesting: cliff is longer than duration");
+        require(
+            cliffDuration <= duration,
+            "TokenVesting: cliff is longer than duration"
+        );
         require(duration > 0, "TokenVesting: duration is 0");
         // solhint-disable-next-line max-line-length
-        require(start.add(duration) > block.timestamp, "TokenVesting: final time is before current time");
+        require(
+            start.add(duration) > block.timestamp,
+            "TokenVesting: final time is before current time"
+        );
 
         _beneficiary = beneficiary;
         _revocable = revocable;
@@ -134,7 +149,10 @@ contract TokenVesting2 is Ownable {
      */
     function revoke(IERC20 token) public onlyOwner {
         require(_revocable, "TokenVesting: cannot revoke");
-        require(!_revoked[address(token)], "TokenVesting: token already revoked");
+        require(
+            !_revoked[address(token)],
+            "TokenVesting: token already revoked"
+        );
 
         uint256 balance = token.balanceOf(address(this));
 
@@ -166,7 +184,9 @@ contract TokenVesting2 is Ownable {
 
         if (block.timestamp < _cliff) {
             return 0;
-        } else if (block.timestamp >= _start.add(_duration) || _revoked[address(token)]) {
+        } else if (
+            block.timestamp >= _start.add(_duration) || _revoked[address(token)]
+        ) {
             return totalBalance;
         } else {
             return totalBalance.mul(block.timestamp.sub(_start)).div(_duration);
