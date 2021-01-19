@@ -4,9 +4,9 @@ var Timelock = artifacts.require("./contracts/Timelock.sol");
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var RBCN = artifacts.require("./contracts/RBCN.sol");
 var Aqueduct = artifacts.require("./contracts/Aqueduct.sol");
-var TokenVesting1 = artifacts.require("./contracts/TokenVesting1");
-var TokenVesting2 = artifacts.require("./contracts/TokenVesting2");
-var WETH = artifacts.require("./contracts/WETH9.sol");
+var TokenVesting1 = artifacts.require("./contracts/peripheral_contracts/TokenVesting1");
+var TokenVesting2 = artifacts.require("./contracts/peripheral_contracts/TokenVesting2");
+var WETH = artifacts.require("./contracts/peripheral_contracts/WETH9.sol");
 
 const FOUR_YEARS = 126144000; // four years in unix time
 

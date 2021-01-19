@@ -9,10 +9,9 @@ pragma solidity ^0.5.12;
 
 import "./RBCN.sol";
 import "./Aqueduct.sol";
-import "./IWETH.sol";
+import "./peripheral_contracts/IWETH.sol";
 
-
-/// @notice DSAuth events for authentication schema 
+/// @notice DSAuth events for authentication schema
 contract DSAuthEvents {
     event LogSetAuthority(address indexed authority);
     event LogSetOwner(address indexed owner);
@@ -146,7 +145,7 @@ contract ERC20 {
 }
 
 /// @notice Events contract for logging trade activity on Rubicon Market
-/// @dev Provides the key event logs that are used in all core functionality of exchanging on the Rubicon Market 
+/// @dev Provides the key event logs that are used in all core functionality of exchanging on the Rubicon Market
 contract EventfulMarket {
     event LogItemUpdate(uint256 id);
     event LogTrade(
@@ -246,8 +245,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
     constructor(address _feeTo) public {
         feeTo = _feeTo;
-        
-    /// @notice The starting fee on taker trades in basis points
+
+        /// @notice The starting fee on taker trades in basis points
         feeBPS = 20;
     }
 
@@ -338,7 +337,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         }
 
         ///@dev Below is the basis point math logic for calculating the fee on a given trade
-        ///@notice The fee is paid in the asset that the caller (taker) is market buying or selling with 
+        ///@notice The fee is paid in the asset that the caller (taker) is market buying or selling with
         uint256 fee = mul(spend, feeBPS) / 10000;
         require(
             offer.buy_gem.transferFrom(msg.sender, feeTo, fee),
@@ -395,7 +394,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         return true;
     }
 
-    /// @notice Allows the caller to cancel the offer if it is their own. 
+    /// @notice Allows the caller to cancel the offer if it is their own.
     /// @notice This function refunds the offer to the maker.
     function cancel(uint256 id)
         public
@@ -490,14 +489,9 @@ contract SimpleMarket is EventfulMarket, DSMath {
     function getFeeBPS() internal view returns (uint256) {
         return feeBPS;
     }
-
-    function setFeeBPS(uint256 _newFeeBPS) public auth returns (bool) {
-        feeBPS = _newFeeBPS;
-        return true;
-    }
 }
 
-/// @notice Expiring market is a Simple Market with a market lifetime. 
+/// @notice Expiring market is a Simple Market with a market lifetime.
 /// @dev When the close_time has been reached, offers can only be cancelled (offer and buy will throw).
 contract ExpiringMarket is DSAuth, SimpleMarket {
     uint64 public close_time;
@@ -1302,6 +1296,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 
+    function setFeeBPS(uint256 _newFeeBPS) public auth returns (bool) {
+        feeBPS = _newFeeBPS;
+        return true;
+    }
 }
 
 // interface RBCNInterface {
