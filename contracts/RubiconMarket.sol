@@ -1,22 +1,9 @@
 /**
- *Submitted for verification at Etherscan.io on 2020-11-06
+ *Submitted for verification at Etherscan.io on ****-**-**
  */
 
-/// RubiconMarket.sol
-
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+/// @title RubiconMarket.sol
+/// @notice Please see the GNU General Public License for this code at https://github.com/RubiconDeFi/rubicon_protocol
 
 pragma solidity ^0.5.12;
 
@@ -24,21 +11,16 @@ import "./RBCN.sol";
 import "./Aqueduct.sol";
 import "./IWETH.sol";
 
-contract DSAuthority {
-    function canCall(
-        address src,
-        address dst,
-        bytes4 sig
-    ) public view returns (bool);
-}
 
+/// @notice DSAuth events for authentication schema 
 contract DSAuthEvents {
     event LogSetAuthority(address indexed authority);
     event LogSetOwner(address indexed owner);
 }
 
+/// @notice DSAuth library for setting owner of the contract
+/// @dev Provides the auth modifier for authenticated function calls
 contract DSAuth is DSAuthEvents {
-    DSAuthority public authority;
     address public owner;
 
     constructor() public {
@@ -49,11 +31,6 @@ contract DSAuth is DSAuthEvents {
     function setOwner(address owner_) public auth {
         owner = owner_;
         emit LogSetOwner(owner);
-    }
-
-    function setAuthority(DSAuthority authority_) public auth {
-        authority = authority_;
-        emit LogSetAuthority(address(authority));
     }
 
     modifier auth {
@@ -72,6 +49,7 @@ contract DSAuth is DSAuthEvents {
     }
 }
 
+/// @notice DSMath library for safe math without integer overflow/underflow
 contract DSMath {
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require((z = x + y) >= x, "ds-math-add-overflow");
@@ -148,12 +126,8 @@ contract DSMath {
     }
 }
 
-contract ERC20Events {
-    event Approval(address indexed src, address indexed guy, uint256 wad);
-    event Transfer(address indexed src, address indexed dst, uint256 wad);
-}
-
-contract ERC20 is ERC20Events {
+/// @notice ERC-20 interface as derived from EIP-20
+contract ERC20 {
     function totalSupply() public view returns (uint256);
 
     function balanceOf(address guy) public view returns (uint256);
@@ -171,6 +145,8 @@ contract ERC20 is ERC20Events {
     ) public returns (bool);
 }
 
+/// @notice Events contract for logging trade activity on Rubicon Market
+/// @dev Provides the key event logs that are used in all core functionality of exchanging on the Rubicon Market 
 contract EventfulMarket {
     event LogItemUpdate(uint256 id);
     event LogTrade(
@@ -227,7 +203,6 @@ contract EventfulMarket {
 
     event LogInt(string lol, uint256 input);
 
-    //** Added Fee Event */
     event FeeTake(
         bytes32 id,
         bytes32 indexed pair,
@@ -243,16 +218,21 @@ contract EventfulMarket {
     );
 }
 
+/// @notice Core trading logic for ERC-20 pairs, an orderbook, and transacting of tokens
+/// @dev This contract holds the core ERC-20 / ERC-20 offer, buy, and cancel logic
 contract SimpleMarket is EventfulMarket, DSMath {
     uint256 public last_offer_id;
 
+    /// @dev The mapping that makes up the core orderbook of the exchange
     mapping(uint256 => OfferInfo) public offers;
 
     bool locked;
 
-    // 20 Basis Point Fee on Taker Trades
-    uint256 internal feeBPS = 20;
+    /// @notice This parameter provides the ability for a protocol fee on taker trades
+    /// @dev This parameter is in basis points
+    uint256 internal feeBPS;
 
+    /// @notice This parameter provides the address to which fees are sent
     address internal feeTo;
 
     struct OfferInfo {
@@ -266,13 +246,18 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
     constructor(address _feeTo) public {
         feeTo = _feeTo;
+        
+    /// @notice The starting fee on taker trades in basis points
+        feeBPS = 20;
     }
 
+    /// @notice Modifier that insures an order exists and is properly in the orderbook
     modifier can_buy(uint256 id) {
         require(isActive(id));
         _;
     }
 
+    /// @notice Modifier that checks the user to make sure they own the offer and its valid before they attempt to cancel it
     modifier can_cancel(uint256 id) {
         require(isActive(id));
         require(getOwner(id) == msg.sender);
@@ -312,7 +297,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         return (offer.pay_amt, offer.pay_gem, offer.buy_amt, offer.buy_gem);
     }
 
-    // ---- Public entrypoints ---- //
+    /// @notice Below are the main public entrypoints
 
     function bump(bytes32 id_) public can_buy(uint256(id_)) {
         uint256 id = uint256(id_);
@@ -328,8 +313,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
         );
     }
 
-    // Accept given `quantity` of an offer. Transfers funds from caller to
-    // offer maker, and from market to caller.
+    /// @notice Accept a given `quantity` of an offer. Transfers funds from caller/taker to offer maker, and from market to caller/taker.
+    /// @notice The fee for taker trades is paid in this function.
     function buy(uint256 id, uint256 quantity)
         public
         can_buy(id)
@@ -342,7 +327,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         require(uint128(spend) == spend, "spend is not an int");
         require(uint128(quantity) == quantity, "quantity is not an int");
 
-        // For backwards semantic compatibility.
+        ///@dev For backwards semantic compatibility.
         if (
             quantity == 0 ||
             spend == 0 ||
@@ -352,14 +337,13 @@ contract SimpleMarket is EventfulMarket, DSMath {
             return false;
         }
 
-        // ******Added Fee Functionality *******
-        // Get fee from user - feeBPS in basis points
+        ///@dev Below is the basis point math logic for calculating the fee on a given trade
+        ///@notice The fee is paid in the asset that the caller (taker) is market buying or selling with 
         uint256 fee = mul(spend, feeBPS) / 10000;
         require(
             offer.buy_gem.transferFrom(msg.sender, feeTo, fee),
             "Insufficient funds to cover fee"
         );
-        // ******************************************
 
         offers[id].pay_amt = sub(offer.pay_amt, quantity);
         offers[id].buy_amt = sub(offer.buy_amt, spend);
@@ -384,7 +368,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
             uint128(spend),
             uint64(now)
         );
-        // Added Fee Event
         emit FeeTake(
             bytes32(id),
             keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
@@ -412,14 +395,15 @@ contract SimpleMarket is EventfulMarket, DSMath {
         return true;
     }
 
-    // Cancel an offer. Refunds offer maker.
+    /// @notice Allows the caller to cancel the offer if it is their own. 
+    /// @notice This function refunds the offer to the maker.
     function cancel(uint256 id)
         public
         can_cancel(id)
         synchronized
         returns (bool success)
     {
-        // read-only offer. Modify an offer by directly accessing offers[id]
+        /// @dev This is a read-only offer. Modify an offer by directly accessing offers[id]
         OfferInfo memory offer = offers[id];
         delete offers[id];
 
@@ -453,7 +437,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         return bytes32(offer(pay_amt, pay_gem, buy_amt, buy_gem));
     }
 
-    // Make a new offer. Takes funds from the caller into market escrow.
+    /// @notice Key function to make a new offer. Takes funds from the caller into market escrow.
     function offer(
         uint256 pay_amt,
         ERC20 pay_gem,
@@ -506,29 +490,33 @@ contract SimpleMarket is EventfulMarket, DSMath {
     function getFeeBPS() internal view returns (uint256) {
         return feeBPS;
     }
+
+    function setFeeBPS(uint256 _newFeeBPS) public auth returns (bool) {
+        feeBPS = _newFeeBPS;
+        return true;
+    }
 }
 
-// Simple Market with a market lifetime. When the close_time has been reached,
-// offers can only be cancelled (offer and buy will throw).
-
+/// @notice Expiring market is a Simple Market with a market lifetime. 
+/// @dev When the close_time has been reached, offers can only be cancelled (offer and buy will throw).
 contract ExpiringMarket is DSAuth, SimpleMarket {
     uint64 public close_time;
     bool public stopped;
 
-    // after close_time has been reached, no new offers are allowed
+    /// @dev After close_time has been reached, no new offers are allowed.
     modifier can_offer {
         require(!isClosed());
         _;
     }
 
-    // after close, no new buys are allowed
+    /// @dev After close, no new buys are allowed.
     modifier can_buy(uint256 id) {
         require(isActive(id));
         require(!isClosed());
         _;
     }
 
-    // after close, anyone can cancel an offer
+    /// @dev After close, anyone can cancel an offer.
     modifier can_cancel(uint256 id) {
         require(isActive(id));
         require((msg.sender == getOwner(id)) || isClosed());
@@ -589,6 +577,9 @@ contract MatchingEvents {
     event LogDelete(address keeper, uint256 id);
 }
 
+/// @notice The core Rubicon Market smart contract
+/// @notice This contract is based on the original open-source work done by OasisDEX under the Apache License 2.0
+/// @dev This contract inherits the key trading functionality from SimpleMarket
 contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     bool public buyEnabled = true; //buy enabled
     bool public matchingEnabled = true; //true: enable matching,
@@ -1311,11 +1302,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 
-    // TODO: Set Fee - how to auth this
-    function setFeeBPS(uint256 _newFeeBPS) public auth returns (bool) {
-        feeBPS = _newFeeBPS;
-        return true;
-    }
 }
 
 // interface RBCNInterface {
