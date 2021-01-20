@@ -44,6 +44,16 @@ contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
 
     // Check distribution values
     describe("RBCN Distribution", async function() {
+        // Important to set the two below live
+        it("can set Aqueduct Address on Market", async function() {
+            await rubiconMarketInstance.setAqueductAddress(aqueductInstance.address);
+            assert.equal(await rubiconMarketInstance.AqueductAddress(), aqueductInstance.address);
+        });
+
+        it("can set RBCN Dist live on Market", async function() {
+            await rubiconMarketInstance.setAqueductDistributionLive(true);
+            assert.equal(await rubiconMarketInstance.AqueductDistributionLive(), true);
+        });
         it("has a four-year distribution window", async function() {
             logIndented("Distribution window of RBCN in seconds:", ((await RBCNInstance.distEndTime()) - (await RBCNInstance.distStartTime())).toString());         
             assert.equal(((await RBCNInstance.distEndTime()) - (await RBCNInstance.distStartTime())).toString(), FOUR_YEARS_SECONDS);

@@ -26,7 +26,8 @@ module.exports = function(deployer, network, accounts) {
       return deployer.deploy(Timelock, Migrations.address, 0).then(function(){   // Takes admin and initial delay that must exceed the minimum delay... ZERO FOR TESTING NOT PRODUCTION READY
         //Give admin token balance and set total supply
         return deployer.deploy(SenateAlpha, Timelock.address, RBCN.address, admin).then(function(){ //gaurdian of senate is admin
-          return deployer.deploy(RubiconMarket, 1735693261, Aqueduct.address, true, admin, /* Testing only */ WETH.address);
+          // Rubicon Market can be deployed independently of Gov/Token system
+          return deployer.deploy(RubiconMarket, 14210121600, true, admin, /* Testing only */ WETH.address);
         });
       });
     });

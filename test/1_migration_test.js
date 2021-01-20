@@ -102,7 +102,7 @@ contract("Rubicon Migrations Test", async function(accounts) {
     });
 
     describe("Migrations", async function() {
-        it("is owned by Account 0", async function() {
+        it("Migrations contract is owned by Account 0", async function() {
             assert.equal(await migrationsInstance.owner(), accounts[0]);
         });
 
@@ -111,6 +111,18 @@ contract("Rubicon Migrations Test", async function(accounts) {
             await senateAlphaInstance.__acceptAdmin();
             assert.equal(await timelockInstance.admin(), senateAlphaInstance.address);
         });
+
+        it("can set Aqueduct Address on Market", async function() {
+            await rubiconMarketInstance.setAqueductAddress(aqueductInstance.address);
+            assert.equal(await rubiconMarketInstance.AqueductAddress(), aqueductInstance.address);
+        });
+
+        it("can set RBCN Dist live on Market", async function() {
+            await rubiconMarketInstance.setAqueductDistributionLive(true);
+            assert.equal(await rubiconMarketInstance.AqueductDistributionLive(), true);
+        });
+
+        // The order of this is important!
 
         it("can set Timelock as owner of RubiconMarket", async function() {
             await rubiconMarketInstance.setOwner(timelockInstance.address);
@@ -133,9 +145,6 @@ contract("Rubicon Migrations Test", async function(accounts) {
 
     describe("Timelock and Rubicon Market Admin Check", async function() {
         it("Timelock has admin as Senate", async function() {
-            assert.equal(await timelockInstance.admin(), senateAlphaInstance.address);
-        });
-        it("Rubicon Market has admin as Timelock", async function() {
             assert.equal(await timelockInstance.admin(), senateAlphaInstance.address);
         });
     });

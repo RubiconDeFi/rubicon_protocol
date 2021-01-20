@@ -594,17 +594,17 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     //TODO: for Mainnnet deployment, WETH address will be hard coded as below
     // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public WETHAddress;
+    /// @dev Below is Kovan WETH Address
+    address public WETHAddress = 0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1;
 
     constructor(
         uint64 close_time,
-        address aqueduct,
+        // address aqueduct,
         bool RBCNDist,
         address _feeTo,
-        /*For Testing Only:*/
         address WETH
     ) public ExpiringMarket(close_time) SimpleMarket(_feeTo) {
-        AqueductAddress = aqueduct;
+        // AqueductAddress = aqueduct;
         AqueductDistributionLive = RBCNDist;
         /*For Testing Only:*/
         WETHAddress = WETH;
@@ -1300,6 +1300,11 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     function setAqueductDistributionLive(bool live) public auth returns (bool) {
         AqueductDistributionLive = live;
+        return true;
+    }
+
+    function setAqueductAddress(address _Aqueduct) public auth returns (bool) {
+        AqueductAddress = _Aqueduct;
         return true;
     }
 }
