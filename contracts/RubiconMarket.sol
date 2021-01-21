@@ -7,9 +7,6 @@
 
 pragma solidity ^0.5.12;
 
-import "./Aqueduct.sol";
-import "./peripheral_contracts/IWETH.sol";
-
 /// @notice DSAuth events for authentication schema
 contract DSAuthEvents {
     event LogSetAuthority(address indexed authority);
@@ -595,7 +592,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //TODO: for Mainnnet deployment, WETH address will be hard coded as below
     // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     /// @dev Below is Kovan WETH Address
-    address public WETHAddress = 0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1;
+    address public WETHAddress; //= 0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1;
 
     constructor(
         uint64 close_time,
@@ -733,7 +730,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
         //RBCN distribution on the trade
         if (AqueductDistributionLive) {
-            Aqueduct(AqueductAddress).distributeToMakerAndTaker(
+            IAqueduct(AqueductAddress).distributeToMakerAndTaker(
                 getOwner(id),
                 msg.sender
             );
@@ -1308,3 +1305,20 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 }
+
+interface IWETH {
+    function deposit() external payable;
+
+    function transfer(address to, uint256 value) external returns (bool);
+
+    function withdraw(uint256) external;
+
+    function approve(address guy, uint256 wad) external returns (bool);
+}
+
+interface IAqueduct {
+        function distributeToMakerAndTaker(address maker, address taker)
+        external
+        returns (bool);
+}
+

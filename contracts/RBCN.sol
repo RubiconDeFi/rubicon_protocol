@@ -26,7 +26,7 @@ contract RBCN {
     uint256 public distEndTime;
 
     /// @notice The contract that holds the RBCN public distribution
-    address public aqueduct;
+    address public aqueductAddress;
 
     /// @ notice The rate of RBCN per unit of Unix time (millisecond) distributed
     ///          to the community
@@ -103,6 +103,7 @@ contract RBCN {
         // 51% to community
         balances[aqueduct] = uint96(510000000e18);
         emit Transfer(address(0), aqueduct, uint256(1000000000e18));
+        aqueductAddress = aqueduct;
 
         // 49% to admin. See distribution here:
         balances[admin] = uint96(490000000e18);

@@ -130,7 +130,7 @@ contract Aqueduct {
 
     //This function should distribute a time-weighted RBCN allocation
     function distributeToMakerAndTaker(address maker, address taker)
-        public
+        external
         onlyExchange
         returns (bool)
     {
