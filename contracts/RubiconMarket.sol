@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on ****-**-**
- */
-
 /// @title RubiconMarket.sol
 /// @notice Please see the GNU General Public License for this code at https://github.com/RubiconDeFi/rubicon_protocol
 

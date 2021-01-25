@@ -3,6 +3,7 @@
 // const { artifacts } = require("hardhat");
 const BN = require('bn.js');
 const BigNumber = require('bignumber.js');
+const web3Abi = require('web3-eth-abi');
 
 const Migrations = artifacts.require("Migrations");
 const RubiconMarket = artifacts.require("RubiconMarket");
@@ -12,6 +13,8 @@ const RBCN = artifacts.require("RBCN");
 const Aqueduct = artifacts.require("Aqueduct");
 const TokenVesting1 = artifacts.require("TokenVesting1");
 const TokenVesting2 = artifacts.require("TokenVesting2");
+
+const helper = require('./testHelpers/timeHelper.js');
 
 let migrationsInstance;
 let rubiconMarketInstance;
@@ -27,7 +30,7 @@ const EighteenZeros = "000000000000000000"
 const Founder1Tokens = "500" + EighteenZeros;
 const Founder2Tokens = "500" + EighteenZeros;
 
-contract("Rubicon Migrations Test", async function(accounts) {
+contract("Rubicon Migrations and Governance Test", async function(accounts) {
 
     describe("Deployment", async function() {
         it("is deployed", async function() {
@@ -165,4 +168,44 @@ contract("Rubicon Migrations Test", async function(accounts) {
             assert.equal((await RBCNInstance.balanceOf(tokenVesting2Instance.address)).toString(), Founder2Tokens);
         });
     });
+
+    // describe('Vote to change "stop" parameter on exchange', () => {
+    //     it("starting value of 'stopped' is false", async function() {
+    //         assert.equal(await rubiconMarketInstance.stopped(), false);
+    //     });
+    //     it("can distribute RBCN to two different voters", async function() {
+    //         await RBCNInstance.transfer(accounts[4].toString(), web3.utils.toWei((5000001).toString(), "ether"), {from: accounts[0]});
+    //         await RBCNInstance.transfer(accounts[5].toString(), web3.utils.toWei((5000001).toString(), "ether"), {from: accounts[0]});
+    //         assert.equal(await RBCNInstance.balanceOf(accounts[4].toString()), web3.utils.toWei((5000001).toString(), "ether"));
+    //         assert.equal(await RBCNInstance.balanceOf(accounts[5].toString()), web3.utils.toWei((5000001).toString(), "ether"));
+    //     });
+    //     it("can delegate votes to account so can propose", async function() {
+
+    //     });
+    //     it("one RBCN holder can make a proposal to change parameter", async function() {
+    //         await helper.advanceTimeAndBlock(1);
+    //         console.log('current votes', (await RBCNInstance.getCurrentVotes(accounts[4])).toString());
+    //         await senateAlphaInstance.propose([rubiconMarketInstance.address], [], [web3.eth.abi.encodeFunctionSignature('stop()')], [],
+    //         "Proposal to stop the Rubicon Market", {from: accounts[4]});
+    //         const stopProposalID = await senateAlphaInstance.latestProposalIds(accounts[4].toString());
+    //         logIndented(stopProposalID);
+    //         assert.equal(await senateAlphaInstance.latestProposalIds(accounts[4].toString()), 1);
+    //     });
+    //     it("Voters can vote on parameter", async function() {
+    //         await senateAlphaInstance.castVote(stopProposalID, true, {from: accounts[5]});
+    //         console.log(await senateAlphaInstance.getReceipt(stopProposalID, accounts[5].toString()));
+    //         // assert.equal(await senateAlphaInstance.getReceipt(stopProposalID, accounts[5].toString()))
+    //     });
+    //     it("holders of RBCN can successfully queue the proposal", async function() {
+    //         await senateAlphaInstance.queue(stopProposalID);
+    //         await helper.advanceTimeAndBlock(28800 * 17);
+    //         await timelockInstance.execute(stopProposalID);
+
+    //     });
+    //     it("Vote can pass and parameter is successfully changed", async function() {
+    //         // await helper.advanceTimeAndBlock(); // Speed up the block time to allow for Timelock execution
+    //         assert.equal(await rubiconMarketInstance.stopped(), true);
+    //     });
+    // });
+
 });
