@@ -1,4 +1,4 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.16;
 
 import "./RBCN.sol";
 
@@ -30,7 +30,7 @@ contract Aqueduct {
     }
 
     function setDistributionParams(address _RBCNAddress, address RubiconMarket)
-        public
+        external
         onlyOwner
         returns (bool)
     {
@@ -81,7 +81,7 @@ contract Aqueduct {
      * @dev Admin has the ability to choose a new exchange.
      */
     function setNewExchange(address newImplementation)
-        public
+        external
         onlyOwner
         returns (bool)
     {

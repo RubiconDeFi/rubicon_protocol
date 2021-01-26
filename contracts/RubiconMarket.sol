@@ -19,7 +19,7 @@ contract DSAuth is DSAuthEvents {
         emit LogSetOwner(msg.sender);
     }
 
-    function setOwner(address owner_) public auth {
+    function setOwner(address owner_) external auth {
         owner = owner_;
         emit LogSetOwner(owner);
     }
@@ -290,7 +290,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
     /// @notice Below are the main public entrypoints
 
-    function bump(bytes32 id_) public can_buy(uint256(id_)) {
+    function bump(bytes32 id_) external can_buy(uint256(id_)) {
         uint256 id = uint256(id_);
         emit LogBump(
             id_,
@@ -415,7 +415,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         success = true;
     }
 
-    function kill(bytes32 id) public {
+    function kill(bytes32 id) external {
         require(cancel(uint256(id)));
     }
 
@@ -424,7 +424,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 buy_gem,
         uint128 pay_amt,
         uint128 buy_amt
-    ) public returns (bytes32 id) {
+    ) external returns (bytes32 id) {
         return bytes32(offer(pay_amt, pay_gem, buy_amt, buy_gem));
     }
 
@@ -468,7 +468,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         );
     }
 
-    function take(bytes32 id, uint128 maxTakeAmount) public {
+    function take(bytes32 id, uint128 maxTakeAmount) external {
         require(buy(uint256(id), maxTakeAmount));
     }
 
@@ -521,7 +521,7 @@ contract ExpiringMarket is DSAuth, SimpleMarket {
         return uint64(now);
     }
 
-    function stop() public auth {
+    function stop() external auth {
         stopped = true;
     }
 }
@@ -628,7 +628,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(buy(uint256(id), maxTakeAmount));
     }
 
-    function kill(bytes32 id) public {
+    function kill(bytes32 id) external {
         require(cancel(uint256(id)));
     }
 
@@ -636,7 +636,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     function offerInETH(
         uint256 buy_amt, //taker (ask) buy how much
         ERC20 buy_gem //taker (ask) buy which token
-    ) public payable returns (uint256) {
+    ) external payable returns (uint256) {
         require(!locked, "Reentrancy attempt");
 
         IWETH(WETHAddress).deposit.value(msg.value)();
@@ -656,7 +656,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return super.offer(msg.value, WETH, buy_amt, buy_gem);
     }
 
-    function buyInETH(uint256 id) public payable can_buy(id) returns (bool) {
+    function buyInETH(uint256 id) external payable can_buy(id) returns (bool) {
         require(!locked, "Reentrancy attempt");
         ERC20 WETH = ERC20(WETHAddress);
         require(offers[id].buy_gem == WETH, "offer you buy must be in WETH");
@@ -699,7 +699,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         uint256 buy_amt, //maker (ask) buy how much
         ERC20 buy_gem, //maker (ask) buy which token
         uint256 pos //position to insert offer, 0 should be used if unknown
-    ) public can_offer returns (uint256) {
+    ) external can_offer returns (uint256) {
         return offer(pay_amt, pay_gem, buy_amt, buy_gem, pos, true);
     }
 
@@ -768,7 +768,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     //deletes _rank [id]
     //  Function should be called by keepers.
-    function del_rank(uint256 id) public returns (bool) {
+    function del_rank(uint256 id) external returns (bool) {
         require(!locked, "Reentrancy attempt");
         require(
             !isActive(id) &&
@@ -788,7 +788,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     function setMinSell(
         ERC20 pay_gem, //token to assign minimum sell amount to
         uint256 dust //maker (ask) minimum sell amount
-    ) public auth note returns (bool) {
+    ) external auth note returns (bool) {
         _dust[address(pay_gem)] = dust;
         emit LogMinSell(address(pay_gem), dust);
         return true;
@@ -797,12 +797,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //returns the minimum sell amount for an offer
     function getMinSell(
         ERC20 pay_gem //token for which minimum sell amount is queried
-    ) public view returns (uint256) {
+    ) external view returns (uint256) {
         return _dust[address(pay_gem)];
     }
 
     //set buy functionality enabled/disabled
-    function setBuyEnabled(bool buyEnabled_) public auth returns (bool) {
+    function setBuyEnabled(bool buyEnabled_) external auth returns (bool) {
         buyEnabled = buyEnabled_;
         emit LogBuyEnabled(buyEnabled);
         return true;
@@ -816,7 +816,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //    If matchingEnabled is false then RubiconMarket is reverted to ExpiringMarket,
     //    and matching is not done, and sorted lists are disabled.
     function setMatchingEnabled(bool matchingEnabled_)
-        public
+        external
         auth
         returns (bool)
     {
@@ -848,7 +848,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //      the better offer is in the lower priced one if its an ask,
     //      the next higher priced one if its a bid offer
     //      and in both cases the older one if they're equal.
-    function getBetterOffer(uint256 id) public view returns (uint256) {
+    function getBetterOffer(uint256 id) external view returns (uint256) {
         return _rank[id].next;
     }
 
@@ -889,7 +889,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         uint256 pay_amt,
         ERC20 buy_gem,
         uint256 min_fill_amount
-    ) public returns (uint256 fill_amt) {
+    ) external returns (uint256 fill_amt) {
         require(!locked, "Reentrancy attempt");
         uint256 offerId;
         while (pay_amt > 0) {
@@ -929,7 +929,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         uint256 buy_amt,
         ERC20 pay_gem,
         uint256 max_fill_amount
-    ) public returns (uint256 fill_amt) {
+    ) external returns (uint256 fill_amt) {
         require(!locked, "Reentrancy attempt");
         uint256 offerId;
         while (buy_amt > 0) {
@@ -969,7 +969,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 buy_gem,
         ERC20 pay_gem,
         uint256 pay_amt
-    ) public view returns (uint256 fill_amt) {
+    ) external view returns (uint256 fill_amt) {
         uint256 offerId = getBestOffer(buy_gem, pay_gem); //Get best offer for the token pair
         while (pay_amt > offers[offerId].buy_amt) {
             fill_amt = add(fill_amt, offers[offerId].pay_amt); //Add amount to buy accumulator
@@ -993,7 +993,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 pay_gem,
         ERC20 buy_gem,
         uint256 buy_amt
-    ) public view returns (uint256 fill_amt) {
+    ) external view returns (uint256 fill_amt) {
         uint256 offerId = getBestOffer(buy_gem, pay_gem); //Get best offer for the token pair
         while (buy_amt > offers[offerId].pay_amt) {
             fill_amt = add(fill_amt, offers[offerId].buy_amt); //Add amount to pay accumulator
@@ -1286,17 +1286,25 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         return true;
     }
 
-    function setFeeBPS(uint256 _newFeeBPS) public auth returns (bool) {
+    function setFeeBPS(uint256 _newFeeBPS) external auth returns (bool) {
         feeBPS = _newFeeBPS;
         return true;
     }
 
-    function setAqueductDistributionLive(bool live) public auth returns (bool) {
+    function setAqueductDistributionLive(bool live)
+        external
+        auth
+        returns (bool)
+    {
         AqueductDistributionLive = live;
         return true;
     }
 
-    function setAqueductAddress(address _Aqueduct) public auth returns (bool) {
+    function setAqueductAddress(address _Aqueduct)
+        external
+        auth
+        returns (bool)
+    {
         AqueductAddress = _Aqueduct;
         return true;
     }
@@ -1313,8 +1321,7 @@ interface IWETH {
 }
 
 interface IAqueduct {
-        function distributeToMakerAndTaker(address maker, address taker)
+    function distributeToMakerAndTaker(address maker, address taker)
         external
         returns (bool);
 }
-
