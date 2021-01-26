@@ -1308,6 +1308,11 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         AqueductAddress = _Aqueduct;
         return true;
     }
+
+    function setFeeTo(address newFeeTo) external auth returns (bool) {
+        feeTo = newFeeTo;
+        return true;
+    }
 }
 
 interface IWETH {

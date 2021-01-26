@@ -108,7 +108,7 @@ contract("Rubicon Migrations and Governance Test", async function(accounts) {
         it("Migrations contract is owned by Account 0", async function() {
             assert.equal(await migrationsInstance.owner(), accounts[0]);
         });
-
+        //Check timelock logic here
         it("can set AuthScheme, then set Senate as admin of Timelock", async function() {
             await migrationsInstance.setAuthSchemeOfSystem(timelockInstance.address, senateAlphaInstance.address);
             await senateAlphaInstance.__acceptAdmin();
