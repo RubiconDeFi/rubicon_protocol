@@ -1,7 +1,7 @@
 /// @title RubiconMarket.sol
-/// @notice Please see the GNU General Public License for this code at https://github.com/RubiconDeFi/rubicon_protocol
+/// @notice Please see the repository for this code at https://github.com/RubiconDeFi/rubicon_protocol
 
-pragma solidity ^0.5.12;
+pragma solidity 0.5.16;
 
 /// @notice DSAuth events for authentication schema
 contract DSAuthEvents {
@@ -585,22 +585,15 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     address public AqueductAddress;
     bool public AqueductDistributionLive;
 
-    //TODO: for Mainnnet deployment, WETH address will be hard coded as below
-    // address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    /// @dev Below is Kovan WETH Address
-    address public WETHAddress; //= 0x772c16c1dD9cC51fe601B6bA8c8B2feF074528f1;
+    /// @dev Below is Mainnet WETH Address
+    address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     constructor(
         uint64 close_time,
-        // address aqueduct,
         bool RBCNDist,
-        address _feeTo,
-        address WETH
+        address _feeTo
     ) public ExpiringMarket(close_time) SimpleMarket(_feeTo) {
-        // AqueductAddress = aqueduct;
         AqueductDistributionLive = RBCNDist;
-        /*For Testing Only:*/
-        WETHAddress = WETH;
     }
 
     // After close, anyone can cancel an offer
@@ -640,15 +633,9 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         require(!locked, "Reentrancy attempt");
 
         IWETH(WETHAddress).deposit.value(msg.value)();
-        // IWETH(WETHAddress).approve(address(this), msg.value);
         IWETH(WETHAddress).transfer(msg.sender, msg.value);
 
         ERC20 WETH = ERC20(WETHAddress);
-
-        // Not sure which route to use here...
-        //Push Normal Order with WETH
-        // function (uint256,ERC20,uint256,ERC20) returns (uint256) fn = matchingEnabled ? _offeru : super.offer;
-        // return fn(msg.value, WETH, buy_amt, buy_gem);
 
         if (matchingEnabled) {
             return _matcho(msg.value, WETH, buy_amt, buy_gem, 0, true);
@@ -732,7 +719,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
             );
         }
         function(uint256, uint256) returns (bool) fn =
-            matchingEnabled ? _buys : super.buy; //<conditional> ? <if-true> : <if-false> --- Offers with matching enabled that get matched? are routed via _matcho into this buy
+            matchingEnabled ? _buys : super.buy; 
 
         return fn(id, amount);
     }

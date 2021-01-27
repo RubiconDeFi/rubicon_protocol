@@ -11,10 +11,21 @@ module.exports = {
     },
     kovan: {
       provider: function() {
-        return new HDWalletProvider(process.env.PRIVATE_KEY, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KOVAN)
+        return new HDWalletProvider(process.env.PRIVATE_KEY_KOVAN, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY)
       },
       network_id: 42,
-      from: "0x75E7aBED3406df8f2fD4E036Cbb5f6830bce525d"
+      from: process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN,
+      gasPrice: 50000000000
+    },
+    mainnet: {
+      provider: function() {
+        return new HDWalletProvider(process.env.PRIVATE_KEY_MAINNET, "https://mainnet.infura.io/v3/" + process.env.INFURA_API_KEY)
+      },
+      network_id: 1,
+      from: process.env.EXCHANGE_LAUNCH_ADDRESS_MAINNET,
+      // gasPrice: 50000000000,
+      // gas: 12000000,
+      timeoutBlocks: 220
     }
   },
   solc: {
