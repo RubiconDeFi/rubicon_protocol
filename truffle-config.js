@@ -1,6 +1,7 @@
 require('dotenv').config();
 var HDWalletProvider = require('truffle-hdwallet-provider');
 
+
 module.exports = {
   networks: {
     development: {
@@ -26,7 +27,7 @@ module.exports = {
       // gasPrice: 50000000000,
       // gas: 12000000,
       timeoutBlocks: 220
-    }
+    },
   },
   solc: {
     optimizer: {

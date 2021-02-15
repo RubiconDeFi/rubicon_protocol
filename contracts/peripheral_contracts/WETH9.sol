@@ -49,7 +49,7 @@ contract WETH9 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return address(this).balance;
+        // return address(this).balance;
     }
 
     function approve(address guy, uint256 wad) public returns (bool) {
