@@ -1,0 +1,54 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DSNote.ovm",
+  "sourceName": "contracts/RubiconMarket.sol",
+  "abi": [
+    {
+      "anonymous": true,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "sig",
+          "type": "bytes4"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "guy",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "foo",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "bar",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "wad",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "fax",
+          "type": "bytes"
+        }
+      ],
+      "name": "LogNote",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50606480601d6000396000f3fe6080604052600080fdfea265627a7a7231582014a2a993a48e11326b6fc3b078514e5e5d565ce1243d2c2e53c78d2933fd8d3464736f6c637828302e352e31362d646576656c6f702e323032302e372e32392b636f6d6d69742e36326536346536370058",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a7231582014a2a993a48e11326b6fc3b078514e5e5d565ce1243d2c2e53c78d2933fd8d3464736f6c637828302e352e31362d646576656c6f702e323032302e372e32392b636f6d6d69742e36326536346536370058",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

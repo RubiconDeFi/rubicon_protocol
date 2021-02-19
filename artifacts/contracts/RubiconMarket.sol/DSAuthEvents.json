@@ -1,0 +1,37 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DSAuthEvents",
+  "sourceName": "contracts/RubiconMarket.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "LogSetAuthority",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "LogSetOwner",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723158204a95e76b1655479e481d85fe14465de756a6d730c4d703b84dce1c74a043715f64736f6c63430005100032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a723158204a95e76b1655479e481d85fe14465de756a6d730c4d703b84dce1c74a043715f64736f6c63430005100032",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
