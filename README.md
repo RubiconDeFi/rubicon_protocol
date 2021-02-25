@@ -4,13 +4,13 @@
 
 ## Docs
 
-For detailed documentation of the Rubicon protocol please visit our [docs page](https://docs.rubicon.finance/)
+For detailed documentation of the Rubicon protocol please visit our [docs](https://docs.rubicon.finance/)
 
 # Rubicon Protocol
 
-Rubicon is a blockchain-based protocol that is aimed at developing and ushering in the emergence of digital asset markets on the Ethereum blockchain. The inefficiencies that exist between firms and capital in traditional finance pose a key problem that Rubicon aims to solve. Rubicon aims to replace traditional intermediaries and costly third parties with open-source code in order to democratize, open, and accelerate global asset markets. This is achieved through the deployment, development, and management of the Rubicon protocol of smart contracts which are described and developed in this repository.
+Rubicon is a Layer 2, open-orderbook DEX built on the EVM and Optimism. Rubicon is also a blockchain-based protocol that is aimed at developing and ushering in the emergence of digital asset markets on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/)
 
-The Rubicon protocol aims to launch on the Ethereum mainnet soon. At that time, the community distribution of the governance token RBCN will be live and the first on-chain digital assets will be trading on Ethereum. If you are interested in joining our team, learning more, or want to contact Rubicon please feel free to reach us at contact@rubicon.finance - we would love to hear from you!
+The Rubicon protocol aims to launch on the Optimism Layer 2 mainnet soon. At that time, the community distribution of the governance token RBCN will be live. If you are interested in joining our team, learning more, or want to contact Rubicon please feel free to reach us at contact@rubicon.finance - we would love to hear from you!
 
 ### Protocol Overview
 
@@ -18,7 +18,7 @@ There are a number of key smart contracts that facilitate the governance and ope
 
 At a high level, Rubicon revolves around a core smart contract [RubiconMarket.sol](https://github.com/RubiconDeFi/rubicon_protocol/blob/master/contracts/RubiconMarket.sol) that facilitates the peer-to-peer transfer of tokens, digital assets, and any ERC-20 compliant token. Additionally, Rubicon and its governance token, RBCN, leverage a number of smart contracts to facilitate the decentralization of the protocol, community governance, and future iterations of the protocol.
 
-## Developers: Start Rubicon Protocol Locally
+## Start Rubicon Protocol Locally
 
 ```bash
 $ git clone https://www.github.com/RubiconDeFi/rubicon_protocol.git   
@@ -27,21 +27,34 @@ $ npm i --save-dev openzeppelin-solidity@2.5.1
 $ truffle init
 $ 'n' for overwriting contracts
 $ 'n' for overwriting migrations
-$ (in separate instance) ganache-cli
+$ (in a separate instance) ganache-cli
 ```
-
-Also make sure that you comment out the lines in truffle-config.js that say 'development: ' and include localhost under networks, so that you can connect to Ganache.
 
 Migrate the contracts to the blockchain of your choosing:
 ```bash
+$ truffle compile --all
 $ truffle migrate
 ```
 
+## Developers: Local Testing - EVM
 
-## Developers: Local Testing
-
-The command below will run all of the protocol tests located in the test folder which make sure that everything from trading functionality to the community distribution of RBCN are working correctly.
+The command below will run all of the protocol tests located in the test folder which make sure that everything from trading functionality to the community distribution of RBCN are working correctly in the EVM.
 ```bash
 $ truffle test
 ```
 
+## Developers: Local Testing - OVM
+
+All OVM specific logic, tests, and configs are contained in the 'ovm' folder of the repository. Given the OVM's nature of being nearly 1:1 with native Solidity and the EVM most core testing logic lives in the test folder for Layer 1 EVM testing. 
+
+To run the suite of OVM tests located in ./ovm/ovmTests simply run the following from the root directory:
+```bash
+$ npx hardhat test
+```
+
+To compile or migrate via truffle in the OVM with a ganache instance running, run the following from the root directory:
+```bash
+$ cd ovm
+$ truffle compile --all
+$ truffle migrate --reset
+```

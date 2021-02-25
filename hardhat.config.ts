@@ -1,7 +1,3 @@
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
-
 import { HardhatUserConfig } from 'hardhat/types'
 
 import '@nomiclabs/hardhat-ethers'
