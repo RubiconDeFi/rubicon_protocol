@@ -47,8 +47,9 @@ $ truffle test
 
 All OVM specific logic, tests, and configs are contained in the 'ovm' folder of the repository. Given the OVM's nature of being nearly 1:1 with native Solidity and the EVM most core testing logic lives in the test folder for Layer 1 EVM testing. 
 
-To run the suite of OVM tests located in ./ovm/ovmTests simply run the following from the root directory:
+To compile the project's contracts in the OVM or run the suite of OVM tests located in ./ovm/ovmTests simply run the following from the root directory:
 ```bash
+$ npx hardhat compile
 $ npx hardhat test
 ```
 
