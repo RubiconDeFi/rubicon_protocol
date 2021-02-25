@@ -7,7 +7,7 @@ const GAS_PRICE = 0x1
 module.exports = {
   contracts_directory: '../contracts',
   contracts_build_directory: '../build',
-  test_directory: 'ovmTests',
+  test_directory: '../test',
   migrations_directory: '../migrations',
 
   networks: {
