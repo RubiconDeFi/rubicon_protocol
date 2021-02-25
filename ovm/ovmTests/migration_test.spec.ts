@@ -2,7 +2,7 @@ import { l2ethers as ethers } from 'hardhat'
 import { Contract, Signer } from 'ethers'
 import { expect } from './setup'
 
-describe("Test", () => {
+describe("Rubicon Protocol L2 Migrations", () => {
     let account1: Signer
     let account2: Signer
     let account3: Signer

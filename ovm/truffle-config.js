@@ -1,8 +1,8 @@
 const mnemonic = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 const { ganache } = require('@eth-optimism/ovm-toolchain');
 
-const GAS_LIMIT = 100000000
-const GAS_PRICE = 10
+const GAS_LIMIT = 0x1fffffffffffff
+const GAS_PRICE = 0x1
 
 module.exports = {
   contracts_directory: '../contracts',
@@ -11,10 +11,9 @@ module.exports = {
   migrations_directory: '../migrations',
 
   networks: {
-    // *** Launch ganache with: ganache-cli --port 7545 --networkId 5777 --gasLimit 100000000 ***
+    // *** Launch ganache with: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize ***
+    // *** Migrations working with above configuration
     test: {
-      // host: "127.0.0.1",
-      // port: 8545,
       network_id: "*",
       networkCheckTimeout: 100000,
       provider: function() {
@@ -40,7 +39,7 @@ module.exports = {
       version: "../node_modules/@eth-optimism/solc",
       optimizer: {
         enabled: true,
-        runs: 999999
+        runs: 200
     },
     }
   }

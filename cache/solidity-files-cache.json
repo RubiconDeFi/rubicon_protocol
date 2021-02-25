@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/Aqueduct.sol": {
-      "lastModificationDate": 1612990316865,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Aqueduct.sol": {
+      "lastModificationDate": 1611677486467,
       "contentHash": "8d557ec791db75461e1cc445cc60aa60",
       "sourceName": "contracts/Aqueduct.sol",
       "solcConfig": {
@@ -35,13 +35,11 @@
       ],
       "artifacts": [
         "Aqueduct",
-        "RBCNInterface",
-        "Aqueduct.ovm",
-        "RBCNInterface.ovm"
+        "RBCNInterface"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/RBCN.sol": {
-      "lastModificationDate": 1611606705046,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\RBCN.sol": {
+      "lastModificationDate": 1611167160709,
       "contentHash": "9e1f43a4a1f8103606970e4da2af5ecf",
       "sourceName": "contracts/RBCN.sol",
       "solcConfig": {
@@ -71,12 +69,11 @@
         "^0.5.16"
       ],
       "artifacts": [
-        "RBCN",
-        "RBCN.ovm"
+        "RBCN"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/Migrations.sol": {
-      "lastModificationDate": 1612990316866,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Migrations.sol": {
+      "lastModificationDate": 1611612087050,
       "contentHash": "4d98165ff4c13b43b407abc572aedb2d",
       "sourceName": "contracts/Migrations.sol",
       "solcConfig": {
@@ -107,13 +104,11 @@
       ],
       "artifacts": [
         "Migrations",
-        "TimelockInterface",
-        "Migrations.ovm",
-        "TimelockInterface.ovm"
+        "TimelockInterface"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/DaiWithFaucet.sol": {
-      "lastModificationDate": 1611606705048,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\DaiWithFaucet.sol": {
+      "lastModificationDate": 1611092217981,
       "contentHash": "03864fb2fdcc3f609d5aa629871a4e2a",
       "sourceName": "contracts/peripheral_contracts/DaiWithFaucet.sol",
       "solcConfig": {
@@ -144,13 +139,11 @@
       ],
       "artifacts": [
         "DaiWithFaucet",
-        "LibNote",
-        "DaiWithFaucet.ovm",
-        "LibNote.ovm"
+        "LibNote"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/EquityToken.sol": {
-      "lastModificationDate": 1611606705048,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\EquityToken.sol": {
+      "lastModificationDate": 1611092218124,
       "contentHash": "4a8498ac8e8faf7df2fcc753045c3be4",
       "sourceName": "contracts/peripheral_contracts/EquityToken.sol",
       "solcConfig": {
@@ -183,12 +176,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "EquityToken",
-        "EquityToken.ovm"
+        "EquityToken"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol": {
-      "lastModificationDate": 1608252265833,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\ERC20.sol": {
+      "lastModificationDate": 1607701594323,
       "contentHash": "22fd452b5721fdbf411ef554c2c80b76",
       "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
@@ -222,12 +214,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "ERC20",
-        "ERC20.ovm"
+        "ERC20"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol": {
-      "lastModificationDate": 1608252265833,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\ERC20Detailed.sol": {
+      "lastModificationDate": 1607701594324,
       "contentHash": "a1a39233394f3c0a00ce348c61433faa",
       "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol",
       "solcConfig": {
@@ -259,12 +250,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "ERC20Detailed",
-        "ERC20Detailed.ovm"
+        "ERC20Detailed"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/GSN/Context.sol": {
-      "lastModificationDate": 1608252265830,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\GSN\\Context.sol": {
+      "lastModificationDate": 1607701594321,
       "contentHash": "32a66f6f4d0584b403f26f8e5e4d17b5",
       "sourceName": "openzeppelin-solidity/contracts/GSN/Context.sol",
       "solcConfig": {
@@ -294,12 +284,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "Context",
-        "Context.ovm"
+        "Context"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol": {
-      "lastModificationDate": 1608252265839,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\IERC20.sol": {
+      "lastModificationDate": 1607701594337,
       "contentHash": "183ff1f5e5f04bcfa85cee597bcb0236",
       "sourceName": "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol",
       "solcConfig": {
@@ -329,12 +318,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "IERC20",
-        "IERC20.ovm"
+        "IERC20"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol": {
-      "lastModificationDate": 1608252265846,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\math\\SafeMath.sol": {
+      "lastModificationDate": 1607701594346,
       "contentHash": "d208da96b6f6c1d204ee8248087cf2d7",
       "sourceName": "openzeppelin-solidity/contracts/math/SafeMath.sol",
       "solcConfig": {
@@ -364,12 +352,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "SafeMath",
-        "SafeMath.ovm"
+        "SafeMath"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol": {
-      "lastModificationDate": 1608252265845,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\SafeERC20.sol": {
+      "lastModificationDate": 1607701594344,
       "contentHash": "83fbce907d2b44fae67a751b83804e02",
       "sourceName": "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
       "solcConfig": {
@@ -403,12 +390,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "SafeERC20",
-        "SafeERC20.ovm"
+        "SafeERC20"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/utils/Address.sol": {
-      "lastModificationDate": 1608252265828,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\utils\\Address.sol": {
+      "lastModificationDate": 1607701594317,
       "contentHash": "a41701ff3cdbb98920cd49750549d127",
       "sourceName": "openzeppelin-solidity/contracts/utils/Address.sol",
       "solcConfig": {
@@ -438,12 +424,11 @@
         "^0.5.5"
       ],
       "artifacts": [
-        "Address",
-        "Address.ovm"
+        "Address"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/TokenVesting2.sol": {
-      "lastModificationDate": 1611606705049,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\TokenVesting2.sol": {
+      "lastModificationDate": 1611092789857,
       "contentHash": "a429bf22b293643104a0dfc2b707efb6",
       "sourceName": "contracts/peripheral_contracts/TokenVesting2.sol",
       "solcConfig": {
@@ -477,12 +462,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "TokenVesting2",
-        "TokenVesting2.ovm"
+        "TokenVesting2"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol": {
-      "lastModificationDate": 1608252265843,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\ownership\\Ownable.sol": {
+      "lastModificationDate": 1607701594341,
       "contentHash": "cd44b8402a71c35a4f725f828ced4cae",
       "sourceName": "openzeppelin-solidity/contracts/ownership/Ownable.sol",
       "solcConfig": {
@@ -514,12 +498,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "Ownable",
-        "Ownable.ovm"
+        "Ownable"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/TokenVesting1.sol": {
-      "lastModificationDate": 1611606705049,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\TokenVesting1.sol": {
+      "lastModificationDate": 1611092798764,
       "contentHash": "3a8f76a6da9179dd00fbe4f0c67f8c07",
       "sourceName": "contracts/peripheral_contracts/TokenVesting1.sol",
       "solcConfig": {
@@ -553,12 +536,11 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "TokenVesting1",
-        "TokenVesting1.ovm"
+        "TokenVesting1"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/IWETH.sol": {
-      "lastModificationDate": 1611606705048,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\IWETH.sol": {
+      "lastModificationDate": 1611092218186,
       "contentHash": "10465da34057b51bbad8e051a0723d15",
       "sourceName": "contracts/peripheral_contracts/IWETH.sol",
       "solcConfig": {
@@ -588,13 +570,12 @@
         ">=0.5.0"
       ],
       "artifacts": [
-        "IWETH",
-        "IWETH.ovm"
+        "IWETH"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/peripheral_contracts/WETH9.sol": {
-      "lastModificationDate": 1613418987380,
-      "contentHash": "0bec54a870d23ba8dd0c6cc43345dd6b",
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\WETH9.sol": {
+      "lastModificationDate": 1614178559078,
+      "contentHash": "cdec98056c58a81148a732066eb7c166",
       "sourceName": "contracts/peripheral_contracts/WETH9.sol",
       "solcConfig": {
         "version": "0.5.16",
@@ -623,12 +604,11 @@
         "^0.5.16"
       ],
       "artifacts": [
-        "WETH9",
-        "WETH9.ovm"
+        "WETH9"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/RubiconMarket.sol": {
-      "lastModificationDate": 1612990316867,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\RubiconMarket.sol": {
+      "lastModificationDate": 1611695685736,
       "contentHash": "1f91272461f32b585b1d0690ecc9d0d0",
       "sourceName": "contracts/RubiconMarket.sol",
       "solcConfig": {
@@ -669,23 +649,11 @@
         "IWETH",
         "MatchingEvents",
         "RubiconMarket",
-        "SimpleMarket",
-        "DSAuth.ovm",
-        "DSAuthEvents.ovm",
-        "DSMath.ovm",
-        "DSNote.ovm",
-        "ERC20.ovm",
-        "EventfulMarket.ovm",
-        "ExpiringMarket.ovm",
-        "IAqueduct.ovm",
-        "IWETH.ovm",
-        "MatchingEvents.ovm",
-        "RubiconMarket.ovm",
-        "SimpleMarket.ovm"
+        "SimpleMarket"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/SenateAlpha.sol": {
-      "lastModificationDate": 1611606705047,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\SenateAlpha.sol": {
+      "lastModificationDate": 1611599228309,
       "contentHash": "142540954cce02f0c8d65db93b2ec82f",
       "sourceName": "contracts/SenateAlpha.sol",
       "solcConfig": {
@@ -717,14 +685,11 @@
       "artifacts": [
         "RBCNInterface",
         "SenateAlpha",
-        "TimelockInterface",
-        "RBCNInterface.ovm",
-        "SenateAlpha.ovm",
-        "TimelockInterface.ovm"
+        "TimelockInterface"
       ]
     },
-    "/Users/bghughes17/workspace/rubicon/rubicon_protocol/contracts/Timelock.sol": {
-      "lastModificationDate": 1611606705047,
+    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Timelock.sol": {
+      "lastModificationDate": 1611018136294,
       "contentHash": "385b9997b637628318649bf06fab475e",
       "sourceName": "contracts/Timelock.sol",
       "solcConfig": {
@@ -756,9 +721,7 @@
       ],
       "artifacts": [
         "SafeMath",
-        "Timelock",
-        "SafeMath.ovm",
-        "Timelock.ovm"
+        "Timelock"
       ]
     }
   }
