@@ -8,9 +8,23 @@ var TokenVesting1 = artifacts.require("./contracts/peripheral_contracts/TokenVes
 var TokenVesting2 = artifacts.require("./contracts/peripheral_contracts/TokenVesting2");
 var WETH = artifacts.require("./contracts/peripheral_contracts/WETH9.sol");
 
+var BathHouse = artifacts.require("./contracts/BathHouse.sol");
+var BathToken = artifacts.require("./contracts/BathToken.sol");
+
 const FOUR_YEARS = 126144000; // four years in unix time
 
 module.exports = function(deployer, network, accounts) {
+  
+  // Testing Rubicon Pools with following CLI Input: truffle test ./test/3_pool_test.js --network pools
+  if (network == "pools") {
+    deployer.deploy(BathHouse).then(function() {
+      deployer.deploy(BathToken).then(function() {
+        return deployer.deploy(RubiconMarket, 14210121600, true, admin, { gas: 100000000 }); //, /* Testing only */ WETH.address);
+      });
+    });
+  }
+  
+  // Mainnet Protocol Migration:
   var admin = accounts[0];
   const Founder1 = accounts[1];
   const Founder2 = accounts[2]; 
@@ -33,4 +47,5 @@ module.exports = function(deployer, network, accounts) {
     });
   });
 });
+
 };
