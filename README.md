@@ -8,7 +8,7 @@ For detailed documentation of the Rubicon protocol please visit our [docs](https
 
 # Rubicon Protocol
 
-Rubicon is a Layer 2, open-orderbook DEX built on the EVM and Optimism. Rubicon is also a blockchain-based protocol that is aimed at developing and ushering in the emergence of digital asset markets on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/)
+Rubicon is a Layer 2, open-orderbook DEX built on the EVM and [Optimism](https://optimism.io/). Rubicon is also a blockchain-based protocol that is aimed at developing and ushering in the emergence of digital asset markets on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/)
 
 The Rubicon protocol aims to launch on the Optimism Layer 2 mainnet soon. At that time, the community distribution of the governance token RBCN will be live. If you are interested in joining our team, learning more, or want to contact Rubicon please feel free to reach us at contact@rubicon.finance - we would love to hear from you!
 
