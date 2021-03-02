@@ -3,6 +3,8 @@ pragma solidity ^0.5.16;
 contract BathHouse {
     string name = 'ETH / USDC Liquidity Pool';
 
+    // Link to UNI pools example: https://uniswap.org/docs/v2/core-concepts/pools/
+
     //deposit() - a function that should allow a user to deposit custom weights into a given pair
     // inputs: custom weights into the pool (x and 1-x), and native assets
     // outputs: return to the user a custom bathASSET and bathQUOTE in accordance to the pair
