@@ -36,16 +36,16 @@ jobs:
         # network", implicate this line that starts up ganache.
       
       - name: Run Core Protocol Tests
-        run: npm run test:protocol
+        run: npm run test:protocol &
       
       - name: Start Ganache for Layer 2
-        run: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize
+        run: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize &
       
       -name: OVM Compilation
-       run: npm run compile:ovm
+       run: npm run compile:ovm &
       
       -name: OVM Migration
-       run: npm run migrate:ovm
+       run: npm run migrate:ovm &
 
 # Opens a shell on the runner. Useful for debugging actions.
 #- name: Setup tmate session
