@@ -2,6 +2,7 @@ pragma solidity ^0.5.16;
 
 contract BathHouse {
     string name = 'ETH / USDC Liquidity Pool';
+    string name1 = 'BathHouse';
 
     // Link to UNI pools example: https://uniswap.org/docs/v2/core-concepts/pools/
 
