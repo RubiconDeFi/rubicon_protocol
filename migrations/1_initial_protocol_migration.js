@@ -18,9 +18,9 @@ module.exports = function(deployer, network, accounts) {
   // Testing Rubicon Pools with following CLI Input: truffle test ./test/3_pool_test.js --network pools
   if (network == "pools") {
     deployer.deploy(BathHouse).then(function() {
-      deployer.deploy(BathToken).then(function() {
-        return deployer.deploy(RubiconMarket, 14210121600, true, admin, { gas: 100000000 }); //, /* Testing only */ WETH.address);
-      });
+      // deployer.deploy(BathToken).then(function() {
+        return deployer.deploy(RubiconMarket, 14210121600, true, admin); //, /* Testing only */ WETH.address);
+      // });
     });
   }
   
