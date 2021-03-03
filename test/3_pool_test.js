@@ -1,5 +1,5 @@
 const BathHouse = artifacts.require("BathHouse");
-const BathToken = artifacts.require("BathToken");
+const BathPair = artifacts.require("BathPair");
 const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
@@ -32,7 +32,7 @@ contract("Rubicon Pools Test", async function(accounts) {
             // Call initialize on Bath house
             (await bathHouseInstance.initBathPair(assetInstance.address, quoteInstance.address));
             const newPair = await bathHouseInstance.getBathPair(assetInstance.address, quoteInstance.address);
-            logIndented("New bathToken: ", newPair);
+            logIndented("New BathPair: ", newPair);
             //Check that new token exists...
             // BathToken.
             // assert.equal(newPair, )

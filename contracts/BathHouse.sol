@@ -1,5 +1,5 @@
 pragma solidity =0.5.16;
-import "./BathToken.sol";
+import "./BathPair.sol";
 
 contract BathHouse {
     string name = 'ETH / USDC Liquidity Pool';
@@ -13,7 +13,7 @@ contract BathHouse {
     // e.g. init them, placePairs trade
 
     // Build / Test flow:
-    // 1. [] Init a bathPair
+    // 1. [X] Init a bathPair
     // 2. [] Allow users to deposit liquidity into bath pair w/ custom weights while receiving Token
     // 3. [] Test BathHouse calling on bath tokens ability to place pairs placePairsTrade <- build this logic
     // 4. [] test a withdrawl... place 
@@ -23,23 +23,6 @@ contract BathHouse {
     // inputs: custom weights into the pool (x and 1-x), and native assets
     // outputs: return to the user a custom bathASSET and bathQUOTE in accordance to the pair
     //  needs to account for when a user deposits funds to correctly pay them back the right amount of yield
-
-    function deposit(address asset, uint assetWeight, address quote, uint quoteWeight) external returns (address bathAsset, address bathQuote) {
-        // require(bathTokens exist)
-        require(asset != quote);
-        require(assetWeight <= 100);
-        require(assetWeight >= 0);
-        require(quoteWeight <= 100);
-        require(quoteWeight >= 0);
-        
-        // mint the bathTokens to the user in accordance to weights, send underlying assets to each Bath Token
-
-
-        //filler for return values
-        address bathAsset = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
-        address bathQuote = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
-        return (bathAsset, bathQuote);
-    }
 
     function initBathPair(address asset, address quote) public returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
@@ -58,7 +41,7 @@ contract BathHouse {
         // allBathPairs.push(pair);
         // getPair[asset][quote] = pair;
 
-        BathToken pair = new BathToken();
+        BathPair pair = new BathPair();
         address newPair = address(pair);
         allBathPairs.push(newPair);
         pair.initialize(quote, asset);
