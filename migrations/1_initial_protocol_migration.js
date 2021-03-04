@@ -9,7 +9,6 @@ var TokenVesting2 = artifacts.require("./contracts/peripheral_contracts/TokenVes
 var WETH = artifacts.require("./contracts/peripheral_contracts/WETH9.sol");
 
 var BathHouse = artifacts.require("./contracts/BathHouse.sol");
-var BathToken = artifacts.require("./contracts/BathToken.sol");
 
 const FOUR_YEARS = 126144000; // four years in unix time
 
