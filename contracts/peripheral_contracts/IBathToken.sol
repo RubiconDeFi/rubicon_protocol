@@ -14,7 +14,10 @@ interface IBathToken {
     function approve(address spender, uint value) external returns (bool);
     function transfer(address to, uint value) external returns (bool);
     function transferFrom(address from, address to, uint value) external returns (bool);
-    function mint(address to, uint value) external returns (bool);
+    
+    //deposit and withdraw:
+    function mint(address to, uint value) external;
+    function withdraw(address from, uint value) external;
 
     function DOMAIN_SEPARATOR() external view returns (bytes32);
     function PERMIT_TYPEHASH() external pure returns (bytes32);

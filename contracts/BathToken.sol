@@ -1,6 +1,7 @@
 pragma solidity =0.5.16;
 
 import "./peripheral_contracts/IBathToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./peripheral_contracts/SafeMath.sol";
 
 
@@ -9,6 +10,7 @@ contract BathToken is IBathToken {
 
     address public pair;
     string public symbol;
+    address public underlyingToken;
 
     string public constant name = 'BathToken V-1';
     uint8 public constant decimals = 18;
@@ -24,10 +26,10 @@ contract BathToken is IBathToken {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor(string memory bathName) public {
+    constructor(string memory bathName, address token) public {
         pair = msg.sender;
         symbol = bathName;
-
+        underlyingToken = token;
 
         uint chainId;
         assembly {
@@ -49,8 +51,17 @@ contract BathToken is IBathToken {
         _;
     }
 
-    function mint(address to, uint value) external onlyPair returns (bool) {
+    function withdraw(address from, uint value) external onlyPair {
+        // add security checks
+        IERC20(underlyingToken).transfer(from, value);
+        _burn(from, value);
+
+        // TODO: emit 
+    }
+
+    function mint(address to, uint value) external onlyPair {
         _mint(to, value);
+        // TODO: emit
     }
 
     function _mint(address to, uint value) internal {
