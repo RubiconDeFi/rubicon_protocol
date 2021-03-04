@@ -1,4 +1,5 @@
 pragma solidity =0.5.16;
+
 import "./BathPair.sol";
 
 contract BathHouse {
@@ -24,7 +25,7 @@ contract BathHouse {
     // outputs: return to the user a custom bathASSET and bathQUOTE in accordance to the pair
     //  needs to account for when a user deposits funds to correctly pay them back the right amount of yield
 
-    function initBathPair(address asset, address quote) public returns (address newPair) {
+    function initBathPair(address asset, string calldata assetName, address quote, string calldata quoteName) external returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
         require(asset != address(0));
@@ -42,9 +43,9 @@ contract BathHouse {
         // getPair[asset][quote] = pair;
 
         BathPair pair = new BathPair();
-        address newPair = address(pair);
+        newPair = address(pair);
         allBathPairs.push(newPair);
-        pair.initialize(quote, asset);
+        pair.initialize(asset, assetName, quote, quoteName);
         getPair[asset][quote] = newPair;        
         return newPair;
     }

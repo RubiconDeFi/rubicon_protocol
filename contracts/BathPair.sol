@@ -1,34 +1,40 @@
 pragma solidity ^0.5.16;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-
-//represents a stake in underlying liquidity of pair-based bath pool...
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "./BathToken.sol";
 
 contract BathPair {
 
     address public bathHouse;
     address public underlyingAsset;
     address public underlyingQuote;
-    // mint() - function that mints to the user a bathToken for this token's asset
-    //     should only be callable from the BathHouse
 
-    // ERC20 - token needs to adapt the ERC20 interface
+    address public bathAssetAddress;
+    address public bathQuoteAddress;
 
-    // burn() - need ability to burn bath tokens when a user withdraws liquidity from a pool
     mapping(address => uint[]) addressToHoldings;
+
 
     constructor () public {
         bathHouse = msg.sender;
     }
 
     // initialize() -start the token 
-    function initialize(address asset, address quote) external {
+    function initialize(address asset, string calldata assetName, address quote, string calldata quoteName) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
         underlyingAsset = asset;
         underlyingQuote = quote;
+
+        //deploy new BathTokens:
+        BathToken bathAsset = new BathToken(string(abi.encodePacked("bath", (assetName))));
+        bathAssetAddress = address(bathAsset);
+
+        BathToken bathQuote = new BathToken(string(abi.encodePacked("bath", (quoteName))));
+        bathQuoteAddress = address(bathQuote);
+
     }
 
-    function deposit(address asset, uint assetAmount, address quote, uint quoteAmount) external returns (uint newAmount) {
+    function deposit(address asset, uint assetAmount, address quote, uint quoteAmount) external returns (uint bathAssetAmount, uint bathQuoteAmount) {
         // require(bathTokens exist)
         require(asset != quote);
         require(asset == underlyingAsset, "wrong asset nerd");
@@ -38,16 +44,11 @@ contract BathPair {
         IERC20(asset).transferFrom(msg.sender, address(this), assetAmount);
         IERC20(quote).transferFrom(msg.sender, address(this), quoteAmount);
         // _mint(msg.sender, amount);
+        IBathToken(bathAssetAddress).mint(msg.sender, assetAmount);
+        IBathToken(bathQuoteAddress).mint(msg.sender, quoteAmount);
 
-
-        uint newAmount = 1;
         //filler for return values
-        return newAmount;
+        return (assetAmount, quoteAmount);
     }
-
-}
-
-interface IBathToken {
-    function initialize(address, address) external;
 
 }

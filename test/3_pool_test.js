@@ -1,11 +1,12 @@
 const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
+const BathToken = artifacts.require("BathToken");
 const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 
-const { isAssertionExpression } = require('typescript');
+const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
 // const { artifacts } = require('hardhat');
 const helper = require('./testHelpers/timeHelper.js');
 
@@ -28,14 +29,35 @@ contract("Rubicon Pools Test", async function(accounts) {
     });
 
     describe("Bath House Initialization of Bath Tokens", async function() {
+        let newPair;
+        let bathPairInstance;
+        let bathAssetInstance;
+        let bathQuoteInstance;
         it("Bath House can initialize a new bathToken Pair", async function() {
             // Call initialize on Bath house
-            (await bathHouseInstance.initBathPair(assetInstance.address, quoteInstance.address));
-            const newPair = await bathHouseInstance.getBathPair(assetInstance.address, quoteInstance.address);
+            (await bathHouseInstance.initBathPair(assetInstance.address, "WETH", quoteInstance.address, "DAI"));
+            newPair = await bathHouseInstance.getBathPair(assetInstance.address, quoteInstance.address);
             logIndented("New BathPair: ", newPair);
-            //Check that new token exists...
-            // BathToken.
-            // assert.equal(newPair, )
+        });
+        it("can correctly spawn bathWETH and bathDAI", async function() {
+            bathPairInstance = await BathPair.at(newPair);
+            bathAssetAddress = await bathPairInstance.bathAssetAddress();
+            logIndented("bathWETH address: ", bathAssetAddress);
+            bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
+            logIndented("bathDAI address: ", bathQuoteAddress);
+
+            bathAssetInstance = await BathToken.at(bathAssetAddress);
+            bathQuoteInstance = await BathToken.at(bathQuoteAddress);
+
+            assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
+            assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);
+
+            // logIndented("asset bath token: ", await BathPair.at(newPair).then((contract) => contract.bathAssetAddress()));
+        });
+        it("bath tokens have the right name", async function() {
+            assert.equal(await bathAssetInstance.symbol(), "bathWETH");
+            assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
+
         });
     });
 });
