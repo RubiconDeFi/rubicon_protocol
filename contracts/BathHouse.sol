@@ -9,15 +9,22 @@ contract BathHouse {
     address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;
 
-    //****Acts as the initializer/factory of BathTokens*****
+    address public admin;
+    address public RubiconMarketAddress;
+
+    constructor(address market) public {
+        admin = msg.sender;
+        RubiconMarketAddress = market;
+    }
+    //****Acts as the initializer/factory/admin of BathPairs*****
     //*** Acts as quarterback for BathToken interactions:*/
     // e.g. init them, placePairs trade
 
     // Build / Test flow:
     // 1. [X] Init a bathPair
-    // 2. [] Allow users to deposit liquidity into bath pair w/ custom weights while receiving Token
+    // 2. [X] Allow users to deposit liquidity into bath pair w/ custom weights while receiving Token
     // 3. [] Test BathHouse calling on bath tokens ability to place pairs placePairsTrade <- build this logic
-    // 4. [] test a withdrawl... place 
+    // 4. [X] test a withdrawl... place 
 
 
     //deposit() - a function that should allow a user to deposit custom weights into a given pair
@@ -31,21 +38,11 @@ contract BathHouse {
         require(asset != address(0));
         require(quote != address(0));
         require(getPair[asset][quote] == address(0), "Bath Pair already exists");
-        
-        // Create the new contract at call!
-        // bytes memory bytecode = type(BathToken).creationCode;
-        // bytes32 salt = keccak256(abi.encodePacked(asset, quote)); //arbitrary data to get new Hash
-        // assembly {
-        //     pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
-        // }
-        // IBathToken(pair).initialize(quote, asset);
-        // allBathPairs.push(pair);
-        // getPair[asset][quote] = pair;
 
         BathPair pair = new BathPair();
         newPair = address(pair);
         allBathPairs.push(newPair);
-        pair.initialize(asset, assetName, quote, quoteName);
+        pair.initialize(asset, assetName, quote, quoteName, RubiconMarketAddress);
         getPair[asset][quote] = newPair;        
         return newPair;
     }
@@ -54,12 +51,6 @@ contract BathHouse {
         return getPair[asset][quote];
     }
 
-
-    //withdraw() - a function that should allow a user to send their bathASSET and bathQUOTE to the smart contract to withdraw provided liquidity
-    // inputs: bathASSET and bathQUOTE tokens
-    // outputs: receive the underlying + any yield and RBCN earned from their stake in the pool
-
-    //onlyRubiconMarket - functionality that only allows the smart contract to send funds to the live Rubicon Market instance
 
     //placePairsTrade() - a function that places a bid and ask in the orderbook for the BathHouse's pair into the RubiconMarket orderbook
     // inputs: spread - the desired spread the pair of bid + ask should be placed outside of the midpoint of the orderbook

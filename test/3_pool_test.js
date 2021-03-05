@@ -88,8 +88,23 @@ contract("Rubicon Pools Test", async function(accounts) {
         });
     });
 
-    describe("Liquidity Providing Tests", async function() {
-        
-    });
+    // Test Market making functionality:
+    // describe("Liquidity Providing Tests", async function() {
+    //     it("Pair has the ability to place trades", async function () {
+
+    //     });
+    //     it("Makers can fill trades", async function () {
+
+    //     });
+    //     it("Funds are correctly returned to bathTokens", async function () {
+
+    //     });
+    //     it("BathPair has the ability to rebalance settled funds between bathTokens", async function () {
+            
+    //     });
+    //     it("RBCN is accrued to the pool..?", async function () {
+            
+    //     });
+    // });
 });
 

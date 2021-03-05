@@ -3,7 +3,7 @@ pragma solidity =0.5.16;
 import "./peripheral_contracts/IBathToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./peripheral_contracts/SafeMath.sol";
-
+import "./RubiconMarket.sol";
 
 contract BathToken is IBathToken {
     using SafeMath for uint;
@@ -11,6 +11,7 @@ contract BathToken is IBathToken {
     address public pair;
     string public symbol;
     address public underlyingToken;
+    address public RubiconMarketAddress;
 
     string public constant name = 'BathToken V-1';
     uint8 public constant decimals = 18;
@@ -26,10 +27,11 @@ contract BathToken is IBathToken {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor(string memory bathName, address token) public {
+    constructor(string memory bathName, address token, address market) public {
         pair = msg.sender;
         symbol = bathName;
         underlyingToken = token;
+        RubiconMarketAddress = market;
 
         uint chainId;
         assembly {
@@ -49,6 +51,17 @@ contract BathToken is IBathToken {
     modifier onlyPair {
         require(msg.sender == pair);
         _;
+    }
+
+    //onlyRubiconMarket - functionality that only allows the smart contract to send funds to the live Rubicon Market instance
+
+
+    // function that places a bid/ask in the orderbook for a given pair
+    function placeOffer() external onlyPair {
+        //add a check to make sure only a fixed proportion of the pool can be outstanding on orders
+
+        //place offer in RubiconMarket
+
     }
 
     function withdraw(address from, uint value) external onlyPair {

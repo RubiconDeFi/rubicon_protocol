@@ -18,6 +18,7 @@ interface IBathToken {
     //deposit and withdraw:
     function mint(address to, uint value) external;
     function withdraw(address from, uint value) external;
+    // function placeOffer() external;
 
     function DOMAIN_SEPARATOR() external view returns (bytes32);
     function PERMIT_TYPEHASH() external pure returns (bytes32);

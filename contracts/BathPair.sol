@@ -2,6 +2,7 @@ pragma solidity ^0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
+import "./RubiconMarket.sol";
 
 contract BathPair {
 
@@ -12,6 +13,8 @@ contract BathPair {
     address public bathAssetAddress;
     address public bathQuoteAddress;
 
+    address public RubiconMarketAddress;
+
     mapping(address => uint[]) addressToHoldings;
 
 
@@ -19,19 +22,22 @@ contract BathPair {
         bathHouse = msg.sender;
     }
 
+    // TODO: add onlyKeeper modifier while using permissioned keepers
+
     // initialize() -start the token 
-    function initialize(address asset, string calldata assetName, address quote, string calldata quoteName) external {
+    function initialize(address asset, string calldata assetName, address quote, string calldata quoteName, address market) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
         underlyingAsset = asset;
         underlyingQuote = quote;
 
         //deploy new BathTokens:
-        BathToken bathAsset = new BathToken(string(abi.encodePacked("bath", (assetName))), asset);
+        BathToken bathAsset = new BathToken(string(abi.encodePacked("bath", (assetName))), asset, market);
         bathAssetAddress = address(bathAsset);
 
-        BathToken bathQuote = new BathToken(string(abi.encodePacked("bath", (quoteName))), quote);
+        BathToken bathQuote = new BathToken(string(abi.encodePacked("bath", (quoteName))), quote, market);
         bathQuoteAddress = address(bathQuote);
 
+        RubiconMarketAddress = market;
     }
 
     function deposit(address asset, uint assetAmount, address quote, uint quoteAmount) external returns (uint bathAssetAmount, uint bathQuoteAmount) {
@@ -51,7 +57,7 @@ contract BathPair {
         return (assetAmount, quoteAmount);
     }
 
-    function withdraw(address asset, uint assetAmount, address quote, uint quoteAmount) external returns (bool) {
+    function withdraw(address asset, uint assetAmount, address quote, uint quoteAmount) external {
         require(asset != quote);
         require(asset == underlyingAsset, "wrong asset nerd");
         require(quote == underlyingQuote, "wrong quote nerd");
@@ -62,7 +68,10 @@ contract BathPair {
         //Return funds to users
         IBathToken(bathAssetAddress).withdraw(msg.sender, assetAmount);
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
-        return true;
+    }
+
+    function placePairsTrade(uint spread) external {
+
     }
 
 }
