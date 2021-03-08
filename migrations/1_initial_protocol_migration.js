@@ -16,7 +16,7 @@ module.exports = function(deployer, network, accounts) {
   
   // Testing Rubicon Pools with following CLI Input: truffle test ./test/3_pool_test.js --network pools
   if (network == "pools") {
-    deployer.deploy(RubiconMarket, 14210121600, true, accounts[0]).then(function() {
+    deployer.deploy(RubiconMarket, 14210121600, false, accounts[0]).then(function() {
       // deployer.deploy(BathToken).then(function() {
         return deployer.deploy(BathHouse, RubiconMarket.address); //, /* Testing only */ WETH.address);
       // });
@@ -24,11 +24,12 @@ module.exports = function(deployer, network, accounts) {
   }
   
   // Mainnet Protocol Migration:
+  
+  if (network != "pools"){
   var admin = accounts[0];
   const Founder1 = accounts[1];
   const Founder2 = accounts[2]; 
 
-  deployer.deploy(WETH);
   
   deployer.deploy(TokenVesting1, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
   deployer.deploy(TokenVesting2, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
@@ -46,5 +47,5 @@ module.exports = function(deployer, network, accounts) {
     });
   });
 });
-
+}
 };

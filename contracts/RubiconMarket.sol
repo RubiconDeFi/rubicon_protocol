@@ -719,7 +719,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
             );
         }
         function(uint256, uint256) returns (bool) fn =
-            matchingEnabled ? _buys : super.buy; 
+            matchingEnabled ? _buys : super.buy;
 
         return fn(id, amount);
     }
