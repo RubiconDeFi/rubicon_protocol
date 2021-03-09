@@ -23,6 +23,7 @@ contract BathPair {
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
+    event Cancel(uint, ERC20, uint);
 
     constructor() public {
         bathHouse = msg.sender;
@@ -117,33 +118,55 @@ contract BathPair {
         require(spread > 0);
 
         // 1. Cancel Outstanding Orders
+        //to do: make this good
+        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
         {
             for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
                 (
-                    uint256 ask_amt,
-                    ERC20 ask_gem,
-                    uint256 bid_amt,
-                    ERC20 bid_gem
+                    uint256 ask_amt0,
+                    ERC20 ask_gem0,
+                    uint256 bid_amt0,
+                    ERC20 bid_gem0
                 ) =
                     RubiconMarket(RubiconMarketAddress).getOffer(
                         outstandingPairIDs[x][0]
                     );
-                emit LogTrade(ask_amt, ask_gem, bid_amt, bid_gem);
+                (
+                    uint256 ask_amt1,
+                    ERC20 ask_gem1,
+                    uint256 bid_amt1,
+                    ERC20 bid_gem1
+                ) =
+                    RubiconMarket(RubiconMarketAddress).getOffer(
+                        outstandingPairIDs[x][1]
+                    );
+                if ((ask_amt0 == 0 && ask_gem0 == ERC20(0) && bid_amt0 == 0 && bid_gem0 == ERC20(0))
+                    &&
+                    (ask_amt1 != 0 && ask_gem1 != ERC20(0) && bid_amt1 != 0 && bid_gem1 != ERC20(0))
+                ){
+                    BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][0]);
+                    emit Cancel(outstandingPairIDs[x][0], ask_gem0, ask_amt0);
+                    delete outstandingPairIDs[x][0];
+                }
+                else if ((ask_amt0 != 0 && ask_gem0 != ERC20(0) && bid_amt0 != 0 && bid_gem0 != ERC20(0))
+                    &&
+                    (ask_amt1 == 0 && ask_gem1 == ERC20(0) && bid_amt1 == 0 && bid_gem1 == ERC20(0))) {
+                    BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][1]);
+                    emit Cancel(outstandingPairIDs[x][1], ask_gem1, ask_amt1);
+                    delete outstandingPairIDs[x][1];
+                    }
+                else if ((ask_amt0 != 0 && ask_gem0 != ERC20(0) && bid_amt0 != 0 && bid_gem0 != ERC20(0))
+                    &&
+                    (ask_amt1 != 0 && ask_gem1 != ERC20(0) && bid_amt1 != 0 && bid_gem1 != ERC20(0))) {
+                        delete outstandingPairIDs[x];
+                    }
+                // emit LogTrade(ask_amt, ask_gem, bid_amt, bid_gem);
                 //cancel order if pair is filled - naive check on this is submit as a pair...
             }
         }
-        // // 1. Cancel Outstanding Orders
-        // for (uint256 x = 0; x < outstandingAskIDs.length; x++) {
-        //     RubiconMarket(RubiconMarketAddress).getOffer(outstandingAskIDs[x]);
-
-        //     //cancel order if pair is filled - naive check on this is submit as a pair...
-        // }
-        // for (uint256 y = 0; y < outstandingBidIDs.length; y++) {
-        //     RubiconMarket(RubiconMarketAddress).getOffer(outstandingBidIDs[y]);
-        // }
 
         // 2. determine Midpoint
-        //add sanity check?
+        //add sanity check ?
 
         uint256 bestAskID =
             RubiconMarket(RubiconMarketAddress).getBestOffer(

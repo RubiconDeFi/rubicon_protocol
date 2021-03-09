@@ -70,6 +70,10 @@ contract BathToken is IBathToken {
         _;
     }
 
+    function cancel(uint id) external onlyPair {
+        RubiconMarket(RubiconMarketAddress).cancel(id);
+    }
+
     //onlyRubiconMarket - functionality that only allows the smart contract to send funds to the live Rubicon Market instance
 
     // function that places a bid/ask in the orderbook for a given pair
