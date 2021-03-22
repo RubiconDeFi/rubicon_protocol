@@ -10,7 +10,6 @@ import "./peripheral_contracts/SafeMath.sol";
 import "./BathHouse.sol";
 
 contract Strategy {
-
     string public name;
 
     address public bathHouse;
@@ -33,14 +32,17 @@ contract Strategy {
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
-    event Cancel(uint, ERC20, uint);
+    event Cancel(uint256, ERC20, uint256);
 
     struct order {
-                    uint256 pay_amt;
-                    ERC20 pay_gem;
-                    uint256 buy_amt;
-                    ERC20 buy_gem;
+        uint256 pay_amt;
+        ERC20 pay_gem;
+        uint256 buy_amt;
+        ERC20 buy_gem;
     }
+
+    order private newAsk;
+    order private newBid;
 
     constructor(string memory _name, address _bathHouse) public {
         name = _name;
@@ -48,83 +50,53 @@ contract Strategy {
     }
 
     modifier onlyPairs {
-        require(BathHouse(bathHouse).isApprovedPair(msg.sender) == true, "not an approved pair");
+        require(
+            BathHouse(bathHouse).isApprovedPair(msg.sender) == true,
+            "not an approved pair"
+        );
         _;
     }
 
-   function placePairsTrade(uint256 spread, address underlyingAsset, address bathAssetAddress, address underlyingQuote, address bathQuoteAddress) internal {
-        require(spread < 100);
-        require(spread > 0);
-        // uint spread = _spread;
+    function placePairsTrade(
+        // uint256 spread,
+        address underlyingAsset,
+        address bathAssetAddress,
+        address underlyingQuote,
+        address bathQuoteAddress
+    ) internal {
         // 1. Cancel Outstanding Orders
         //to do: make this good
-        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
-        {
-            for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
-                (
-                    uint256 ask_amt0,
-                    ERC20 ask_gem0,
-                    uint256 bid_amt0,
-                    ERC20 bid_gem0
-                ) =
-                    RubiconMarket(RubiconMarketAddress).getOffer(
-                        outstandingPairIDs[x][0]
-                    );
-                (
-                    uint256 ask_amt1,
-                    ERC20 ask_gem1,
-                    uint256 bid_amt1,
-                    ERC20 bid_gem1
-                ) =
-                    RubiconMarket(RubiconMarketAddress).getOffer(
-                        outstandingPairIDs[x][1]
-                    );
-                if ((ask_amt0 == 0 && ask_gem0 == ERC20(0) && bid_amt0 == 0 && bid_gem0 == ERC20(0))
-                    &&
-                    (ask_amt1 != 0 && ask_gem1 != ERC20(0) && bid_amt1 != 0 && bid_gem1 != ERC20(0))
-                ){
-                    BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][0]);
-                    emit Cancel(outstandingPairIDs[x][0], ask_gem0, ask_amt0);
-                    delete outstandingPairIDs[x][0];
-                }
-                else if ((ask_amt0 != 0 && ask_gem0 != ERC20(0) && bid_amt0 != 0 && bid_gem0 != ERC20(0))
-                    &&
-                    (ask_amt1 == 0 && ask_gem1 == ERC20(0) && bid_amt1 == 0 && bid_gem1 == ERC20(0))) {
-                    BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][1]);
-                    emit Cancel(outstandingPairIDs[x][1], ask_gem1, ask_amt1);
-                    delete outstandingPairIDs[x][1];
-                    }
-                else if ((ask_amt0 != 0 && ask_gem0 != ERC20(0) && bid_amt0 != 0 && bid_gem0 != ERC20(0))
-                    &&
-                    (ask_amt1 != 0 && ask_gem1 != ERC20(0) && bid_amt1 != 0 && bid_gem1 != ERC20(0))) {
-                        delete outstandingPairIDs[x];
-                    }
-                // emit LogTrade(ask_amt, ask_gem, bid_amt, bid_gem);
-                //cancel order if pair is filled - naive check on this is submit as a pair...
-            }
-        }
 
+        // 2. Cancel partial fills
+        cancelPartialFills(bathAssetAddress, bathQuoteAddress);
 
-        // 3. Place trades at a fixed spread of the midpoint
-        (order memory bestAsk, order memory bestBid) = getNewOrders(underlyingAsset, underlyingQuote);
+        // 3. Calculate new bid and ask
+        // (order memory bestAsk, order memory bestBid) =
+        getNewOrders(underlyingAsset, underlyingQuote);
 
-        placeTrades(bathAssetAddress, bathQuoteAddress, bestAsk, bestBid);
-        
+        // 4. place new bid and ask
+        placeTrades(bathAssetAddress, bathQuoteAddress, newAsk, newBid);
     }
 
-    function getNewOrders(address underlyingAsset, address underlyingQuote) internal returns (order memory,  order memory) {
-         // 2. determine Midpoint TODO: extrapolate
+    function getNewOrders(address underlyingAsset, address underlyingQuote)
+        internal
+    // returns (order memory, order memory)
+    {
+        // 2. determine Midpoint TODO: extrapolate
         //add sanity check ?
         ERC20 ERC20underlyingAsset = ERC20(underlyingAsset);
         ERC20 ERC20underlyingQuote = ERC20(underlyingQuote);
 
-        (uint256 pay_amt0, ERC20 pay_gem0, uint256 buy_amt0, ERC20 buy_gem0) =
-            RubiconMarket(RubiconMarketAddress).getOffer(RubiconMarket(RubiconMarketAddress).getBestOffer(
+        uint256 bestAskId =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
                 ERC20underlyingAsset,
                 ERC20underlyingQuote
-            ));
-        
-        order memory bestAsk = order( pay_amt0,  pay_gem0,  buy_amt0,  buy_gem0);
+            );
+
+        (uint256 pay_amt0, ERC20 pay_gem0, uint256 buy_amt0, ERC20 buy_gem0) =
+            RubiconMarket(RubiconMarketAddress).getOffer(bestAskId);
+
+        order memory bestAsk = order(pay_amt0, pay_gem0, buy_amt0, buy_gem0);
 
         require(
             bestAsk.pay_gem != ERC20(0) &&
@@ -134,14 +106,16 @@ contract Strategy {
             "empty order ask"
         );
 
-        (uint256 pay_amt1, ERC20 pay_gem1, uint256 buy_amt1, ERC20 buy_gem1) =
-            RubiconMarket(RubiconMarketAddress).getOffer( RubiconMarket(RubiconMarketAddress).getBestOffer(
+        uint256 bestBidId =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
                 ERC20underlyingQuote,
                 ERC20underlyingAsset
-            ));
-        order memory bestBid  = order( pay_amt1,  pay_gem1,  buy_amt1,  buy_gem1);
+            );
+        (uint256 pay_amt1, ERC20 pay_gem1, uint256 buy_amt1, ERC20 buy_gem1) =
+            RubiconMarket(RubiconMarketAddress).getOffer(bestBidId);
+        order memory bestBid = order(pay_amt1, pay_gem1, buy_amt1, buy_gem1);
 
-       require(
+        require(
             bestBid.pay_gem != ERC20(0) &&
                 bestBid.pay_amt != 0 &&
                 bestBid.buy_gem != ERC20(0) &&
@@ -149,20 +123,30 @@ contract Strategy {
             "empty order bid"
         );
 
+        // TODO: build spread support
         uint256 newBidAmt = bestBid.pay_amt - ((5 * bestBid.pay_amt) / 1e20);
         uint256 newAskAmt = bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
 
         bestAsk.pay_amt = newAskAmt;
         bestBid.pay_amt = newBidAmt;
-        return (bestAsk, bestBid);
+        // return (bestAsk, bestBid);
+        newAsk = bestAsk;
+        newBid = bestBid;
     }
 
-    // function placeTrades(address bathAssetAddress,address bathQuoteAddress, 
-    //      order memory ask, order memory bid) internal returns (bool) {
+    function getOfferInfo(uint256 id) internal returns (order memory) {
+        (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
+            RubiconMarket(RubiconMarketAddress).getOffer(id);
+        order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
+        return offerInfo;
+    }
 
-    // }
-    function placeTrades(address bathAssetAddress,address bathQuoteAddress, 
-        order memory ask, order memory bid) internal returns (bool) {
+    function placeTrades(
+        address bathAssetAddress,
+        address bathQuoteAddress,
+        order memory ask,
+        order memory bid
+    ) internal returns (bool) {
         uint256 newAskID =
             BathToken(bathAssetAddress).placeOffer(
                 ask.pay_amt,
@@ -170,10 +154,7 @@ contract Strategy {
                 ask.buy_amt,
                 ask.buy_gem
             ); // TODO: SafeMath?
-        emit LogTrade(ask.pay_amt,
-                ask.pay_gem,
-                ask.buy_amt,
-                ask.buy_gem);
+        emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
         // outstandingAskIDs.push(newAskID);
 
         uint256 newBidID =
@@ -183,12 +164,68 @@ contract Strategy {
                 bid.buy_amt,
                 bid.buy_gem
             ); // TODO: SafeMath?
-        emit LogTrade(bid.pay_amt,
-                bid.pay_gem,
-                bid.buy_amt,
-                bid.buy_gem);
+        emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
         // outstandingBidIDs.push(newBidID);
         outstandingPairIDs.push([newAskID, newBidID]);
+    }
+
+    function cancelPartialFills(
+        address bathAssetAddress,
+        address bathQuoteAddress
+    ) internal {
+        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
+
+        for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+            order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+            order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+
+            if (
+                (offer1.pay_amt == 0 &&
+                    offer1.pay_gem == ERC20(0) &&
+                    offer1.buy_amt == 0 &&
+                    offer1.buy_gem == ERC20(0)) &&
+                (offer2.pay_amt != 0 &&
+                    offer2.pay_gem != ERC20(0) &&
+                    offer2.buy_amt != 0 &&
+                    offer2.buy_gem != ERC20(0))
+            ) {
+                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][0]);
+                emit Cancel(
+                    outstandingPairIDs[x][0],
+                    offer1.pay_gem,
+                    offer1.pay_amt
+                );
+                delete outstandingPairIDs[x][0];
+            } else if (
+                (offer1.pay_amt != 0 &&
+                    offer1.pay_gem != ERC20(0) &&
+                    offer1.buy_amt != 0 &&
+                    offer1.pay_gem != ERC20(0)) &&
+                (offer2.pay_amt == 0 &&
+                    offer2.pay_gem == ERC20(0) &&
+                    offer2.buy_amt == 0 &&
+                    offer2.buy_gem == ERC20(0))
+            ) {
+                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][1]);
+                emit Cancel(
+                    outstandingPairIDs[x][1],
+                    offer2.pay_gem,
+                    offer2.pay_amt
+                );
+                delete outstandingPairIDs[x][1];
+            } else if (
+                (offer1.pay_amt != 0 &&
+                    offer1.pay_gem != ERC20(0) &&
+                    offer1.buy_amt != 0 &&
+                    offer1.pay_gem != ERC20(0)) &&
+                (offer2.pay_amt != 0 &&
+                    offer2.pay_gem != ERC20(0) &&
+                    offer2.buy_amt != 0 &&
+                    offer2.buy_gem != ERC20(0))
+            ) {
+                delete outstandingPairIDs[x];
+            }
+        }
     }
 
     function rebalancePair() external {
@@ -196,13 +233,22 @@ contract Strategy {
         // get the balance of each pair and determine inventory levels
     }
 
-    function execute(address underlyingAsset, address bathAssetAddress, address underlyingQuote, address bathQuoteAddress) onlyPairs external {
+    function execute(
+        address underlyingAsset,
+        address bathAssetAddress,
+        address underlyingQuote,
+        address bathQuoteAddress
+    ) external onlyPairs {
         // main function to chain the actions of a single strategic market making transaction
 
-        placePairsTrade(5, underlyingAsset, bathAssetAddress, underlyingQuote, bathQuoteAddress);
+        placePairsTrade(
+            underlyingAsset,
+            bathAssetAddress,
+            underlyingQuote,
+            bathQuoteAddress
+        );
 
         // This should simply be dynamic placing of pairs based on balances
         // manageInventory();
     }
-
 }
