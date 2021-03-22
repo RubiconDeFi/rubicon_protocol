@@ -6,7 +6,7 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 var Aqueduct = artifacts.require("./contracts/Aqueduct.sol");
 var TokenVesting1 = artifacts.require("./contracts/peripheral_contracts/TokenVesting1");
 var TokenVesting2 = artifacts.require("./contracts/peripheral_contracts/TokenVesting2");
-var WETH = artifacts.require("./contracts/peripheral_contracts/WETH9.sol");
+var Strategy = artifacts.require("./contracts/Strategy.sol");
 
 var BathHouse = artifacts.require("./contracts/BathHouse.sol");
 
@@ -15,12 +15,14 @@ const FOUR_YEARS = 126144000; // four years in unix time
 module.exports = function(deployer, network, accounts) {
   
   // Testing Rubicon Pools with following CLI Input: truffle test ./test/3_pool_test.js --network pools
+  // Pools Migrations - TODO: extrapolate to a new migrations file
   if (network == "pools") {
     deployer.deploy(RubiconMarket, 14210121600, false, accounts[0]).then(function() {
       // deployer.deploy(BathToken).then(function() {
         return deployer.deploy(BathHouse, RubiconMarket.address); //, /* Testing only */ WETH.address);
       // });
     });
+    deployer.deploy(Strategy);
   }
   
   // Mainnet Protocol Migration:

@@ -2,6 +2,7 @@ pragma solidity ^0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
+import "./BathHouse.sol";
 import "./RubiconMarket.sol";
 import "./peripheral_contracts/SafeMath.sol";
 import "./Strategy.sol";
@@ -25,7 +26,6 @@ contract BathPair {
     // Risk Parameters
     uint public reserveRatio; // proportion of the pool that must remain present in the pair
     uint public maximumOrderSize; // max order size that can be places in a single order
-    mapping(address => bool) approvedStrategies;
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
@@ -36,30 +36,16 @@ contract BathPair {
     }
 
     // TODO: add onlyKeeper modifier while using permissioned keepers
-    modifier onlyApprovedStrategy {
-        require(isApprovedStrat(msg.sender) == true, "not an approved sender");
-        _;
-    }
 
     modifier onlyBathHouse {
         require(msg.sender == bathHouse);
         _;
     }
 
-    function isApprovedStrat(address strategy) internal returns (bool) {
-        // TODO: Check that this works as intended
-        if (approvedStrategies[strategy] == true) {
-            return true;
-        } else {
-            return false;
-        }
+    modifier onlyApprovedStrategy(address targetStrategy) {
+        require(BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true, "not an approved sender");
+        _;
     }
-
-    function setApprovedStrat(address strategy) external onlyBathHouse returns (bool) {
-        // add to approvedStrategies
-        //  TODO: allow for permissioned adding of Strategies
-    }   
-
 
     // initialize() -start the token
     function initialize(
@@ -143,11 +129,8 @@ contract BathPair {
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
     }
 
-    function executeStrategy() external onlyApprovedStrategy {
+    function executeStrategy(address targetStrategy) onlyApprovedStrategy(targetStrategy) external  {
         // perform crucial checks to ensure that reserve ratio is maintained...
-    }
-
-    function manageInventory() external onlyApprovedStrategy {
 
     }
  

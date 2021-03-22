@@ -12,9 +12,17 @@ contract BathHouse {
     address public admin;
     address public RubiconMarketAddress;
 
+    // List of approved strategies
+    mapping(address => bool) approvedStrategies;
+
     constructor(address market) public {
         admin = msg.sender;
         RubiconMarketAddress = market;
+    }
+
+    modifier onlyAdmin {
+        require(msg.sender == admin);
+        _;
     }
 
     //****Acts as the initializer/factory/admin of BathPairs*****
@@ -69,15 +77,17 @@ contract BathHouse {
         return getPair[asset][quote];
     }
 
-    //placePairsTrade() - a function that places a bid and ask in the orderbook for the BathHouse's pair into the RubiconMarket orderbook
-    // inputs: spread - the desired spread the pair of bid + ask should be placed outside of the midpoint of the orderbook
-    // output: success or failure - log pair placed => note who the keeper is and store trade details in memory so next time placePairsTrade is called the keeper gets paid
-    // Flow:
-    //  1. cancel any partial fills previously made by this function call
-    //  2. pay the keeper of said partial fill from the portion that was filled
-    //  3. Identify new midpoint of orderbook
-    //  4. perform sanity check to make sure this midpoint makes sense / no manipulation ?
-    //  5. place new pair and save information
+    function isApprovedStrat(address strategy) external returns (bool) {
+        // TODO: Check that this works as intended
+        if (approvedStrategies[strategy] == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // getMidpoint() - function to return the current midpoint/price of the orderbook while performing sanity checks if needed
+    function approveStrategy(address strategy) external onlyAdmin returns (bool) {
+        // TODO: require check that strategy adheres to IStrategy;
+        approvedStrategies[strategy] = true;
+    }   
 }

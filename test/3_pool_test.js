@@ -5,8 +5,10 @@ const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
+const Strategy = artifacts.require("Strategy");
 
-const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
+// const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
+const _deploy_asset_contracts = require('../migrations/2_deploy_asset_contracts.js');
 // const { artifacts } = require('hardhat');
 const helper = require('./testHelpers/timeHelper.js');
 
@@ -121,12 +123,13 @@ contract("Rubicon Pools Test", async function(accounts) {
         });
         it("Can initialize an approved strategy", async function () {
             // await bathPairInstance.executeStrategy(10);
+            // await deployer.deploy(Strategy, {from: accounts[0]});
+            strategyInstance = await Strategy.deployed();
 
-            // TODO: add support for Strategy initialization
-            // --> then: allow anyone to call executeStrategy on Bath Pairs....
+            await bathHouseInstance.approveStrategy(strategyInstance.address);
         });
         it("Any user can call executeStrategy() on bath Pairs", async function () {
-           
+           await bathPairInstance.executeStrategy(strategyInstance.address);
         });
         it("Trades are successfully placed on the exchange", async function () {
            
