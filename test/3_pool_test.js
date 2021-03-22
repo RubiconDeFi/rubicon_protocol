@@ -119,10 +119,19 @@ contract("Rubicon Pools Test", async function(accounts) {
             // logIndented(await rubiconMarketInstance.AqueductDistributionLive());
             await rubiconMarketInstance.offer( web3.utils.toWei((40).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.5).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
-        it("Can call placePairsTrade on pair", async function () {
-            await bathPairInstance.placePairsTrade(10);
+        it("Can initialize an approved strategy", async function () {
+            // await bathPairInstance.executeStrategy(10);
+
+            // TODO: add support for Strategy initialization
+            // --> then: allow anyone to call executeStrategy on Bath Pairs....
         });
-        it("Makers can fill trades", async function () {
+        it("Any user can call executeStrategy() on bath Pairs", async function () {
+           
+        });
+        it("Trades are successfully placed on the exchange", async function () {
+           
+        });
+        it("Takers can fill trades and a partial fill is updated after executeStrategy()", async function () {
            
         });
         it("Funds are correctly returned to bathTokens", async function () {
