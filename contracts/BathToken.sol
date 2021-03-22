@@ -4,6 +4,8 @@ import "./peripheral_contracts/IBathToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./peripheral_contracts/SafeMath.sol";
 import "./RubiconMarket.sol";
+import "./Strategy.sol";
+import "./BathHouse.sol";
 
 contract BathToken is IBathToken {
     using SafeMath for uint256;
@@ -12,6 +14,9 @@ contract BathToken is IBathToken {
     string public symbol;
     address public underlyingToken;
     address public RubiconMarketAddress;
+
+    // admin
+    address public bathHouse;
 
     string public constant name = "BathToken V-1";
     uint8 public constant decimals = 18;
@@ -41,12 +46,14 @@ contract BathToken is IBathToken {
     constructor(
         string memory bathName,
         address token,
-        address market
+        address market,
+        address _bathHouse
     ) public {
         pair = msg.sender;
         symbol = bathName;
         underlyingToken = token;
         RubiconMarketAddress = market;
+        bathHouse = _bathHouse;
 
         uint256 chainId;
         assembly {
@@ -70,7 +77,15 @@ contract BathToken is IBathToken {
         _;
     }
 
-    function cancel(uint id) external onlyPair {
+    modifier onlyApprovedStrategy() {
+        require(
+            BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
+            "not an approved sender"
+        );
+        _;
+    }
+
+    function cancel(uint256 id) external onlyPair {
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 
@@ -82,11 +97,11 @@ contract BathToken is IBathToken {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    ) external onlyPair returns (uint256) {
+    ) external onlyApprovedStrategy returns (uint256) {
         //add a check to make sure only a fixed proportion of the pool can be outstanding on orders
 
         //place offer in RubiconMarket
-        // to do: change to make() ?
+        // to do: change to make() ? also --- add infinite approval to Rubicon Market on this contract?
         IERC20(address(pay_gem)).approve(RubiconMarketAddress, pay_amt);
 
         uint256 id =

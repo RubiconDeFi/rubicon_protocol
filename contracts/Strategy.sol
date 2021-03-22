@@ -7,19 +7,25 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
 import "./RubiconMarket.sol";
 import "./peripheral_contracts/SafeMath.sol";
+import "./BathHouse.sol";
 
 contract Strategy {
 
-    address public bathHouse;
-    address public underlyingAsset;
-    address public underlyingQuote;
+    string public name;
 
-    address public bathAssetAddress;
-    address public bathQuoteAddress;
+    address public bathHouse;
+    // address public underlyingAsset;
+    // address public underlyingQuote;
+
+    // address public bathAssetAddress;
+    // address public bathQuoteAddress;
 
     address public RubiconMarketAddress;
 
     mapping(address => uint256[]) addressToHoldings;
+
+    // security mapping to ensure only Pairs
+    mapping(address => bool) approvedPairs;
 
     uint256[] public outstandingAskIDs;
     uint256[] public outstandingBidIDs;
@@ -29,10 +35,27 @@ contract Strategy {
     event LogNote(string, uint256);
     event Cancel(uint, ERC20, uint);
 
-   function placePairsTrade(uint256 spread) external {
+    struct order {
+                    uint256 pay_amt;
+                    ERC20 pay_gem;
+                    uint256 buy_amt;
+                    ERC20 buy_gem;
+    }
+
+    constructor(string memory _name, address _bathHouse) public {
+        name = _name;
+        bathHouse = _bathHouse;
+    }
+
+    modifier onlyPairs {
+        require(BathHouse(bathHouse).isApprovedPair(msg.sender) == true, "not an approved pair");
+        _;
+    }
+
+   function placePairsTrade(uint256 spread, address underlyingAsset, address bathAssetAddress, address underlyingQuote, address bathQuoteAddress) internal {
         require(spread < 100);
         require(spread > 0);
-
+        // uint spread = _spread;
         // 1. Cancel Outstanding Orders
         //to do: make this good
         require(outstandingPairIDs.length < 10, "too many outstanding pairs");
@@ -81,74 +104,89 @@ contract Strategy {
             }
         }
 
-        // 2. determine Midpoint
-        //add sanity check ?
-        uint256 bestAskID =
-            RubiconMarket(RubiconMarketAddress).getBestOffer(
-                ERC20(underlyingAsset),
-                ERC20(underlyingQuote)
-            );
-        emit LogNote("bestAskId", bestAskID);
-        (uint256 pay_amt0, ERC20 pay_gem0, uint256 buy_amt0, ERC20 buy_gem0) =
-            RubiconMarket(RubiconMarketAddress).getOffer(bestAskID);
 
-        // If no orders in the orderbook then throw
-        if (
-            pay_gem0 == ERC20(0) &&
-            pay_amt0 == 0 &&
-            buy_gem0 == ERC20(0) &&
-            buy_amt0 == 0
-        ) {
-            emit LogTrade(pay_amt0, pay_gem0, buy_amt0, buy_gem0);
-            return;
-        }
+        // 3. Place trades at a fixed spread of the midpoint
+        (order memory bestAsk, order memory bestBid) = getNewOrders(underlyingAsset, underlyingQuote);
+
+        placeTrades(bathAssetAddress, bathQuoteAddress, bestAsk, bestBid);
+        
+    }
+
+    function getNewOrders(address underlyingAsset, address underlyingQuote) internal returns (order memory,  order memory) {
+         // 2. determine Midpoint TODO: extrapolate
+        //add sanity check ?
+        ERC20 ERC20underlyingAsset = ERC20(underlyingAsset);
+        ERC20 ERC20underlyingQuote = ERC20(underlyingQuote);
+
+        (uint256 pay_amt0, ERC20 pay_gem0, uint256 buy_amt0, ERC20 buy_gem0) =
+            RubiconMarket(RubiconMarketAddress).getOffer(RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20underlyingAsset,
+                ERC20underlyingQuote
+            ));
+        
+        order memory bestAsk = order( pay_amt0,  pay_gem0,  buy_amt0,  buy_gem0);
+
         require(
-            pay_gem0 != ERC20(0) &&
-                pay_amt0 != 0 &&
-                buy_gem0 != ERC20(0) &&
-                buy_amt0 != 0,
+            bestAsk.pay_gem != ERC20(0) &&
+                bestAsk.pay_amt != 0 &&
+                bestAsk.buy_gem != ERC20(0) &&
+                bestAsk.buy_amt != 0,
             "empty order ask"
         );
 
-        // 3. Place trades at a fixed spread of the midpoint
-        uint256 newAskAmt = pay_amt0 + ((spread * pay_amt0) / 1e20);
-        uint256 newAskID =
-            BathToken(bathAssetAddress).placeOffer(
-                newAskAmt,
-                pay_gem0,
-                buy_amt0,
-                buy_gem0
-            ); // TODO: SafeMath?
-        emit LogTrade(newAskAmt, pay_gem0, buy_amt0, buy_gem0);
-        // outstandingAskIDs.push(newAskID);
-
-        uint256 bestBidID =
-            RubiconMarket(RubiconMarketAddress).getBestOffer(
-                ERC20(underlyingQuote),
-                ERC20(underlyingAsset)
-            );
-        emit LogNote("bestBidId", bestAskID);
-
         (uint256 pay_amt1, ERC20 pay_gem1, uint256 buy_amt1, ERC20 buy_gem1) =
-            RubiconMarket(RubiconMarketAddress).getOffer(bestBidID);
+            RubiconMarket(RubiconMarketAddress).getOffer( RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20underlyingQuote,
+                ERC20underlyingAsset
+            ));
+        order memory bestBid  = order( pay_amt1,  pay_gem1,  buy_amt1,  buy_gem1);
 
-        require(
-            pay_gem1 != ERC20(0) &&
-                pay_amt1 != 0 &&
-                buy_gem1 != ERC20(0) &&
-                buy_amt1 != 0,
+       require(
+            bestBid.pay_gem != ERC20(0) &&
+                bestBid.pay_amt != 0 &&
+                bestBid.buy_gem != ERC20(0) &&
+                bestBid.buy_amt != 0,
             "empty order bid"
         );
 
-        uint256 newBidAmt = pay_amt1 - ((spread * pay_amt1) / 1e20);
+        uint256 newBidAmt = bestBid.pay_amt - ((5 * bestBid.pay_amt) / 1e20);
+        uint256 newAskAmt = bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
+
+        bestAsk.pay_amt = newAskAmt;
+        bestBid.pay_amt = newBidAmt;
+        return (bestAsk, bestBid);
+    }
+
+    // function placeTrades(address bathAssetAddress,address bathQuoteAddress, 
+    //      order memory ask, order memory bid) internal returns (bool) {
+
+    // }
+    function placeTrades(address bathAssetAddress,address bathQuoteAddress, 
+        order memory ask, order memory bid) internal returns (bool) {
+        uint256 newAskID =
+            BathToken(bathAssetAddress).placeOffer(
+                ask.pay_amt,
+                ask.pay_gem,
+                ask.buy_amt,
+                ask.buy_gem
+            ); // TODO: SafeMath?
+        emit LogTrade(ask.pay_amt,
+                ask.pay_gem,
+                ask.buy_amt,
+                ask.buy_gem);
+        // outstandingAskIDs.push(newAskID);
+
         uint256 newBidID =
             BathToken(bathQuoteAddress).placeOffer(
-                newBidAmt,
-                pay_gem1,
-                buy_amt1,
-                buy_gem1
+                bid.pay_amt,
+                bid.pay_gem,
+                bid.buy_amt,
+                bid.buy_gem
             ); // TODO: SafeMath?
-        emit LogTrade(newBidAmt, buy_gem1, pay_amt1, pay_gem1);
+        emit LogTrade(bid.pay_amt,
+                bid.pay_gem,
+                bid.buy_amt,
+                bid.buy_gem);
         // outstandingBidIDs.push(newBidID);
         outstandingPairIDs.push([newAskID, newBidID]);
     }
@@ -158,12 +196,13 @@ contract Strategy {
         // get the balance of each pair and determine inventory levels
     }
 
-    function executeStrategy() external {
+    function execute(address underlyingAsset, address bathAssetAddress, address underlyingQuote, address bathQuoteAddress) onlyPairs external {
         // main function to chain the actions of a single strategic market making transaction
 
-        // placePairsTrade()
+        placePairsTrade(5, underlyingAsset, bathAssetAddress, underlyingQuote, bathQuoteAddress);
 
-        // manageInventory()
+        // This should simply be dynamic placing of pairs based on balances
+        // manageInventory();
     }
 
 }

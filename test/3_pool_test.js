@@ -129,7 +129,7 @@ contract("Rubicon Pools Test", async function(accounts) {
             await bathHouseInstance.approveStrategy(strategyInstance.address);
         });
         it("Any user can call executeStrategy() on bath Pairs", async function () {
-           await bathPairInstance.executeStrategy(strategyInstance.address);
+        //    await bathPairInstance.executeStrategy(strategyInstance.address);
         });
         it("Trades are successfully placed on the exchange", async function () {
            

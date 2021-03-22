@@ -14,6 +14,7 @@ contract BathHouse {
 
     // List of approved strategies
     mapping(address => bool) approvedStrategies;
+    mapping(address => bool) approvedPairs;
 
     constructor(address market) public {
         admin = msg.sender;
@@ -66,6 +67,8 @@ contract BathHouse {
             RubiconMarketAddress
         );
         getPair[asset][quote] = newPair;
+
+        approvePair(newPair);
         return newPair;
     }
 
@@ -86,8 +89,26 @@ contract BathHouse {
         }
     }
 
-    function approveStrategy(address strategy) external onlyAdmin returns (bool) {
+    function approveStrategy(address strategy)
+        external
+        onlyAdmin
+        returns (bool)
+    {
         // TODO: require check that strategy adheres to IStrategy;
         approvedStrategies[strategy] = true;
-    }   
+    }
+
+    function isApprovedPair(address pair) external returns (bool) {
+        // TODO: Check that this works as intended
+        if (approvedPairs[pair] == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function approvePair(address pair) internal returns (bool) {
+        // TODO: require check that strategy adheres to IStrategy;
+        approvedPairs[pair] = true;
+    }
 }

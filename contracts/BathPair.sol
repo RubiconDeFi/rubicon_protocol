@@ -24,12 +24,12 @@ contract BathPair {
     uint256[2][] public outstandingPairIDs;
 
     // Risk Parameters
-    uint public reserveRatio; // proportion of the pool that must remain present in the pair
-    uint public maximumOrderSize; // max order size that can be places in a single order
+    uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
+    uint256 public maximumOrderSize; // max order size that can be places in a single order
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
-    event Cancel(uint, ERC20, uint);
+    event Cancel(uint256, ERC20, uint256);
 
     constructor() public {
         bathHouse = msg.sender;
@@ -43,7 +43,10 @@ contract BathPair {
     }
 
     modifier onlyApprovedStrategy(address targetStrategy) {
-        require(BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true, "not an approved sender");
+        require(
+            BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true,
+            "not an approved sender"
+        );
         _;
     }
 
@@ -64,7 +67,8 @@ contract BathPair {
             new BathToken(
                 string(abi.encodePacked("bath", (assetName))),
                 asset,
-                market
+                market,
+                bathHouse
             );
         bathAssetAddress = address(bathAsset);
 
@@ -72,7 +76,8 @@ contract BathPair {
             new BathToken(
                 string(abi.encodePacked("bath", (quoteName))),
                 quote,
-                market
+                market,
+                bathHouse
             );
         bathQuoteAddress = address(bathQuote);
 
@@ -129,9 +134,16 @@ contract BathPair {
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
     }
 
-    function executeStrategy(address targetStrategy) onlyApprovedStrategy(targetStrategy) external  {
+    function executeStrategy(address targetStrategy)
+        external
+        onlyApprovedStrategy(targetStrategy)
+    {
         // perform crucial checks to ensure that reserve ratio is maintained...
-
+        Strategy(targetStrategy).execute(
+            underlyingAsset,
+            bathAssetAddress,
+            underlyingQuote,
+            bathQuoteAddress
+        );
     }
- 
 }
