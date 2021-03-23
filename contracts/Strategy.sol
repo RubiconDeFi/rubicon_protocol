@@ -8,6 +8,7 @@ import "./BathToken.sol";
 import "./RubiconMarket.sol";
 import "./peripheral_contracts/SafeMath.sol";
 import "./BathHouse.sol";
+import "./peripheral_contracts/ABDKMath64x64.sol";
 
 contract Strategy {
     string public name;
@@ -44,7 +45,11 @@ contract Strategy {
     order private newAsk;
     order private newBid;
 
-    constructor(string memory _name, address _bathHouse, address _rubiconMarket) public {
+    constructor(
+        string memory _name,
+        address _bathHouse,
+        address _rubiconMarket
+    ) public {
         name = _name;
         bathHouse = _bathHouse;
         RubiconMarketAddress = _rubiconMarket;
@@ -69,21 +74,34 @@ contract Strategy {
     ) internal {
         // 2. Calculate new bid and ask
         // (order memory bestAsk, order memory bestBid) =
-        getNewOrders(underlyingAsset, underlyingQuote);
+        getNewOrders(
+            underlyingAsset,
+            underlyingQuote,
+            baseAsk,
+            baseBid,
+            bathAssetAddress,
+            bathQuoteAddress
+        );
 
         // 3. place new bid and ask
         placeTrades(bathAssetAddress, bathQuoteAddress, newAsk, newBid);
     }
 
-    function getNewOrders(address underlyingAsset, address underlyingQuote)
-        internal
-        returns (order memory, order memory)
-    {
+    function getNewOrders(
+        address underlyingAsset,
+        address underlyingQuote,
+        uint256 baseAsk,
+        uint256 baseBid,
+        address bathAssetAddress,
+        address bathQuoteAddress
+    ) internal returns (order memory, order memory) {
         // 2. determine Midpoint TODO: clean this...
         ERC20 ERC20underlyingAsset = ERC20(underlyingAsset);
         ERC20 ERC20underlyingQuote = ERC20(underlyingQuote);
 
-        // TODO: empty orders are throwing here...
+        // TODO: implement sizing logic
+        uint256 size = 1;
+
         if (
             RubiconMarket(RubiconMarketAddress).getOfferCount(
                 ERC20underlyingAsset,
@@ -106,6 +124,10 @@ contract Strategy {
             order memory bestAsk =
                 order(pay_amt0, pay_gem0, buy_amt0, buy_gem0);
 
+            // TODO: implement dynamic bid / ask sizing by a function call here
+
+            // order memory optimalAsk = calculateOptimalOrder(bestAsk, true);
+
             uint256 newAskAmt =
                 bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
             bestAsk.pay_amt = newAskAmt;
@@ -113,27 +135,14 @@ contract Strategy {
             newAsk = bestAsk;
         } else {
             order memory bestAsk =
-                order(0, ERC20underlyingAsset, 0, ERC20underlyingQuote);
+                order(
+                    (baseAsk * size),
+                    ERC20underlyingAsset,
+                    1e18,
+                    ERC20underlyingQuote
+                );
             newAsk = bestAsk;
         }
-        // uint256 bestAskId =
-        //     RubiconMarket(RubiconMarketAddress).getBestOffer(
-        //         ERC20underlyingAsset,
-        //         ERC20underlyingQuote
-        //     );
-
-        // (uint256 pay_amt0, ERC20 pay_gem0, uint256 buy_amt0, ERC20 buy_gem0) =
-        //     RubiconMarket(RubiconMarketAddress).getOffer(bestAskId);
-
-        // order memory bestAsk = order(pay_amt0, pay_gem0, buy_amt0, buy_gem0);
-
-        // require(
-        //     bestAsk.pay_gem != ERC20(0) &&
-        //         bestAsk.pay_amt != 0 &&
-        //         bestAsk.buy_gem != ERC20(0) &&
-        //         bestAsk.buy_amt != 0,
-        //     "empty order ask"
-        // );
 
         if (
             RubiconMarket(RubiconMarketAddress).getOfferCount(
@@ -163,22 +172,46 @@ contract Strategy {
             newBid = bestBid;
         } else {
             order memory bestBid =
-                order(0, ERC20underlyingQuote, 0, ERC20underlyingAsset);
+                order(
+                    1e18,
+                    ERC20underlyingQuote,
+                    (baseBid * size),
+                    ERC20underlyingAsset
+                );
             newBid = bestBid;
         }
-
-        // require(
-        //     bestBid.pay_gem != ERC20(0) &&
-        //         bestBid.pay_amt != 0 &&
-        //         bestBid.buy_gem != ERC20(0) &&
-        //         bestBid.buy_amt != 0,
-        //     "empty order bid"
-        // );
-
         return (newAsk, newBid);
     }
 
-    function getOfferInfo(uint256 id) internal returns (order memory) {
+    //info represents the current best for this bid or ask
+    function calculateOptimalOrder(
+        order memory info,
+        bool isAsk,
+        address bathAssetAddress,
+        address bathQuoteAddress
+    ) internal {
+        // orderSize is how many times that the order can divide into the quote...
+        //  --> pay_amt / buy_amt = rate --> askSize or bidSize = pay_amt / rate
+        //  optimal order size is given as:
+        //  --> if (overWeight this asset/quote):
+        //  -->     newAsk/Bid = maxOrderSize * (e**(-0.005*maxOrderSize))
+        //  --> else:
+        //  -->     equals maxOrderSize
+        //  new amt calculation
+
+        //  1. calculate current ratio: (asset balance / quote balance) -> target balance is current rate
+
+        if (isAsk) {
+            uint256 rate = info.pay_amt / info.buy_amt; // verify that no division errors
+            // check if over balanced one way or the other... naively target balances reflective of rate...
+
+            // uint askSize =
+        } else {
+            uint256 rate = info.buy_amt / info.pay_amt;
+        }
+    }
+
+    function getOfferInfo(uint256 id) internal view returns (order memory) {
         (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
             RubiconMarket(RubiconMarketAddress).getOffer(id);
         order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);

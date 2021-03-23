@@ -80,7 +80,7 @@ contract BathHouse {
         return getPair[asset][quote];
     }
 
-    function isApprovedStrat(address strategy) external returns (bool) {
+    function isApprovedStrat(address strategy) external view returns (bool) {
         // TODO: Check that this works as intended
         if (approvedStrategies[strategy] == true) {
             return true;
@@ -98,7 +98,7 @@ contract BathHouse {
         approvedStrategies[strategy] = true;
     }
 
-    function isApprovedPair(address pair) external returns (bool) {
+    function isApprovedPair(address pair) external view returns (bool) {
         // TODO: Check that this works as intended
         if (approvedPairs[pair] == true) {
             return true;
