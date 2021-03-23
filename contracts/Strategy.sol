@@ -64,23 +64,18 @@ contract Strategy {
         address underlyingQuote,
         address bathQuoteAddress
     ) internal {
-        // 1. Cancel Outstanding Orders
-        //to do: make this good
 
-        // 2. Cancel partial fills
-        cancelPartialFills(bathAssetAddress, bathQuoteAddress);
-
-        // 3. Calculate new bid and ask
+        // 2. Calculate new bid and ask
         // (order memory bestAsk, order memory bestBid) =
         getNewOrders(underlyingAsset, underlyingQuote);
 
-        // 4. place new bid and ask
+        // 3. place new bid and ask
         placeTrades(bathAssetAddress, bathQuoteAddress, newAsk, newBid);
     }
 
     function getNewOrders(address underlyingAsset, address underlyingQuote)
         internal
-    // returns (order memory, order memory)
+        // returns (order memory, order memory)
     {
         // 2. determine Midpoint TODO: extrapolate
         //add sanity check ?
@@ -123,7 +118,7 @@ contract Strategy {
             "empty order bid"
         );
 
-        // TODO: build spread support
+        // TODO: build spread support *** new bid/ask calculation *****
         uint256 newBidAmt = bestBid.pay_amt - ((5 * bestBid.pay_amt) / 1e20);
         uint256 newAskAmt = bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
 
@@ -178,7 +173,7 @@ contract Strategy {
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
             order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
             order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
-
+     
             if (
                 (offer1.pay_amt == 0 &&
                     offer1.pay_gem == ERC20(0) &&
@@ -228,9 +223,24 @@ contract Strategy {
         }
     }
 
-    function rebalancePair() external {
+    function rebalancePair(        
+        address underlyingAsset,
+        address bathAssetAddress,
+        address underlyingQuote,
+        address bathQuoteAddress) internal {
         //function to rebalance the descrepencies in bathBalance between the tokens of this pair...
         // get the balance of each pair and determine inventory levels
+        uint bathAssetYield = ERC20(underlyingQuote).balanceOf(bathAssetAddress);
+        uint bathQuoteYield = ERC20(underlyingAsset).balanceOf(bathQuoteAddress);
+
+        if (bathAssetYield > 0 ) {
+            ERC20(underlyingQuote).transferFrom(bathAssetAddress, bathQuoteAddress, bathAssetYield);
+        }
+
+        if (bathQuoteYield > 0 ) {
+            ERC20(underlyingQuote).transferFrom(bathQuoteAddress, bathQuoteAddress, bathQuoteYield);
+        }
+
     }
 
     function execute(
@@ -240,7 +250,11 @@ contract Strategy {
         address bathQuoteAddress
     ) external onlyPairs {
         // main function to chain the actions of a single strategic market making transaction
-
+        
+        // 1. Cancel Outstanding Orders
+        cancelPartialFills(bathAssetAddress, bathQuoteAddress);
+        
+        // 2. Place pairs trade
         placePairsTrade(
             underlyingAsset,
             bathAssetAddress,
@@ -248,7 +262,11 @@ contract Strategy {
             bathQuoteAddress
         );
 
-        // This should simply be dynamic placing of pairs based on balances
-        // manageInventory();
+        // 3. Manage inventory - pass fills to the appropriate bathToken
+        rebalancePair(        
+            underlyingAsset,
+            bathAssetAddress,
+            underlyingQuote,
+            bathQuoteAddress);
     }
 }
