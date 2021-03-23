@@ -1,7 +1,7 @@
 // contract that employs user Bath liquidity to market make and pass yield to users
+/// @author Benjamin Hughes
+/// @notice This represents a Stoikov market-making model designed for Rubicon...
 pragma solidity ^0.5.16;
-
-//Should have an interface that allows for executeStrategy...
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
@@ -10,7 +10,7 @@ import "./peripheral_contracts/SafeMath.sol";
 import "./BathHouse.sol";
 import "./peripheral_contracts/ABDKMath64x64.sol";
 
-contract Strategy {
+contract Strategy  {
     string public name;
 
     address public bathHouse;
@@ -31,8 +31,14 @@ contract Strategy {
     uint256[] public outstandingBidIDs;
     uint256[2][] public outstandingPairIDs;
 
+    // TODO: make variable...
+    int128 public maxAskSize = 1;
+    int128 public maxBidSize = 1;
+
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
+    event LogNote128(string, int128);
+
     event Cancel(uint256, ERC20, uint256);
 
     struct order {
@@ -122,15 +128,18 @@ contract Strategy {
             ) = RubiconMarket(RubiconMarketAddress).getOffer(bestAskId);
 
             order memory bestAsk =
-                order(pay_amt0, pay_gem0, buy_amt0, buy_gem0);
+                order(pay_amt0, pay_gem0, buy_amt0, buy_gem0); ///***** */
+            
+            // ***sets newAsk when implemented***
+            calculateOptimalOrder(bestAsk, true, bathAssetAddress, bathQuoteAddress);
 
             // TODO: implement dynamic bid / ask sizing by a function call here
 
             // order memory optimalAsk = calculateOptimalOrder(bestAsk, true);
 
-            uint256 newAskAmt =
-                bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
-            bestAsk.pay_amt = newAskAmt;
+            // uint256 newAskAmt =
+            //     bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
+            // bestAsk.pay_amt = newAskAmt;
 
             newAsk = bestAsk;
         } else {
@@ -164,10 +173,13 @@ contract Strategy {
             order memory bestBid =
                 order(pay_amt1, pay_gem1, buy_amt1, buy_gem1);
 
-            // new amount
-            uint256 newBidAmt =
-                bestBid.pay_amt - ((5 * bestBid.pay_amt) / 1e20);
-            bestBid.pay_amt = newBidAmt;
+            //sets newBid
+            calculateOptimalOrder(bestBid, false, bathAssetAddress, bathQuoteAddress);
+            
+            // // new amount
+            // uint256 newBidAmt =
+            //     bestBid.pay_amt - ((5 * bestBid.pay_amt) / 1e20);
+            // bestBid.pay_amt = newBidAmt;
 
             newBid = bestBid;
         } else {
@@ -200,14 +212,89 @@ contract Strategy {
         //  new amt calculation
 
         //  1. calculate current ratio: (asset balance / quote balance) -> target balance is current rate
+        //  2. if greater than 1, then scale down Asset/Ask <> if less than 1 then scale down quote/bid
 
+        // int128 ratio = ABDKMath64x64.divu(assetBalance, quoteBalance);
         if (isAsk) {
-            uint256 rate = info.pay_amt / info.buy_amt; // verify that no division errors
+            uint256 assetBalance = info.pay_gem.balanceOf(bathAssetAddress);
+            uint256 quoteBalance = info.buy_gem.balanceOf(bathQuoteAddress);
+
+            int128 balances = ABDKMath64x64.divu(assetBalance, quoteBalance);
+            // emit LogNote128("calculated pair ratio", (balances));
+
+            int128 rate = ABDKMath64x64.divu(info.pay_amt, info.buy_amt);
+            // emit LogNote128("calculated market rate", (rate));
+            balances = balances - 1;
+
+            int128 delta = balances - rate;
+            // emit LogNote128("calculated delta", (balances - rate));
+            if(rate == balances) {
+                //means that inventory management is on-point
+                // optimal order = max order size for ask
+                
+                // new pay_amt = size * rate
+                // TODO: Implement new rate calculation to target Stoikov indifference price
+                order memory newAsk = order(
+                    uint256(maxAskSize * rate),
+                    info.pay_gem, 
+                    uint256(maxAskSize * 1e18),
+                    info.buy_gem
+                );
+                emit LogNote("new pay_amt", uint256((maxAskSize * rate)));
+
+            } else if (rate > balances) {
+                // delta is negative here...
+
+                //means that asset is low --> ask at dynamic scaled down ask
+                // 184467440737095516 vs. 18446744073709551616
+                // 18446744073709551614
+                // 18451744751397137232
+                order memory newAsk = order(
+                    uint256((maxAskSize * rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))),
+                    info.pay_gem,
+                    uint256(maxAskSize), 
+                    info.buy_gem
+                );
+                emit LogNote("base pay_amt", uint256((maxAskSize * rate)));
+
+                emit LogNote("dynamic pay_amt", uint256((maxAskSize* rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))));
+                emit LogNote128("input to exp calc", ABDKMath64x64.div(-1, 200));
+
+                emit LogNote128("exp calc", ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200)));
+                emit LogNote("new value", uint256(ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200))));
+
+                // base 184467440737095516
+                // calc 18441744751274689903
+
+                // 184467440737095516 --> 447650840883988354326
+                // 18354740553814661001 --> 114319607222052642492417
+
+            } else {
+                //means that asset is high --> ask at mas ask
+
+            }
+
+            // uint256 rate = info.pay_amt / info.buy_amt; // verify that no division errors
             // check if over balanced one way or the other... naively target balances reflective of rate...
 
-            // uint askSize =
+            // setNewAsk with updated value
+            // newAsk = 
         } else {
-            uint256 rate = info.buy_amt / info.pay_amt;
+            uint256 assetBalance = info.buy_gem.balanceOf(bathAssetAddress);
+            uint256 quoteBalance = info.pay_gem.balanceOf(bathQuoteAddress);
+            int128 balances = ABDKMath64x64.divu(assetBalance, quoteBalance);
+            int128 rate = ABDKMath64x64.divu(info.pay_amt, info.buy_amt);
+
+            if(rate == balances) {
+                //means that inventory management is on-point
+                // optimal order = max order size for bid
+            } else if (rate > balances) {
+                //means that quite is high --> bid at max ask
+            } else {
+                //means that asset is high --> bid at scaled down bid
+
+            }
+
         }
     }
 

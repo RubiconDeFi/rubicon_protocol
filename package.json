@@ -28,6 +28,7 @@
     "compile:ovm": "cd ovm && truffle compile --all",
     "migrate:ovm": "printf 'Ensure that ganache is configured as: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize \n' && cd ovm && truffle compile --all && truffle migrate --reset",
     "test:pools": "truffle test ./test/3_pool_test.js --network pools",
+    "test:poolsE": "truffle test ./test/3_pool_test.js --network pools --show-events",
     "test:protocol": "truffle test ./test/1_migration_test.js && truffle test ./test/2_RBCN_distribution_and_trade_tests.js",
     "clean": "npx prettier --write 'contracts/**/*.sol'"
   }
