@@ -20,7 +20,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy(RubiconMarket, 14210121600, false, accounts[0]).then(function() {
       // deployer.deploy(BathToken).then(function() {
         return deployer.deploy(BathHouse, RubiconMarket.address).then(function() {
-          return deployer.deploy(Strategy, "Stoikov Market Making", BathHouse.address);
+          return deployer.deploy(Strategy, "Stoikov Market Making", BathHouse.address, RubiconMarket.address);
         }); //, /* Testing only */ WETH.address);
       // });
     });
