@@ -64,7 +64,8 @@ contract BathHouse {
             assetName,
             quote,
             quoteName,
-            RubiconMarketAddress
+            RubiconMarketAddress,
+            90
         );
         getPair[asset][quote] = newPair;
 

@@ -127,11 +127,11 @@ contract Strategy  {
                 ERC20 buy_gem0
             ) = RubiconMarket(RubiconMarketAddress).getOffer(bestAskId);
 
-            order memory bestAsk =
+            order memory bestInBook =
                 order(pay_amt0, pay_gem0, buy_amt0, buy_gem0); ///***** */
             
             // ***sets newAsk when implemented***
-            calculateOptimalOrder(bestAsk, true, bathAssetAddress, bathQuoteAddress);
+            // calculateOptimalOrder(bestInBook, true, bathAssetAddress, bathQuoteAddress);
 
             // TODO: implement dynamic bid / ask sizing by a function call here
 
@@ -140,8 +140,8 @@ contract Strategy  {
             // uint256 newAskAmt =
             //     bestAsk.pay_amt + ((5 * bestAsk.pay_amt) / 1e20);
             // bestAsk.pay_amt = newAskAmt;
-
-            newAsk = bestAsk;
+            newAsk = bestInBook;
+            // naively bid at current rate
         } else {
             order memory bestAsk =
                 order(
@@ -170,6 +170,8 @@ contract Strategy  {
                 uint256 buy_amt1,
                 ERC20 buy_gem1
             ) = RubiconMarket(RubiconMarketAddress).getOffer(bestBidId);
+
+            // Naively bid the same as current rate
             order memory bestBid =
                 order(pay_amt1, pay_gem1, buy_amt1, buy_gem1);
 
@@ -224,9 +226,9 @@ contract Strategy  {
 
             int128 rate = ABDKMath64x64.divu(info.pay_amt, info.buy_amt);
             // emit LogNote128("calculated market rate", (rate));
-            balances = balances - 1;
+            // balances = balances - 1;
 
-            int128 delta = balances - rate;
+            // int128 delta = balances - rate;
             // emit LogNote128("calculated delta", (balances - rate));
             if(rate == balances) {
                 //means that inventory management is on-point
@@ -234,51 +236,68 @@ contract Strategy  {
                 
                 // new pay_amt = size * rate
                 // TODO: Implement new rate calculation to target Stoikov indifference price
-                order memory newAsk = order(
+                order memory newAskUpdate = order(
+                    uint256(maxAskSize * 1e15),
+                    info.pay_gem, 
+                    uint256(maxAskSize * rate),
+                    info.buy_gem
+                );
+                emit LogNote("new pay_amt", uint256((maxAskSize * rate)));
+                newAsk = newAskUpdate;
+
+
+            } else if (rate > balances) {
+                // delta is negative here...
+                order memory newAskUpdate = order(
                     uint256(maxAskSize * rate),
                     info.pay_gem, 
                     uint256(maxAskSize * 1e18),
                     info.buy_gem
                 );
-                emit LogNote("new pay_amt", uint256((maxAskSize * rate)));
-
-            } else if (rate > balances) {
-                // delta is negative here...
 
                 //means that asset is low --> ask at dynamic scaled down ask
                 // 184467440737095516 vs. 18446744073709551616
                 // 18446744073709551614
                 // 18451744751397137232
-                order memory newAsk = order(
-                    uint256((maxAskSize * rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))),
-                    info.pay_gem,
-                    uint256(maxAskSize), 
-                    info.buy_gem
-                );
-                emit LogNote("base pay_amt", uint256((maxAskSize * rate)));
 
-                emit LogNote("dynamic pay_amt", uint256((maxAskSize* rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))));
-                emit LogNote128("input to exp calc", ABDKMath64x64.div(-1, 200));
+                // Dynamic attempy:
+                // order memory newAsk = order(
+                //     uint256((maxAskSize * rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))),
+                //     info.pay_gem,
+                //     uint256(maxAskSize), 
+                //     info.buy_gem
+                // );
+                // emit LogNote("base pay_amt", uint256((maxAskSize * rate)));
 
-                emit LogNote128("exp calc", ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200)));
-                emit LogNote("new value", uint256(ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200))));
+                // emit LogNote("dynamic pay_amt", uint256((maxAskSize* rate) * ABDKMath64x64.exp(ABDKMath64x64.mul(ABDKMath64x64.div(-1, 200), delta))));
+                // emit LogNote128("input to exp calc", ABDKMath64x64.div(-1, 200));
+
+                // emit LogNote128("exp calc", ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200)));
+                // emit LogNote("new value", uint256(ABDKMath64x64.exp(ABDKMath64x64.div(-1, 200))));
 
                 // base 184467440737095516
                 // calc 18441744751274689903
 
                 // 184467440737095516 --> 447650840883988354326
                 // 18354740553814661001 --> 114319607222052642492417
+                newAsk = newAskUpdate;
+
 
             } else {
                 //means that asset is high --> ask at mas ask
-
+                order memory newAskUpdate = order(
+                    uint256(maxAskSize * rate),
+                    info.pay_gem, 
+                    uint256(maxAskSize * 1e18),
+                    info.buy_gem
+                );
+                newAsk = newAskUpdate;
             }
 
             // uint256 rate = info.pay_amt / info.buy_amt; // verify that no division errors
             // check if over balanced one way or the other... naively target balances reflective of rate...
 
             // setNewAsk with updated value
-            // newAsk = 
         } else {
             uint256 assetBalance = info.buy_gem.balanceOf(bathAssetAddress);
             uint256 quoteBalance = info.pay_gem.balanceOf(bathQuoteAddress);
@@ -295,6 +314,7 @@ contract Strategy  {
 
             }
 
+            // bestBid = newBid;
         }
     }
 

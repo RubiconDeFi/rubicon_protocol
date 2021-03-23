@@ -42,6 +42,14 @@ contract BathPair {
         _;
     }
 
+    modifier enforceReserveRatio {
+        require((BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingAsset).balanceOf(bathAssetAddress));
+        require((BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
+        _;
+        require((BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingAsset).balanceOf(bathAssetAddress));
+        require((BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
+    }
+
     modifier onlyApprovedStrategy(address targetStrategy) {
         require(
             BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true,
@@ -56,9 +64,14 @@ contract BathPair {
         string calldata assetName,
         address quote,
         string calldata quoteName,
-        address market
+        address market,
+        uint _reserveRatio
     ) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
+        require(_reserveRatio <= 100);
+        require(_reserveRatio > 0);
+        reserveRatio = _reserveRatio;
+
         underlyingAsset = asset;
         underlyingQuote = quote;
 
@@ -136,14 +149,18 @@ contract BathPair {
 
     function executeStrategy(address targetStrategy)
         external
-        onlyApprovedStrategy(targetStrategy)
-    {
-        // perform crucial checks to ensure that reserve ratio is maintained...
+        onlyApprovedStrategy(targetStrategy) enforceReserveRatio
+    {   
+
         Strategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,
             bathQuoteAddress
         );
+
+        // Return settled trades to the appropriate bathToken
+        require(IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0, "yield not correctly rebalanced");
+        require(IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0, "yield not correctly rebalanced");
     }
 }
