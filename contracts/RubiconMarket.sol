@@ -561,6 +561,7 @@ contract MatchingEvents {
     event LogSortedOffer(uint256 id);
     event LogInsert(address keeper, uint256 id);
     event LogDelete(address keeper, uint256 id);
+    event LogMatch(uint id, uint256 amount);
 }
 
 /// @notice The core Rubicon Market smart contract
@@ -1131,6 +1132,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
             // ^ The `rounding` parameter is a compromise borne of a couple days
             // of discussion.
             buy(best_maker_id, min(m_pay_amt, t_buy_amt));
+            emit LogMatch(id, min(m_pay_amt, t_buy_amt));
             t_buy_amt_old = t_buy_amt;
             t_buy_amt = sub(t_buy_amt, min(m_pay_amt, t_buy_amt));
             t_pay_amt = mul(t_buy_amt, t_pay_amt) / t_buy_amt_old;

@@ -135,11 +135,6 @@ contract("Rubicon Pools Test", async function(accounts) {
             // is presently just bidding and asking at market rate
             await bathPairInstance.executeStrategy(strategyInstance.address);
         });
-        it("new lp trades are on the exchange", async function () {
-            // ... orders being placed by Pools are filling before this... bidding at an auto-fill...?
-           assert.equal((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString(), "2");
-           assert.equal((await rubiconMarketInstance.getOfferCount(DAIInstance.address, WETHInstance.address)).toString(), "2");
-        });
         it("Takers can fill trades and a partial fill is updated after executeStrategy()", async function () {
            
         });
