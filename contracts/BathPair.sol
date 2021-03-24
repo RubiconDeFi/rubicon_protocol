@@ -81,7 +81,8 @@ contract BathPair {
                 string(abi.encodePacked("bath", (assetName))),
                 asset,
                 market,
-                bathHouse
+                bathHouse,
+                quote
             );
         bathAssetAddress = address(bathAsset);
 
@@ -90,7 +91,8 @@ contract BathPair {
                 string(abi.encodePacked("bath", (quoteName))),
                 quote,
                 market,
-                bathHouse
+                bathHouse,
+                asset
             );
         bathQuoteAddress = address(bathQuote);
 
@@ -147,6 +149,24 @@ contract BathPair {
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
     }
 
+    function rebalancePair(
+    ) internal {
+        //function to rebalance the descrepencies in bathBalance between the tokens of this pair...
+        // get the balance of each pair and determine inventory levels
+        uint256 bathAssetYield =
+            ERC20(underlyingQuote).balanceOf(bathAssetAddress);
+        uint256 bathQuoteYield =
+            ERC20(underlyingAsset).balanceOf(bathQuoteAddress);
+
+        if (bathAssetYield > 0) {
+            BathToken(bathAssetAddress).rebalance(bathQuoteAddress);
+        }
+
+        if (bathQuoteYield > 0) {
+            BathToken(bathQuoteAddress).rebalance(bathAssetAddress);
+        }
+    }
+
     function executeStrategy(address targetStrategy)
         external
         onlyApprovedStrategy(targetStrategy) enforceReserveRatio
@@ -159,6 +179,9 @@ contract BathPair {
             bathQuoteAddress
         );
 
+        // Return any filled yield to the appropriate bathToken
+        rebalancePair();
+        
         // Return settled trades to the appropriate bathToken
         require(IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0, "yield not correctly rebalanced");
         require(IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0, "yield not correctly rebalanced");

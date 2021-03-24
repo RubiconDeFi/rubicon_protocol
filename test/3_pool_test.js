@@ -95,13 +95,13 @@ contract("Rubicon Pools Test", async function(accounts) {
     // Test Market making functionality:
     describe("Liquidity Providing Tests", async function() {
         it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
-            await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
-            await WETHInstance.approve(bathPairInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});
+            await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((10).toString())})
+            await WETHInstance.approve(bathPairInstance.address, web3.utils.toWei((10).toString()), {from: accounts[1]});
             
-            await bathPairInstance.deposit(WETHInstance.address,  web3.utils.toWei((1).toString()), DAIInstance.address, 0, {from: accounts[1]});
-            assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((1).toString()));            
+            await bathPairInstance.deposit(WETHInstance.address,  web3.utils.toWei((10).toString()), DAIInstance.address, 0, {from: accounts[1]});
+            assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((10).toString()));            
         });
-        it("User can deposit quote funds with custom weights and receive bathTokens", async function() {
+        it("Users can deposit quote funds with custom weights and receive bathTokens", async function() {
             await DAIInstance.faucet({from: accounts[2]});
             await DAIInstance.approve(bathPairInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
             
@@ -112,14 +112,14 @@ contract("Rubicon Pools Test", async function(accounts) {
            
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
-            await rubiconMarketInstance.offer(web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address, web3.utils.toWei((10).toString(), "ether"), DAIInstance.address, 0, {from: accounts[3]});        
+            await rubiconMarketInstance.offer(web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address, web3.utils.toWei((5).toString(), "ether"), DAIInstance.address, 0, {from: accounts[3]});        
             
             // To trigger faucet again:
             // helper.advanceTimeAndBlock(8700);
             await DAIInstance.faucet({from: accounts[4]});
             await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((70).toString()), {from: accounts[4]});
             // logIndented(await rubiconMarketInstance.AqueductDistributionLive());
-            await rubiconMarketInstance.offer( web3.utils.toWei((8).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
+            await rubiconMarketInstance.offer( web3.utils.toWei((4).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
         it("Can initialize an approved strategy", async function () {
             // await bathPairInstance.executeStrategy(10);
@@ -135,8 +135,18 @@ contract("Rubicon Pools Test", async function(accounts) {
             // is presently just bidding and asking at market rate
             await bathPairInstance.executeStrategy(strategyInstance.address);
         });
-        it("Takers can fill trades and a partial fill is updated after executeStrategy()", async function () {
-           
+        it("Taker can fill part of trade", async function () {
+            // Fill part of the pair trade --> fill the ask
+            await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((1).toString())});
+            await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((1).toString()), {from: accounts[5]});
+
+            await rubiconMarketInstance.buy(4, web3.utils.toWei((0.1).toString()), { from: accounts[5] });
+        });
+        it("Partial fill is correctly cancelled and replaced", async function () {
+            await bathPairInstance.executeStrategy(strategyInstance.address);
+            logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
+
+
         });
         it("Funds are correctly returned to bathTokens", async function () {
 

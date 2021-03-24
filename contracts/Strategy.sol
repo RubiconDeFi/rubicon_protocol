@@ -38,6 +38,7 @@ contract Strategy  {
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event LogNote128(string, int128);
+    event BothFilled();
 
     event Cancel(uint256, ERC20, uint256);
 
@@ -408,37 +409,9 @@ contract Strategy  {
                     offer2.buy_gem != ERC20(0))
             ) {
                 delete outstandingPairIDs[x];
+                emit BothFilled();
+
             }
-        }
-    }
-
-    function rebalancePair(
-        address underlyingAsset,
-        address bathAssetAddress,
-        address underlyingQuote,
-        address bathQuoteAddress
-    ) internal {
-        //function to rebalance the descrepencies in bathBalance between the tokens of this pair...
-        // get the balance of each pair and determine inventory levels
-        uint256 bathAssetYield =
-            ERC20(underlyingQuote).balanceOf(bathAssetAddress);
-        uint256 bathQuoteYield =
-            ERC20(underlyingAsset).balanceOf(bathQuoteAddress);
-
-        if (bathAssetYield > 0) {
-            ERC20(underlyingQuote).transferFrom(
-                bathAssetAddress,
-                bathQuoteAddress,
-                bathAssetYield
-            );
-        }
-
-        if (bathQuoteYield > 0) {
-            ERC20(underlyingQuote).transferFrom(
-                bathQuoteAddress,
-                bathQuoteAddress,
-                bathQuoteYield
-            );
         }
     }
 
@@ -463,14 +436,6 @@ contract Strategy  {
             50
             // baseAsk,
             // baseBid
-        );
-
-        // 3. Manage inventory - pass fills to the appropriate bathToken
-        rebalancePair(
-            underlyingAsset,
-            bathAssetAddress,
-            underlyingQuote,
-            bathQuoteAddress
         );
     }
 }
