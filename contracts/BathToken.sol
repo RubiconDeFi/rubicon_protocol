@@ -88,7 +88,8 @@ contract BathToken is IBathToken {
         _;
     }
 
-    function cancel(uint256 id) external onlyPair {
+    // Should this be auth'd to pair or strategy
+    function cancel(uint256 id) external onlyApprovedStrategy {
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 

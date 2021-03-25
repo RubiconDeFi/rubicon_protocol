@@ -37,6 +37,7 @@ contract Strategy  {
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
+    event LogAddress(string, ERC20);
     event LogNote128(string, int128);
     event BothFilled();
 
@@ -358,6 +359,7 @@ contract Strategy  {
         address bathAssetAddress,
         address bathQuoteAddress
     ) internal {
+        // TODO: remove this due to revert at Pair level?
         require(outstandingPairIDs.length < 10, "too many outstanding pairs");
 
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
@@ -374,7 +376,7 @@ contract Strategy  {
                     offer2.buy_amt != 0 &&
                     offer2.buy_gem != ERC20(0))
             ) {
-                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][0]);
+                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
                 emit Cancel(
                     outstandingPairIDs[x][0],
                     offer1.pay_gem,
@@ -391,7 +393,7 @@ contract Strategy  {
                     offer2.buy_amt == 0 &&
                     offer2.buy_gem == ERC20(0))
             ) {
-                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][1]);
+                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
                 emit Cancel(
                     outstandingPairIDs[x][1],
                     offer2.pay_gem,
@@ -409,8 +411,6 @@ contract Strategy  {
                     offer2.buy_gem != ERC20(0))
             ) {
                 delete outstandingPairIDs[x];
-                emit BothFilled();
-
             }
         }
     }
@@ -432,6 +432,7 @@ contract Strategy  {
             bathAssetAddress,
             underlyingQuote,
             bathQuoteAddress,
+            // TODO: fix this:
             52,
             50
             // baseAsk,

@@ -137,16 +137,21 @@ contract("Rubicon Pools Test", async function(accounts) {
         });
         it("Taker can fill part of trade", async function () {
             // Fill part of the pair trade --> fill the ask
-            await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((1).toString())});
-            await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((1).toString()), {from: accounts[5]});
+            // logIndented("what is starting", (await WETHInstance.balanceOf(accounts[5])).toString());
 
-            await rubiconMarketInstance.buy(4, web3.utils.toWei((0.1).toString()), { from: accounts[5] });
+            await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((.1*1.002).toString())});
+            await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((.1*1.002).toString()), {from: accounts[5]});
+            // logIndented("Get Offer:", (await rubiconMarketInstance.getOffer(4)));
+
+            await rubiconMarketInstance.buy(4, web3.utils.toWei((4).toString()), { from: accounts[5] });
+            // logIndented("what is left", (await WETHInstance.balanceOf(accounts[5])).toString());
+            // logIndented("what is earned", (await DAIInstance.balanceOf(accounts[5])).toString());
         });
         it("Partial fill is correctly cancelled and replaced", async function () {
             await bathPairInstance.executeStrategy(strategyInstance.address);
-            logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
-
-
+            // logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
+            // logIndented((await rubiconMarketInstance.getOfferCount(DAIInstance.address ,WETHInstance.address)).toString());
+            // logIndented("anmount bought", web3.utils.toWei((.1).toString()));
         });
         it("Funds are correctly returned to bathTokens", async function () {
 

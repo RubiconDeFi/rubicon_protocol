@@ -207,6 +207,8 @@ contract EventfulMarket {
         address feeTo,
         uint64 timestamp
     );
+
+    event OfferDeleted(uint id);
 }
 
 /// @notice Core trading logic for ERC-20 pairs, an orderbook, and transacting of tokens
@@ -381,6 +383,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
 
         if (offers[id].pay_amt == 0) {
             delete offers[id];
+            emit OfferDeleted(id);
         }
 
         return true;
