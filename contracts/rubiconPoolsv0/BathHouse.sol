@@ -4,7 +4,6 @@ import "./BathPair.sol";
 
 contract BathHouse {
     string name = "ETH / USDC Liquidity Pool";
-    string name1 = "BathHouse";
 
     address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;

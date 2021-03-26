@@ -5,10 +5,10 @@ pragma solidity ^0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
-import "./RubiconMarket.sol";
-import "./peripheral_contracts/SafeMath.sol";
+import "../RubiconMarket.sol";
+import "../peripheral_contracts/SafeMath.sol";
 import "./BathHouse.sol";
-import "./peripheral_contracts/ABDKMath64x64.sol";
+import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract Strategy {
     string public name;
