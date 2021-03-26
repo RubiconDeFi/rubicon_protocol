@@ -27,11 +27,9 @@ contract("Rubicon Pools Test", async function(accounts) {
     describe("Deployment", async function() {
         it("is deployed", async function() {
             rubiconMarketInstance = await RubiconMarket.deployed();
-            // RBCNInstance = await RBCN.deployed();
             bathHouseInstance = await BathHouse.deployed();
             DAIInstance = await DAI.deployed();
             WETHInstance = await WETH.deployed();
-            // bathTokenInstance = await BathToken.deployed();
         });
     });
 
@@ -55,8 +53,6 @@ contract("Rubicon Pools Test", async function(accounts) {
 
             assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
             assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);
-
-            // logIndented("asset bath token: ", await BathPair.at(newPair).then((contract) => contract.bathAssetAddress()));
         });
         it("bath tokens have the right name", async function() {
             assert.equal(await bathAssetInstance.symbol(), "bathWETH");
@@ -94,6 +90,12 @@ contract("Rubicon Pools Test", async function(accounts) {
 
     // Test Market making functionality:
     describe("Liquidity Providing Tests", async function() {
+        // Bid and ask made by Pools throughout the test
+        const askNumerator = web3.utils.toWei((0.1).toString()); 
+        const askDenominator = web3.utils.toWei((5).toString());
+        const bidNumerator = web3.utils.toWei((4).toString());
+        const bidDenominator = web3.utils.toWei((0.1).toString());
+
         it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
             await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((10).toString())})
             await WETHInstance.approve(bathPairInstance.address, web3.utils.toWei((10).toString()), {from: accounts[1]});
@@ -118,54 +120,28 @@ contract("Rubicon Pools Test", async function(accounts) {
             // helper.advanceTimeAndBlock(8700);
             await DAIInstance.faucet({from: accounts[4]});
             await DAIInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((70).toString()), {from: accounts[4]});
-            // logIndented(await rubiconMarketInstance.AqueductDistributionLive());
             await rubiconMarketInstance.offer( web3.utils.toWei((4).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
         it("Can initialize an approved strategy", async function () {
-            // await bathPairInstance.executeStrategy(10);
-            // await deployer.deploy(Strategy, {from: accounts[0]});
             strategyInstance = await Strategy.deployed();
 
             await bathHouseInstance.approveStrategy(strategyInstance.address);
         });
         it("Any user can call executeStrategy() on bath Pairs", async function () {
-            // returns 1:
-            // logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
-           
-            // is presently just bidding and asking at market rate
-            const askNumerator = web3.utils.toWei((0.1).toString()); 
-            const askDenominator = web3.utils.toWei((5).toString());
-            const bidNumerator = web3.utils.toWei((4).toString());
-            const bidDenominator = web3.utils.toWei((0.1).toString());
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
         it("Taker can fill part of trade", async function () {
-            // Fill part of the pair trade --> fill the ask
-            // logIndented("what is starting", (await WETHInstance.balanceOf(accounts[5])).toString());
-
             await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((.1*1.002).toString())});
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((.1*1.002).toString()), {from: accounts[5]});
-            // logIndented("Get Offer:", (await rubiconMarketInstance.getOffer(4)));
 
             await rubiconMarketInstance.buy(4, web3.utils.toWei((4).toString()), { from: accounts[5] });
-            // logIndented("what is left", (await WETHInstance.balanceOf(accounts[5])).toString());
-            // logIndented("what is earned", (await DAIInstance.balanceOf(accounts[5])).toString());
         });
         it("Partial fill is correctly cancelled and replaced", async function () {
-            // Cancel emmitted and working!
-            const askNumerator = web3.utils.toWei((0.1).toString()); 
-            const askDenominator = web3.utils.toWei((5).toString());
-            const bidNumerator = web3.utils.toWei((4).toString());
-            const bidDenominator = web3.utils.toWei((0.1).toString());
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-
-            // logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
-            // logIndented((await rubiconMarketInstance.getOfferCount(DAIInstance.address ,WETHInstance.address)).toString());
-            // logIndented("anmount bought", web3.utils.toWei((.1).toString()));
         });
         it("Funds are correctly returned to bathTokens", async function () {
-            // assert.equal((await WETHInstance.balanceOf(bathQuoteAddress.address)).toString(),"0");
-            // assert.equal((await DAIInstance.balanceOf(bathAssetAddress.address)).toString(),"0");
+            assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
+            assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
         });
     });
 });
