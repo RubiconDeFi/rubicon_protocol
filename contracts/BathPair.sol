@@ -43,11 +43,23 @@ contract BathPair {
     }
 
     modifier enforceReserveRatio {
-        require((BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingAsset).balanceOf(bathAssetAddress));
-        require((BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
+        require(
+            (BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <=
+                IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+        );
+        require(
+            (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
+                IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+        );
         _;
-        require((BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingAsset).balanceOf(bathAssetAddress));
-        require((BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
+        require(
+            (BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <=
+                IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+        );
+        require(
+            (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
+                IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+        );
     }
 
     modifier onlyApprovedStrategy(address targetStrategy) {
@@ -65,7 +77,7 @@ contract BathPair {
         address quote,
         string calldata quoteName,
         address market,
-        uint _reserveRatio
+        uint256 _reserveRatio
     ) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
         require(_reserveRatio <= 100);
@@ -114,10 +126,6 @@ contract BathPair {
         IERC20(asset).transferFrom(msg.sender, bathAssetAddress, assetAmount);
         IERC20(quote).transferFrom(msg.sender, bathQuoteAddress, quoteAmount);
 
-        // (bool success0, bytes memory data0) = (asset).delegatecall(abi.encodeWithSignature("approve(address,uint)", bathAssetAddress, assetAmount));
-        // (bool success1, bytes memory data1) = (quote).delegatecall(abi.encodeWithSignature("approve(address,uint)", bathQuoteAddress, quoteAmount));
-
-        // _mint(msg.sender, amount);
         IBathToken(bathAssetAddress).mint(msg.sender, assetAmount);
         IBathToken(bathQuoteAddress).mint(msg.sender, quoteAmount);
 
@@ -149,10 +157,7 @@ contract BathPair {
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
     }
 
-    function rebalancePair(
-    ) internal {
-        //function to rebalance the descrepencies in bathBalance between the tokens of this pair...
-        // get the balance of each pair and determine inventory levels
+    function rebalancePair() internal {
         uint256 bathAssetYield =
             ERC20(underlyingQuote).balanceOf(bathAssetAddress);
         uint256 bathQuoteYield =
@@ -167,23 +172,35 @@ contract BathPair {
         }
     }
 
-    function executeStrategy(address targetStrategy)
-        external
-        onlyApprovedStrategy(targetStrategy) enforceReserveRatio
-    {   
-
+    function executeStrategy(
+        address targetStrategy,
+        uint256 askNumerator, // Quote / Asset
+        uint256 askDenominator, // Asset / Quote
+        uint256 bidNumerator, // size in ASSET
+        uint256 bidDenominator // size in QUOTES
+    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
         Strategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,
-            bathQuoteAddress
+            bathQuoteAddress,
+            askNumerator, // Quote / Asset
+            askDenominator, // Asset / Quote
+            bidNumerator, // size in ASSET
+            bidDenominator // size in QUOTES
         );
 
         // Return any filled yield to the appropriate bathToken
         rebalancePair();
-        
+
         // Return settled trades to the appropriate bathToken
-        require(IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0, "yield not correctly rebalanced");
-        require(IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0, "yield not correctly rebalanced");
+        require(
+            IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0,
+            "yield not correctly rebalanced"
+        );
+        require(
+            IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0,
+            "yield not correctly rebalanced"
+        );
     }
 }

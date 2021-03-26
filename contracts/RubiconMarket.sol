@@ -208,7 +208,7 @@ contract EventfulMarket {
         uint64 timestamp
     );
 
-    event OfferDeleted(uint id);
+    event OfferDeleted(uint256 id);
 }
 
 /// @notice Core trading logic for ERC-20 pairs, an orderbook, and transacting of tokens
@@ -564,7 +564,7 @@ contract MatchingEvents {
     event LogSortedOffer(uint256 id);
     event LogInsert(address keeper, uint256 id);
     event LogDelete(address keeper, uint256 id);
-    event LogMatch(uint id, uint256 amount);
+    event LogMatch(uint256 id, uint256 amount);
 }
 
 /// @notice The core Rubicon Market smart contract

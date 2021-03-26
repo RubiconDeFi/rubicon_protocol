@@ -133,7 +133,11 @@ contract("Rubicon Pools Test", async function(accounts) {
             // logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
            
             // is presently just bidding and asking at market rate
-            await bathPairInstance.executeStrategy(strategyInstance.address);
+            const askNumerator = web3.utils.toWei((0.1).toString()); 
+            const askDenominator = web3.utils.toWei((5).toString());
+            const bidNumerator = web3.utils.toWei((4).toString());
+            const bidDenominator = web3.utils.toWei((0.1).toString());
+            await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
         it("Taker can fill part of trade", async function () {
             // Fill part of the pair trade --> fill the ask
@@ -148,20 +152,25 @@ contract("Rubicon Pools Test", async function(accounts) {
             // logIndented("what is earned", (await DAIInstance.balanceOf(accounts[5])).toString());
         });
         it("Partial fill is correctly cancelled and replaced", async function () {
-            await bathPairInstance.executeStrategy(strategyInstance.address);
+            // Cancel emmitted and working!
+            const askNumerator = web3.utils.toWei((0.1).toString()); 
+            const askDenominator = web3.utils.toWei((5).toString());
+            const bidNumerator = web3.utils.toWei((4).toString());
+            const bidDenominator = web3.utils.toWei((0.1).toString());
+            await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+
             // logIndented((await rubiconMarketInstance.getOfferCount(WETHInstance.address, DAIInstance.address)).toString());
             // logIndented((await rubiconMarketInstance.getOfferCount(DAIInstance.address ,WETHInstance.address)).toString());
             // logIndented("anmount bought", web3.utils.toWei((.1).toString()));
         });
         it("Funds are correctly returned to bathTokens", async function () {
-
-        });
-        it("BathPair has the ability to rebalance settled funds between bathTokens", async function () {
-            
-        });
-        it("RBCN is accrued to the pool..?", async function () {
-            
+            // assert.equal((await WETHInstance.balanceOf(bathQuoteAddress.address)).toString(),"0");
+            // assert.equal((await DAIInstance.balanceOf(bathAssetAddress.address)).toString(),"0");
         });
     });
 });
 
+
+
+// Running list of TO DOs:
+//  - dynamic order sizing

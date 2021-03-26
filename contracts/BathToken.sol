@@ -127,7 +127,10 @@ contract BathToken is IBathToken {
     }
 
     function rebalance(address sisterBath) external onlyPair {
-        IERC20(pairedUnderlying).transfer(sisterBath, IERC20(pairedUnderlying).balanceOf(address(this)));
+        IERC20(pairedUnderlying).transfer(
+            sisterBath,
+            IERC20(pairedUnderlying).balanceOf(address(this))
+        );
     }
 
     function mint(address to, uint256 value) external onlyPair {
