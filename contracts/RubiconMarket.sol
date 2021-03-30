@@ -1300,6 +1300,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         whitelist[addition] = true;
     }
 
+    function removeFromWhitelist(address remove) external auth {
+        whitelist[remove] = false;
+    }
+
     function setAqueductDistributionLive(bool live)
         external
         auth
