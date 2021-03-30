@@ -219,6 +219,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @dev The mapping that makes up the core orderbook of the exchange
     mapping(uint256 => OfferInfo) public offers;
 
+    mapping(address => bool) internal whitelist;
+
     bool locked;
 
     /// @notice This parameter provides the ability for a protocol fee on taker trades
@@ -266,6 +268,12 @@ contract SimpleMarket is EventfulMarket, DSMath {
         locked = true;
         _;
         locked = false;
+    }
+
+    modifier onlyWhitelisted(ERC20 pay_gem, ERC20 buy_gem) {
+        require(isWhitelisted(address(pay_gem)));
+        require(isWhitelisted(address(buy_gem)));
+        _;
     }
 
     function isActive(uint256 id) public view returns (bool active) {
@@ -483,6 +491,10 @@ contract SimpleMarket is EventfulMarket, DSMath {
     // Fee logic
     function getFeeBPS() internal view returns (uint256) {
         return feeBPS;
+    }
+
+    function isWhitelisted(address target) internal view returns (bool) {
+        return whitelist[target];
     }
 }
 
@@ -1281,6 +1293,11 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     function setFeeBPS(uint256 _newFeeBPS) external auth returns (bool) {
         feeBPS = _newFeeBPS;
         return true;
+    }
+
+    // Adding to token whitelist entrypoint
+    function addToWhitelist(address addition) external auth {
+        whitelist[addition] = true;
     }
 
     function setAqueductDistributionLive(bool live)
