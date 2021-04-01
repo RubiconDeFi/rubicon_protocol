@@ -44,7 +44,11 @@ contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
 
     // Check distribution values
     describe("RBCN Distribution", async function() {
-        // Important to set the two below live
+        // Important to set the two below live'
+        it("Rubicon Market has been initialized with the proper variables", async function() {
+            await rubiconMarketInstance.initialize(true, accounts[0]);
+            assert.equal((await rubiconMarketInstance.initialized()), true);
+        });
         it("can set Aqueduct Address on Market", async function() {
             await rubiconMarketInstance.setAqueductAddress(aqueductInstance.address);
             assert.equal(await rubiconMarketInstance.AqueductAddress(), aqueductInstance.address);
@@ -70,6 +74,10 @@ contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
 
     // Test a single trade after X amount of seconds that checks if correct amount of RBCN is deployed
     describe("Trade Test", async function() {
+        it("Admin can whitelist WETH and DAI for trading", async function() {
+            await rubiconMarketInstance.addToWhitelist(WETHInstance.address);
+            await rubiconMarketInstance.addToWhitelist(DAIInstance.address);
+        });
         it("Maker can place an offer to sell 0.5 WETH for 50 DAI", async function() {
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});

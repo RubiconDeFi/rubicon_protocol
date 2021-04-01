@@ -30,6 +30,7 @@ contract BathToken is IBathToken {
     bytes32 public constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     mapping(address => uint256) public nonces;
+    bool public initialized;
 
     event Approval(
         address indexed owner,
@@ -44,13 +45,14 @@ contract BathToken is IBathToken {
         ERC20 buy_gem
     );
 
-    constructor(
+    function initialize(
         string memory bathName,
         address token,
         address market,
         address _bathHouse,
         address _paired
     ) public {
+        require(!initialized);
         pair = msg.sender;
         symbol = bathName;
         underlyingToken = token;
@@ -73,6 +75,7 @@ contract BathToken is IBathToken {
                 address(this)
             )
         );
+        initialized = true;
     }
 
     modifier onlyPair {

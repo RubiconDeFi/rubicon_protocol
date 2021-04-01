@@ -14,8 +14,8 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 const BigNumber = require('bignumber.js');
 
 module.exports = function(deployer, network, accounts) {
-  var admin = "0x501D8Fa75DF1C0023F2798708b1995D6E09Cc58A";
 
+  // Core Assets (Asset / Quote) used in protocol testing
   deployer.deploy(WETH);
   deployer.deploy(DAI, 42);
 
