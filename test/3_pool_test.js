@@ -110,6 +110,10 @@ contract("Rubicon Pools Test", async function(accounts) {
             await bathPairInstance.deposit(WETHInstance.address,  0, DAIInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
             assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
         });
+        it("Admin can whitelist WETH and DAI for trading", async function() {
+            await rubiconMarketInstance.addToWhitelist(WETHInstance.address);
+            await rubiconMarketInstance.addToWhitelist(DAIInstance.address);
+        });
         it("Place a starting pair to clear checks", async function () {
            
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
