@@ -148,7 +148,7 @@ contract Strategy {
                 ask.pay_gem,
                 ask.buy_amt,
                 ask.buy_gem
-            ); 
+            );
         emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
 
         uint256 newBidID =
@@ -157,7 +157,7 @@ contract Strategy {
                 bid.pay_gem,
                 bid.buy_amt,
                 bid.buy_gem
-            ); 
+            );
         emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
         outstandingPairIDs.push([newAskID, newBidID]);
     }

@@ -37,6 +37,7 @@ contract("Rubicon Pools Test", async function(accounts) {
 
         it("Bath House can initialize a new bathToken Pair", async function() {
             // Call initialize on Bath house
+            await bathHouseInstance.initialize(rubiconMarketInstance.address);
             (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI"));
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
@@ -110,12 +111,12 @@ contract("Rubicon Pools Test", async function(accounts) {
             await bathPairInstance.deposit(WETHInstance.address,  0, DAIInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
             assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
         });
-        it("Admin can whitelist WETH and DAI for trading", async function() {
+        it("Admin can initialize and whitelist WETH and DAI for trading", async function() {
+            await rubiconMarketInstance.initialize(false, accounts[0]);
             await rubiconMarketInstance.addToWhitelist(WETHInstance.address);
             await rubiconMarketInstance.addToWhitelist(DAIInstance.address);
         });
         it("Place a starting pair to clear checks", async function () {
-           
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((0.5).toString()), {from: accounts[3]});
             await rubiconMarketInstance.offer(web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address, web3.utils.toWei((5).toString(), "ether"), DAIInstance.address, 0, {from: accounts[3]});        

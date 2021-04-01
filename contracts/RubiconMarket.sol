@@ -433,7 +433,13 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    ) public can_offer synchronized onlyWhitelisted(pay_gem, buy_gem) returns (uint256 id) {
+    )
+        public
+        can_offer
+        synchronized
+        onlyWhitelisted(pay_gem, buy_gem)
+        returns (uint256 id)
+    {
         require(uint128(pay_amt) == pay_amt);
         require(uint128(buy_amt) == buy_amt);
         require(pay_amt > 0);
@@ -587,15 +593,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     /// @dev Below is variable to allow for a proxy-friendly constructor
     bool public initialized;
 
-    function initialize(
-        bool RBCNDist,
-        address _feeTo
-    ) public {
+    function initialize(bool RBCNDist, address _feeTo) public {
         // require(msg.sender == ___deployer____);
         require(!initialized, "contract is already initialized");
         AqueductDistributionLive = RBCNDist;
         feeTo = _feeTo;
-        
+
         owner = msg.sender;
         emit LogSetOwner(msg.sender);
 
