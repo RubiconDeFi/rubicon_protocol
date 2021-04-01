@@ -44,7 +44,11 @@ contract("RBCN Public Allocation and Trade Tests", async function(accounts) {
 
     // Check distribution values
     describe("RBCN Distribution", async function() {
-        // Important to set the two below live
+        // Important to set the two below live'
+        it("Rubicon Market has been initialized with the proper variables", async function() {
+            await rubiconMarketInstance.initialize(true, accounts[0]);
+            assert.equal((await rubiconMarketInstance.initialized()), true);
+        });
         it("can set Aqueduct Address on Market", async function() {
             await rubiconMarketInstance.setAqueductAddress(aqueductInstance.address);
             assert.equal(await rubiconMarketInstance.AqueductAddress(), aqueductInstance.address);

@@ -8,7 +8,7 @@ module.exports = function(deployer, network, accounts) {
 
     //Use below line for single contract deployment
     //truffle migrate -f 3 --network kovan
-    deployer.deploy(RubiconMarket, 14210121600, false, accounts[0]).then(function() {
+    deployer.deploy(RubiconMarket).then(function() {
           return deployer.deploy(BathHouse, RubiconMarket.address).then(function() {
             return deployer.deploy(Strategy, "Stoikov Market Making", BathHouse.address, RubiconMarket.address);
           }); 

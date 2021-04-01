@@ -14,11 +14,6 @@ contract DSAuthEvents {
 contract DSAuth is DSAuthEvents {
     address public owner;
 
-    constructor() public {
-        owner = msg.sender;
-        emit LogSetOwner(msg.sender);
-    }
-
     function setOwner(address owner_) external auth {
         owner = owner_;
         emit LogSetOwner(owner);
@@ -237,13 +232,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 buy_gem;
         address owner;
         uint64 timestamp;
-    }
-
-    constructor(address _feeTo) public {
-        feeTo = _feeTo;
-
-        /// @notice The starting fee on taker trades in basis points
-        feeBPS = 20;
     }
 
     /// @notice Modifier that insures an order exists and is properly in the orderbook
@@ -501,7 +489,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
 /// @notice Expiring market is a Simple Market with a market lifetime.
 /// @dev When the close_time has been reached, offers can only be cancelled (offer and buy will throw).
 contract ExpiringMarket is DSAuth, SimpleMarket {
-    uint64 public close_time;
     bool public stopped;
 
     /// @dev After close_time has been reached, no new offers are allowed.
@@ -524,12 +511,8 @@ contract ExpiringMarket is DSAuth, SimpleMarket {
         _;
     }
 
-    constructor(uint64 _close_time) public {
-        close_time = _close_time;
-    }
-
-    function isClosed() public view returns (bool closed) {
-        return stopped || getTime() > close_time;
+    function isClosed() public pure returns (bool closed) {
+        return false;
     }
 
     function getTime() public view returns (uint64) {
@@ -601,15 +584,24 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     address public AqueductAddress;
     bool public AqueductDistributionLive;
 
-    /// @dev Below is Mainnet WETH Address
-    address public WETHAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    /// @dev Below is variable to allow for a proxy-friendly constructor
+    bool public initialized;
 
-    constructor(
-        uint64 close_time,
+    function initialize(
         bool RBCNDist,
         address _feeTo
-    ) public ExpiringMarket(close_time) SimpleMarket(_feeTo) {
+    ) public {
+        // require(msg.sender == ___deployer____);
+        require(!initialized, "contract is already initialized");
         AqueductDistributionLive = RBCNDist;
+        feeTo = _feeTo;
+        
+        owner = msg.sender;
+        emit LogSetOwner(msg.sender);
+
+        /// @notice The starting fee on taker trades in basis points
+        feeBPS = 20;
+        initialized = true;
     }
 
     // After close, anyone can cancel an offer
@@ -639,34 +631,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
 
     function kill(bytes32 id) external {
         require(cancel(uint256(id)));
-    }
-
-    // Routing function to make a trade where the user is sending Native ETH
-    function offerInETH(
-        uint256 buy_amt, //taker (ask) buy how much
-        ERC20 buy_gem //taker (ask) buy which token
-    ) external payable returns (uint256) {
-        require(!locked, "Reentrancy attempt");
-
-        IWETH(WETHAddress).deposit.value(msg.value)();
-        IWETH(WETHAddress).transfer(msg.sender, msg.value);
-
-        ERC20 WETH = ERC20(WETHAddress);
-
-        if (matchingEnabled) {
-            return _matcho(msg.value, WETH, buy_amt, buy_gem, 0, true);
-        }
-        return super.offer(msg.value, WETH, buy_amt, buy_gem);
-    }
-
-    function buyInETH(uint256 id) external payable can_buy(id) returns (bool) {
-        require(!locked, "Reentrancy attempt");
-        ERC20 WETH = ERC20(WETHAddress);
-        require(offers[id].buy_gem == WETH, "offer you buy must be in WETH");
-        IWETH(WETHAddress).deposit.value(msg.value)();
-        IWETH(WETHAddress).transfer(msg.sender, msg.value);
-
-        super.buy(id, msg.value);
     }
 
     // Make a new offer. Takes funds from the caller into market escrow.

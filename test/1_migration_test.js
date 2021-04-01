@@ -84,11 +84,9 @@ contract("Rubicon Migrations and Governance Test", async function(accounts) {
     });
 
     describe("RubiconMarket", async function() {
-        it("has a market 'close time' in the future", async function() {
-            const close_time = await rubiconMarketInstance.close_time();
-            const curr_time = Math.floor(Date.now() / 1000);
-            // Using .toNumber on BN (big number) is safe here, since Unix time will be lower than MAX_SAFE_INTEGER
-            assert.isAbove(close_time.toNumber(), curr_time);
+        it("has been initialized with the proper variables", async function() {
+            await rubiconMarketInstance.initialize(true, accounts[0]);
+            assert.equal((await rubiconMarketInstance.initialized()), true);
         });
     });
 
