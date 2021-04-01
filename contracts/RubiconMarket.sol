@@ -445,7 +445,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    ) public can_offer synchronized returns (uint256 id) {
+    ) public can_offer synchronized onlyWhitelisted(pay_gem, buy_gem) returns (uint256 id) {
         require(uint128(pay_amt) == pay_amt);
         require(uint128(buy_amt) == buy_amt);
         require(pay_amt > 0);

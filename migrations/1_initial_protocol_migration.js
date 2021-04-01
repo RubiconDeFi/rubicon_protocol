@@ -26,8 +26,7 @@ module.exports = function(deployer, network, accounts) {
     });
   }
   
-  // Mainnet Protocol Migration:
-  
+  // Full Protocol Migration:
   if (network != "pools"){
   var admin = accounts[0];
   const Founder1 = accounts[1];
