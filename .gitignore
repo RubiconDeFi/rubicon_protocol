@@ -8,3 +8,4 @@ build/
 *.csv
 cache/
 artifacts/
+.DS_Store
