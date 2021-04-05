@@ -31,8 +31,12 @@ contract BathPair {
     event LogNote(string, uint256);
     event Cancel(uint256, ERC20, uint256);
 
-    constructor() public {
+    bool public initialized;
+
+    function initialize() public {
+        require(!initialized);
         bathHouse = msg.sender;
+        initialized = true;
     }
 
     // TODO: add onlyKeeper modifier while using permissioned keepers
@@ -71,7 +75,7 @@ contract BathPair {
     }
 
     // initialize() -start the token
-    function initialize(
+    function initializePair(
         address asset,
         string calldata assetName,
         address quote,
@@ -88,24 +92,24 @@ contract BathPair {
         underlyingQuote = quote;
 
         //deploy new BathTokens:
-        BathToken bathAsset =
-            new BathToken(
-                string(abi.encodePacked("bath", (assetName))),
-                asset,
-                market,
-                bathHouse,
-                quote
-            );
+        BathToken bathAsset = new BathToken();
+        bathAsset.initialize(
+            string(abi.encodePacked("bath", (assetName))),
+            asset,
+            market,
+            bathHouse,
+            quote
+        );
         bathAssetAddress = address(bathAsset);
 
-        BathToken bathQuote =
-            new BathToken(
-                string(abi.encodePacked("bath", (quoteName))),
-                quote,
-                market,
-                bathHouse,
-                asset
-            );
+        BathToken bathQuote = new BathToken();
+        bathQuote.initialize(
+            string(abi.encodePacked("bath", (quoteName))),
+            quote,
+            market,
+            bathHouse,
+            asset
+        );
         bathQuoteAddress = address(bathQuote);
 
         RubiconMarketAddress = market;

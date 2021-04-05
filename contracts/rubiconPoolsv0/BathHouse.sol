@@ -15,9 +15,13 @@ contract BathHouse {
     mapping(address => bool) approvedStrategies;
     mapping(address => bool) approvedPairs;
 
-    constructor(address market) public {
+    bool public initialized;
+
+    function initialize(address market) public {
+        require(!initialized);
         admin = msg.sender;
         RubiconMarketAddress = market;
+        initialized = true;
     }
 
     modifier onlyAdmin {
@@ -58,7 +62,8 @@ contract BathHouse {
         BathPair pair = new BathPair();
         newPair = address(pair);
         allBathPairs.push(newPair);
-        pair.initialize(
+        pair.initialize();
+        pair.initializePair(
             asset,
             assetName,
             quote,
