@@ -5,7 +5,7 @@ import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/SafeMath.sol";
-import "./Strategy.sol";
+import "../interfaces/IStrategy.sol";
 
 contract BathPair {
     address public bathHouse;
@@ -174,29 +174,7 @@ contract BathPair {
         if (bathQuoteYield > 0) {
             BathToken(bathQuoteAddress).rebalance(bathAssetAddress);
         }
-    }
-
-    function executeStrategy(
-        address targetStrategy,
-        uint256 askNumerator, // Quote / Asset
-        uint256 askDenominator, // Asset / Quote
-        uint256 bidNumerator, // size in ASSET
-        uint256 bidDenominator // size in QUOTES
-    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
-        Strategy(targetStrategy).execute(
-            underlyingAsset,
-            bathAssetAddress,
-            underlyingQuote,
-            bathQuoteAddress,
-            askNumerator, // Quote / Asset
-            askDenominator, // Asset / Quote
-            bidNumerator, // size in ASSET
-            bidDenominator // size in QUOTES
-        );
-
-        // Return any filled yield to the appropriate bathToken
-        rebalancePair();
-
+                    
         // Return settled trades to the appropriate bathToken
         require(
             IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0,
@@ -206,5 +184,27 @@ contract BathPair {
             IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0,
             "yield not correctly rebalanced"
         );
+    }
+
+    function executeStrategy(
+        address targetStrategy,
+        uint256 askNumerator, // Quote / Asset
+        uint256 askDenominator, // Asset / Quote
+        uint256 bidNumerator, // size in ASSET
+        uint256 bidDenominator // size in QUOTES
+    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+        IStrategy(targetStrategy).execute(
+            underlyingAsset,
+            bathAssetAddress,
+            underlyingQuote,
+            bathQuoteAddress,
+            askNumerator, // ask pay_amt
+            askDenominator, // ask buy_amt
+            bidNumerator, // bid pay_amt
+            bidDenominator // bid buy_amt
+        );
+
+        // Return any filled yield to the appropriate bathToken
+        rebalancePair();
     }
 }
