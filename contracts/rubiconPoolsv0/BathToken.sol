@@ -1,6 +1,6 @@
 pragma solidity =0.5.16;
 
-import "../peripheral_contracts/IBathToken.sol";
+import "../interfaces/IBathToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "../peripheral_contracts/SafeMath.sol";
 import "../RubiconMarket.sol";
