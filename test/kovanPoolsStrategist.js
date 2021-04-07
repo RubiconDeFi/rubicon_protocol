@@ -13,7 +13,13 @@ var rubiconMarketKovanAddr = "0x8A4A4d9A874dc038c01638e003fF7307498103f6";
 var RubiconMarketContractKovan = new web3.eth.Contract(abi, rubiconMarketKovanAddr);
 
 // Load in Pools contract addresses on Kovan
+var { abi } = require("../build/contracts/BathHouse.json");
+var bathHouseKovanAddr = "0xe86791480d3246e29976164763970b374eE2f4B7";
+var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
+var { abi } = require("../build/contracts/Strategy.json");
+var strategyKovanAddr = "0xFC827B5157cAE59Ed96A2E0537B7C2EF9939306B";
+var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 // Pseudocode - As a loop:
 // 1. Grab the current price for a Kovan pair
