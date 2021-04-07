@@ -9,3 +9,4 @@ build/
 cache/
 artifacts/
 .DS_Store
+randomNotes.txt

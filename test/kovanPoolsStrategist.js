@@ -21,21 +21,47 @@ var { abi } = require("../build/contracts/Strategy.json");
 var strategyKovanAddr = "0xFC827B5157cAE59Ed96A2E0537B7C2EF9939306B";
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
-// Initialize a bathPair for WAYNE / DAI
-var txData = bathHouseContractKovan.methods.initBathPair("0xC61812684385910CF8E93Fa0B04c572E6051F679", "WAYNE", "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", "DAI").encodeABI();
+// // Initialize a bathPair for WAYNE / DAI
+// var txData = bathHouseContractKovan.methods.initBathPair("0xC61812684385910CF8E93Fa0B04c572E6051F679", "WAYNE", "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", "DAI").encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+//     to: bathHouseKovanAddr,
+//     gasPrice: web3.utils.toWei("50", "Gwei")
+// }
+// // Send the transaction
+// web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+//     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+// });
 
-var tx = {
-    gas: 12500000,
-    data: txData.toString(),
-    from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
-    to: bathHouseKovanAddr
-}
-web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
-    // console.log(signedTx);
-    web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
-});
+// Kovan 4.7.21
+// New BathPair: 0x0D2632967ab6fe195c6B4659cBc414695456AA54
+// New bathToken (WAYNE): 0x935947b550e75ecd1956a28549c892fe038880d0
+// new BathToken (DAI): 0xc8b820db24f85dd9f42656d9a2d46a7b453c3a6c
+
+// Load in BathPair Contract
+var { abi } = require("../build/contracts/BathPair.json");
+var bathPairKovanAddr = "0x0D2632967ab6fe195c6B4659cBc414695456AA54";
+var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
+
+// Deposit assets into BathPair
+// **Approve first**
+// var txData = bathPairContractKovan.methods.deposit("0xC61812684385910CF8E93Fa0B04c572E6051F679", "WAYNE", "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", "DAI").encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+//     to: bathHouseKovanAddr,
+//     gasPrice: web3.utils.toWei("50", "Gwei")
+// }
+// // Send the transaction
+// web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+//     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+// });
 
 
+// MarketMake:
 // Pseudocode - As a loop:
 // 1. Grab the current price for a Kovan pair
 // 2. executeStrategy --> Place better a bid and ask at the best bid/ask - 1
