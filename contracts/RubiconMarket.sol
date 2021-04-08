@@ -338,7 +338,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         offers[id].buy_amt = sub(offer.buy_amt, spend);
         require(
             offer.buy_gem.transferFrom(msg.sender, offer.owner, spend),
-            "offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) failed"
+            "offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) failed - check that you can pay the fee"
         );
         require(
             offer.pay_gem.transfer(msg.sender, quantity),
