@@ -45,14 +45,36 @@ var { abi } = require("../build/contracts/BathPair.json");
 var bathPairKovanAddr = "0x0D2632967ab6fe195c6B4659cBc414695456AA54";
 var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 
-// Deposit assets into BathPair
-// **Approve first**
-// var txData = bathPairContractKovan.methods.deposit("0xC61812684385910CF8E93Fa0B04c572E6051F679", "WAYNE", "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", "DAI").encodeABI();
+// Load in WAYNE Contract
+var { abi } = require("../build/contracts/EquityToken.json");
+var WAYNEKovanAddr = "0xC61812684385910CF8E93Fa0B04c572E6051F679";
+var WAYNEContractKovan = new web3.eth.Contract(abi, WAYNEKovanAddr);
+
+// Load in Dai Contract
+var { abi } = require("../build/contracts/EquityToken.json");
+var DAIKovanAddr = "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a";
+var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
+
+// **Approve bathPair to recieve WAYNE and DAI first**
+// var txData = WAYNEContractKovan.methods.approve(bathPairKovanAddr, web3.utils.toWei("200")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
 //     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
-//     to: bathHouseKovanAddr,
+//     to: WAYNEKovanAddr,
+//     gasPrice: web3.utils.toWei("20", "Gwei")
+// }
+// // Send the transaction
+// web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+//     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+// });
+
+// var txData = DAIContractKovan.methods.approve(bathPairKovanAddr, web3.utils.toWei("400")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+//     to: DAIKovanAddr,
 //     gasPrice: web3.utils.toWei("50", "Gwei")
 // }
 // // Send the transaction
@@ -60,6 +82,21 @@ var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 //     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
 // });
 
+// // Deposit assets into BathPair
+// var txData = bathPairContractKovan.methods.deposit("0xC61812684385910CF8E93Fa0B04c572E6051F679", web3.utils.toWei("200"), "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", web3.utils.toWei("400")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+//     to: bathPairKovanAddr,
+//     gasPrice: web3.utils.toWei("20", "Gwei")
+// }
+// // Send the transaction
+// web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+//     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+// });
+
+// The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan
 
 // MarketMake:
 // Pseudocode - As a loop:
