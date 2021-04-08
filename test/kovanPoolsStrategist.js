@@ -9,7 +9,7 @@ let web3 = new Web3("https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY);
 
 // Load the RubiconMarket contract
 var { abi } = require("../build/contracts/RubiconMarket.json");
-var rubiconMarketKovanAddr = "0x8A4A4d9A874dc038c01638e003fF7307498103f6";
+var rubiconMarketKovanAddr = process.env.RUBICONMARKET_V0_KOVAN;
 var RubiconMarketContractKovan = new web3.eth.Contract(abi, rubiconMarketKovanAddr);
 
 // Load in Pools contract addresses on Kovan
@@ -102,5 +102,22 @@ var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 // Pseudocode - As a loop:
 // 1. Grab the current price for a Kovan pair
 // 2. executeStrategy --> Place better a bid and ask at the best bid/ask - 1
-// 3. Rinse repeat...
+// 2a. Make sure that dynamic order sizes are placed to manage inventory...
+
+async function getSpread() {
+    // var bestAsk = await RubiconMarketContractKovan.methods.getOfferCount(WAYNEKovanAddr, DAIKovanAddr).call();
+    var bestAsk = await RubiconMarketContractKovan.methods.getBestOffer(WAYNEKovanAddr, DAIKovanAddr).call();
+    console.log(bestAsk);
+    var askInfo = await RubiconMarketContractKovan.methods.getOffer(bestAsk).call();
+    console.log(askInfo[2] / askInfo[0]);
+}
+
+getSpread()
+// WAYNEContractKovan.methods.balanceOf(bathPairKovanAddr).call().then(console.log);
+
+// console.log(bestAsk);
+
+
+
+
 
