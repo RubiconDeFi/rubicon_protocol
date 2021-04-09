@@ -52,6 +52,9 @@ var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 // New bathToken (WAYNE): 0x09fe4e229615c2b76d524481a03ec46981a9f62e
 // new BathToken (DAI): 0xd154e2e5322f2501de9ce041d99b3c1fed77e59b
 
+var bathAssetToken = "0x09fe4e229615c2b76d524481a03ec46981a9f62e"
+var bathQuoteToken = "0xd154e2e5322f2501de9ce041d99b3c1fed77e59b"
+
 // Load in BathPair Contract
 var { abi } = require("../build/contracts/BathPair.json");
 var bathPairKovanAddr = "0xe6de87cf75110c28a488091668aace99fa93703e";
@@ -188,16 +191,31 @@ async function marketMake(a, b) {
     });
 }
 
+// This function should return a positive or negative number reflecting the balance.
+async function manageInventory(currentAsk, currentBid) {
+    var assetBalance = await WAYNEContractKovan.methods.balanceOf(bathAssetToken).call();
+    var quoteBalance = await DAIContractKovan.methods.balanceOf(bathQuoteToken).call();
+    console.log(assetBalance);
+    console.log(quoteBalance);
+    console.log('current price / midpoint', (currentAsk + currentBid) / 2)
+    console.log('quote over asset', quoteBalance / assetBalance);
+
+    // Bring price information into manageInventory() then use that to back into target balance of 50/50 and bid accordingl
+
+    
+}
+
 getSpread().then((data) => {
     var currentAsk = data[0];
     var currentBid = data[1];
     // console.log(currentAsk);
     // console.log(currentBid);
-
+    manageInventory(currentAsk, currentBid);
     // TODO: Sorting Logic
-    marketMake(currentAsk, currentBid);
+    // marketMake(currentAsk, currentBid);
 });
 
+getSpread();
 // getSpread().then((data) => {
 //     var currentAsk = data[0];
 //     var currentBid = data[1];
