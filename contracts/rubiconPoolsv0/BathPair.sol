@@ -89,11 +89,6 @@ contract BathPair {
         underlyingAsset = asset;
         underlyingQuote = quote;
 
-        // if (BathHosue(bathHouse).bathQuoteExists[quote]) {
-        //     // don't deploy the new 
-        // } else {
-            
-        // }
         //deploy new BathTokens:
         BathToken bathAsset = new BathToken();
         bathAsset.initialize(
@@ -105,15 +100,23 @@ contract BathPair {
         );
         bathAssetAddress = address(bathAsset);
 
-        BathToken bathQuote = new BathToken();
-        bathQuote.initialize(
-            string(abi.encodePacked("bath", (quoteName))),
-            quote,
-            market,
-            bathHouse,
-            asset
-        );
-        bathQuoteAddress = address(bathQuote);
+        if (BathHouse(bathHouse).doesQuoteExist(quote)) {
+            // don't deploy the new
+            address bathQuote =
+                BathHouse(bathHouse).quoteToBathQuoteCheck(quote);
+            bathQuoteAddress = address(bathQuote);
+        } else {
+            // deploy a new bathQuote
+            BathToken bathQuote = new BathToken();
+            bathQuote.initialize(
+                string(abi.encodePacked("bath", (quoteName))),
+                quote,
+                market,
+                bathHouse,
+                asset
+            );
+            bathQuoteAddress = address(bathQuote);
+        }
 
         RubiconMarketAddress = market;
     }

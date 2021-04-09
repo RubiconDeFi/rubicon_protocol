@@ -15,6 +15,7 @@ contract BathHouse {
     mapping(address => bool) approvedStrategies;
     mapping(address => bool) approvedPairs;
     mapping(address => bool) bathQuoteExists;
+    mapping(address => address) quoteToBathQuote;
 
     bool public initialized;
 
@@ -35,7 +36,7 @@ contract BathHouse {
         string calldata assetName,
         address quote,
         string calldata quoteName,
-        uint _reserveRatio
+        uint256 _reserveRatio
     ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
@@ -63,7 +64,7 @@ contract BathHouse {
         getPair[asset][quote] = newPair;
 
         approvePair(newPair);
-        addQuote(quote);
+        addQuote(quote, address(pair.bathQuoteAddress));
         return newPair;
     }
 
@@ -103,11 +104,20 @@ contract BathHouse {
         approvedPairs[pair] = true;
     }
 
-    function addQuote(address quote) internal {
+    function addQuote(address quote, address bathQuote) internal {
         if (bathQuoteExists[quote]) {
             return;
         } else {
             bathQuoteExists[quote] = true;
+            quoteToBathQuote[quote] = bathQuote;
         }
+    }
+
+    function doesQuoteExist(address quote) public returns (bool) {
+        return bathQuoteExists[quote];
+    }
+
+    function quoteToBathQuoteCheck(address quote) public returns (address) {
+        return quoteToBathQuote[quote];
     }
 }
