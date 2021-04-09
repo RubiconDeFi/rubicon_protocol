@@ -16,10 +16,6 @@ module.exports = {
       network_id: "*", // Match any network id
       gas: 10000000,  
     },
-    ovm: {
-      host: "127.0.0.1",
-      port: 7545,
-    },
     kovan: {
       provider: function() {
         return new HDWalletProvider(process.env.PRIVATE_KEY_KOVAN, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY)
