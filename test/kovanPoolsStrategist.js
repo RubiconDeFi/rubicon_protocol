@@ -151,22 +151,22 @@ async function stoikov() {
 async function marketMake(a, b, im) {
     console.log('Current best ask: ', a);
     console.log('Current best bid: ', b);
-    console.log('im in marketMake', await im);
+    console.log('IM Factor', await im); // ratio of current inventory balance divided by the target balance
 
     // ***Market Maker Inputs***
     const spreadFactor = 0.02; // the % of the spread we want to improve
     const maxOrderSize =  10;//size in *quote currency* of the orders
+    const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
     var newAskPrice = a * (1-spreadFactor);
     var newBidPrice = b * (1+spreadFactor);
     
+    // Oversupply of bathQuote -> dynamic ask size
     if (im > 1) {
         var dynNum = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im)))) / newAskPrice;
         var dynDen = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im))));
         var askNum = dynNum;
         var askDen = dynDen;
-        // var askNum = maxOrderSize / newAskPrice;
-        // var askDen = maxOrderSize;
         console.log('Dynamically sized ask:');
         console.log(askNum);
         console.log(askDen);
@@ -177,11 +177,12 @@ async function marketMake(a, b, im) {
         console.log(bidNum);
         console.log(bidDen);
     } else {
+    // Oversupply of bathAsset -> dynamic bid size
         var dynNum = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im))));
         var dynDen = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im)))) / newBidPrice;
         var bidNum = dynNum;
         var bidDen = dynDen;
-        // console.log(dynDen);
+
         var askNum = maxOrderSize / newAskPrice;
         var askDen = maxOrderSize;
         console.log('New Ask at max size:');
