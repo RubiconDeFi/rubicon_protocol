@@ -137,7 +137,7 @@ var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 // 2. executeStrategy --> Place better a bid and ask at the best bid/ask - 1
 // 2a. Make sure that dynamic order sizes are placed to manage inventory...
 
-async function getSpread() {
+async function stoikov() {
     var bestAsk = await RubiconMarketContractKovan.methods.getBestOffer(WAYNEKovanAddr, DAIKovanAddr).call();
     var askInfo = await RubiconMarketContractKovan.methods.getOffer(bestAsk).call();
     var bestAskPrice = (askInfo[2] / askInfo[0]);
@@ -149,8 +149,8 @@ async function getSpread() {
 }
 
 async function marketMake(a, b, im) {
-    console.log(a);
-    console.log(b);
+    console.log('Current best ask: ', a);
+    console.log('Current best bid: ', b);
     console.log('im in marketMake', await im);
 
     // ***Market Maker Inputs***
@@ -161,63 +161,61 @@ async function marketMake(a, b, im) {
     var newBidPrice = b * (1+spreadFactor);
     
     if (im > 1) {
-        var dynNum = (maxOrderSize * ((Math.E)^(-0.005)*im)) / newAskPrice;
-        var dynDen = (maxOrderSize * ((Math.E)^(-0.005)*im));
+        var dynNum = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im)))) / newAskPrice;
+        var dynDen = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im))));
         var askNum = dynNum;
         var askDen = dynDen;
-        console.log(dynNum);
-        console.log(dynDen);
         // var askNum = maxOrderSize / newAskPrice;
         // var askDen = maxOrderSize;
+        console.log('Dynamically sized ask:');
         console.log(askNum);
         console.log(askDen);
     
         var bidNum = maxOrderSize;
         var bidDen = maxOrderSize / newBidPrice;
+        console.log('New bid at max size:');
         console.log(bidNum);
         console.log(bidDen);
     } else {
-        var dynNum = (maxOrderSize * ((Math.E)^(-0.005*im)));
-        var dynDen = (maxOrderSize * ((Math.E)^(-0.005*im))) / newBidPrice;
+        var dynNum = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im))));
+        var dynDen = (maxOrderSize * Math.pow((Math.E),((-0.005)* await (im)))) / newBidPrice;
         var bidNum = dynNum;
         var bidDen = dynDen;
-        console.log('neworder size', dynNum);
         // console.log(dynDen);
         var askNum = maxOrderSize / newAskPrice;
         var askDen = maxOrderSize;
+        console.log('New Ask at max size:');
         console.log(askNum);
         console.log(askDen);
-    
-        // var bidNum = maxOrderSize;
-        // var bidDen = maxOrderSize / newBidPrice;
+        console.log('Dynamically sized bid:');
         console.log(dynNum);
         console.log(dynDen);
     }
  
 
-    console.log('ask price', askNum / askDen);
-    console.log('bid price', bidNum / bidDen);
+    console.log('new ask price', askDen / askNum);
+    console.log('new bid price', bidNum / bidDen);
 
 
-    // // execute strategy with tighter spread
-    // var txData = bathPairContractKovan.methods.executeStrategy(
-    //     strategyKovanAddr, 
-    //     web3.utils.toWei(askNum.toString()),
-    //     web3.utils.toWei(askDen.toString()),
-    //     web3.utils.toWei(bidNum.toString()),
-    //     web3.utils.toWei(bidDen.toString())
-    // ).encodeABI();
-    // var tx = {
-    //     gas: 12500000,
-    //     data: txData.toString(),
-    //     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
-    //     to: bathPairKovanAddr,
-    //     gasPrice: web3.utils.toWei("40", "Gwei")
-    // }
-    // // Send the transaction
-    // web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
-    //     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
-    // });
+    // execute strategy with tighter spread
+    var txData = bathPairContractKovan.methods.executeStrategy(
+        strategyKovanAddr, 
+        web3.utils.toWei(askNum.toString()),
+        web3.utils.toWei(askDen.toString()),
+        web3.utils.toWei(bidNum.toString()),
+        web3.utils.toWei(bidDen.toString())
+    ).encodeABI();
+    var tx = {
+        gas: 12500000,
+        data: txData.toString(),
+        from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+        to: bathPairKovanAddr,
+        gasPrice: web3.utils.toWei("40", "Gwei")
+    }
+    // Send the transaction
+    web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+    });
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -233,7 +231,7 @@ async function manageInventory(currentAsk, currentBid) {
     return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
-getSpread().then((data) => {
+stoikov().then((data) => {
     var currentAsk = data[0];
     var currentBid = data[1];
 
@@ -241,16 +239,9 @@ getSpread().then((data) => {
     marketMake(currentAsk, currentBid, IMfactor);
 });
 
-getSpread();
-// getSpread().then((data) => {
-//     var currentAsk = data[0];
-//     var currentBid = data[1];
-//     console.log(currentAsk);
-//     console.log(currentBid);
+// This function sets off the chain of calls to successfully marketMake
+stoikov();
 
-//     // marketMake(currentAsk, currentBid);
-// });
-// console.log(currentPrice[0], currentPrice[1]);
 
 
 
