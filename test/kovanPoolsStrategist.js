@@ -148,47 +148,76 @@ async function getSpread() {
     return [bestAskPrice, bestBidPrice];
 }
 
-async function marketMake(a, b) {
+async function marketMake(a, b, im) {
     console.log(a);
     console.log(b);
+    console.log('im in marketMake', await im);
 
     // ***Market Maker Inputs***
     const spreadFactor = 0.02; // the % of the spread we want to improve
-    const orderSize =  5;//size in quote currency of the orders
-
+    const maxOrderSize =  10;//size in *quote currency* of the orders
+    // *************************
     var newAskPrice = a * (1-spreadFactor);
     var newBidPrice = b * (1+spreadFactor);
-
-    var askNum = orderSize / newAskPrice;
-    var askDen = orderSize;
-    console.log(askNum);
-    console.log(askDen);
-
-    var bidNum = orderSize;
-    var bidDen = orderSize / newBidPrice;
-    console.log(bidNum);
-    console.log(bidDen);
-
-
-    // execute strategy with tighter spread
-    var txData = bathPairContractKovan.methods.executeStrategy(
-        strategyKovanAddr, 
-        web3.utils.toWei(askNum.toString()),
-        web3.utils.toWei(askDen.toString()),
-        web3.utils.toWei(bidNum.toString()),
-        web3.utils.toWei(bidDen.toString())
-    ).encodeABI();
-    var tx = {
-        gas: 12500000,
-        data: txData.toString(),
-        from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
-        to: bathPairKovanAddr,
-        gasPrice: web3.utils.toWei("40", "Gwei")
+    
+    if (im > 1) {
+        var dynNum = (maxOrderSize * ((Math.E)^(-0.005)*im)) / newAskPrice;
+        var dynDen = (maxOrderSize * ((Math.E)^(-0.005)*im));
+        var askNum = dynNum;
+        var askDen = dynDen;
+        console.log(dynNum);
+        console.log(dynDen);
+        // var askNum = maxOrderSize / newAskPrice;
+        // var askDen = maxOrderSize;
+        console.log(askNum);
+        console.log(askDen);
+    
+        var bidNum = maxOrderSize;
+        var bidDen = maxOrderSize / newBidPrice;
+        console.log(bidNum);
+        console.log(bidDen);
+    } else {
+        var dynNum = (maxOrderSize * ((Math.E)^(-0.005*im)));
+        var dynDen = (maxOrderSize * ((Math.E)^(-0.005*im))) / newBidPrice;
+        var bidNum = dynNum;
+        var bidDen = dynDen;
+        console.log('neworder size', dynNum);
+        // console.log(dynDen);
+        var askNum = maxOrderSize / newAskPrice;
+        var askDen = maxOrderSize;
+        console.log(askNum);
+        console.log(askDen);
+    
+        // var bidNum = maxOrderSize;
+        // var bidDen = maxOrderSize / newBidPrice;
+        console.log(dynNum);
+        console.log(dynDen);
     }
-    // Send the transaction
-    web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
-    });
+ 
+
+    console.log('ask price', askNum / askDen);
+    console.log('bid price', bidNum / bidDen);
+
+
+    // // execute strategy with tighter spread
+    // var txData = bathPairContractKovan.methods.executeStrategy(
+    //     strategyKovanAddr, 
+    //     web3.utils.toWei(askNum.toString()),
+    //     web3.utils.toWei(askDen.toString()),
+    //     web3.utils.toWei(bidNum.toString()),
+    //     web3.utils.toWei(bidDen.toString())
+    // ).encodeABI();
+    // var tx = {
+    //     gas: 12500000,
+    //     data: txData.toString(),
+    //     from: process.env.KOVAN_DEPLOYER_ADDRESS.toString(),
+    //     to: bathPairKovanAddr,
+    //     gasPrice: web3.utils.toWei("40", "Gwei")
+    // }
+    // // Send the transaction
+    // web3.eth.accounts.signTransaction(tx, process.env.PRIVATE_KEY_KOVAN).then((signedTx) => {
+    //     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+    // });
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -198,21 +227,18 @@ async function manageInventory(currentAsk, currentBid) {
     console.log(assetBalance);
     console.log(quoteBalance);
     console.log('current price / midpoint', (currentAsk + currentBid) / 2)
-    console.log('quote over asset', quoteBalance / assetBalance);
+    console.log('quote over asset', (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2));
 
-    // Bring price information into manageInventory() then use that to back into target balance of 50/50 and bid accordingl
-
-    
+    // Ratio targets the current orderbook midpoint as the ideal ratio (50/50)
+    return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
 getSpread().then((data) => {
     var currentAsk = data[0];
     var currentBid = data[1];
-    // console.log(currentAsk);
-    // console.log(currentBid);
-    manageInventory(currentAsk, currentBid);
-    // TODO: Sorting Logic
-    // marketMake(currentAsk, currentBid);
+
+    const IMfactor = manageInventory(currentAsk, currentBid);
+    marketMake(currentAsk, currentBid, IMfactor);
 });
 
 getSpread();
