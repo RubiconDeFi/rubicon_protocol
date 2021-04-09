@@ -34,7 +34,7 @@ var DAIKovanAddr = "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a";
 var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 
 // // Initialize a bathPair for WAYNE / DAI
-// var txData = bathHouseContractKovan.methods.initBathPair(WAYNEKovanAddr, "WAYNE", DAIKovanAddr, "DAI").encodeABI();
+// var txData = bathHouseContractKovan.methods.initBathPair(WAYNEKovanAddr, "WAYNE", DAIKovanAddr, "DAI", 90).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),

@@ -38,7 +38,7 @@ contract("Rubicon Pools Test", async function(accounts) {
         it("Bath House can initialize a new bathToken Pair", async function() {
             // Call initialize on Bath house
             await bathHouseInstance.initialize(rubiconMarketInstance.address);
-            (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI"));
+            (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI", 90));
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
         });

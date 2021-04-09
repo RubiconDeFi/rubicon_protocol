@@ -34,9 +34,9 @@ contract BathHouse {
         address asset,
         string calldata assetName,
         address quote,
-        string calldata quoteName
-        // uint _reserveRatio
-    ) external returns (address newPair) {
+        string calldata quoteName,
+        uint _reserveRatio
+    ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
         require(asset != address(0));
@@ -45,8 +45,8 @@ contract BathHouse {
             getPair[asset][quote] == address(0),
             "Bath Pair already exists"
         );
-        // require(_reserveRatio < 100);
-        // require(_reserveRatio > 60);
+        require(_reserveRatio < 100);
+        require(_reserveRatio > 60);
         BathPair pair = new BathPair();
         newPair = address(pair);
         allBathPairs.push(newPair);
@@ -58,7 +58,7 @@ contract BathHouse {
             quoteName,
             RubiconMarketAddress,
             // TODO: have this provided as an input:
-            90
+            _reserveRatio
         );
         getPair[asset][quote] = newPair;
 

@@ -17,8 +17,6 @@ contract BathPair {
 
     address public RubiconMarketAddress;
 
-    mapping(address => uint256[]) addressToHoldings;
-
     uint256[] public outstandingAskIDs;
     uint256[] public outstandingBidIDs;
     uint256[2][] public outstandingPairIDs;
@@ -91,8 +89,8 @@ contract BathPair {
         underlyingAsset = asset;
         underlyingQuote = quote;
 
-        // if (B) {
-            
+        // if (BathHosue(bathHouse).bathQuoteExists[quote]) {
+        //     // don't deploy the new 
         // } else {
             
         // }
