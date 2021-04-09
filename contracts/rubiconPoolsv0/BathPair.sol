@@ -91,6 +91,11 @@ contract BathPair {
         underlyingAsset = asset;
         underlyingQuote = quote;
 
+        // if (B) {
+            
+        // } else {
+            
+        // }
         //deploy new BathTokens:
         BathToken bathAsset = new BathToken();
         bathAsset.initialize(

@@ -3,7 +3,7 @@ pragma solidity =0.5.16;
 import "./BathPair.sol";
 
 contract BathHouse {
-    string name = "ETH / USDC Liquidity Pool";
+    string public name = "Rubicon Bath House";
 
     address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;
@@ -14,6 +14,7 @@ contract BathHouse {
     // List of approved strategies
     mapping(address => bool) approvedStrategies;
     mapping(address => bool) approvedPairs;
+    mapping(address => bool) bathQuoteExists;
 
     bool public initialized;
 
@@ -34,6 +35,7 @@ contract BathHouse {
         string calldata assetName,
         address quote,
         string calldata quoteName
+        // uint _reserveRatio
     ) external returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
@@ -43,7 +45,8 @@ contract BathHouse {
             getPair[asset][quote] == address(0),
             "Bath Pair already exists"
         );
-
+        // require(_reserveRatio < 100);
+        // require(_reserveRatio > 60);
         BathPair pair = new BathPair();
         newPair = address(pair);
         allBathPairs.push(newPair);
@@ -54,11 +57,13 @@ contract BathHouse {
             quote,
             quoteName,
             RubiconMarketAddress,
+            // TODO: have this provided as an input:
             90
         );
         getPair[asset][quote] = newPair;
 
         approvePair(newPair);
+        addQuote(quote);
         return newPair;
     }
 
@@ -94,7 +99,15 @@ contract BathHouse {
         }
     }
 
-    function approvePair(address pair) internal returns (bool) {
+    function approvePair(address pair) internal {
         approvedPairs[pair] = true;
+    }
+
+    function addQuote(address quote) internal {
+        if (bathQuoteExists[quote]) {
+            return;
+        } else {
+            bathQuoteExists[quote] = true;
+        }
     }
 }
