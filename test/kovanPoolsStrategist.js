@@ -194,9 +194,18 @@ getSpread().then((data) => {
     // console.log(currentAsk);
     // console.log(currentBid);
 
+    // TODO: Sorting Logic
     marketMake(currentAsk, currentBid);
 });
 
+// getSpread().then((data) => {
+//     var currentAsk = data[0];
+//     var currentBid = data[1];
+//     console.log(currentAsk);
+//     console.log(currentBid);
+
+//     // marketMake(currentAsk, currentBid);
+// });
 // console.log(currentPrice[0], currentPrice[1]);
 
 
