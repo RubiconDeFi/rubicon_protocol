@@ -154,4 +154,10 @@ contract("Rubicon Pools Test", async function(accounts) {
 
 
 // Running list of TO DOs:
-//  - dynamic order sizing
+//  - Determine what lives on-chain vs off-chain for v1 schema
+
+// Rubicon Pools v1 Improvements:
+// -Yield is correctly being passed to users over time
+// -Single asset liquidity across pools *
+// -Strategists are payed a cut for good performance
+// -Add an inventory management sanity check

@@ -174,7 +174,7 @@ contract BathPair {
         if (bathQuoteYield > 0) {
             BathToken(bathQuoteAddress).rebalance(bathAssetAddress);
         }
-                    
+
         // Return settled trades to the appropriate bathToken
         require(
             IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0,

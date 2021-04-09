@@ -29,21 +29,6 @@ contract BathHouse {
         _;
     }
 
-    //****Acts as the initializer/factory/admin of BathPairs*****
-    //*** Acts as quarterback for BathToken interactions:*/
-    // e.g. init them, placePairs trade
-
-    // Build / Test flow:
-    // 1. [X] Init a bathPair
-    // 2. [X] Allow users to deposit liquidity into bath pair w/ custom weights while receiving Token
-    // 3. [] Test BathHouse calling on bath tokens ability to place pairs placePairsTrade <- build this logic
-    // 4. [X] test a withdrawl... place
-
-    //deposit() - a function that should allow a user to deposit custom weights into a given pair
-    // inputs: custom weights into the pool (x and 1-x), and native assets
-    // outputs: return to the user a custom bathASSET and bathQUOTE in accordance to the pair
-    //  needs to account for when a user deposits funds to correctly pay them back the right amount of yield
-
     function initBathPair(
         address asset,
         string calldata assetName,
@@ -86,7 +71,6 @@ contract BathHouse {
     }
 
     function isApprovedStrat(address strategy) external view returns (bool) {
-        // TODO: Check that this works as intended
         if (approvedStrategies[strategy] == true) {
             return true;
         } else {
@@ -99,12 +83,10 @@ contract BathHouse {
         onlyAdmin
         returns (bool)
     {
-        // TODO: require check that strategy adheres to IStrategy;
         approvedStrategies[strategy] = true;
     }
 
     function isApprovedPair(address pair) external view returns (bool) {
-        // TODO: Check that this works as intended
         if (approvedPairs[pair] == true) {
             return true;
         } else {
@@ -113,7 +95,6 @@ contract BathHouse {
     }
 
     function approvePair(address pair) internal returns (bool) {
-        // TODO: require check that strategy adheres to IStrategy;
         approvedPairs[pair] = true;
     }
 }
