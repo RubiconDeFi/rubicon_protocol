@@ -46,6 +46,13 @@ contract BathPair {
         uint256 timestamp;
     }
 
+        struct order {
+        uint256 pay_amt;
+        ERC20 pay_gem;
+        uint256 buy_amt;
+        ERC20 buy_gem;
+    }
+
     function initialize() public {
         require(!initialized);
         bathHouse = msg.sender;
@@ -205,6 +212,70 @@ contract BathPair {
         );
     }
 
+        function cancelPartialFills(
+    ) internal {
+        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
+
+        for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+            order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+            order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+
+            if (
+                (offer1.pay_amt == 0 &&
+                    offer1.pay_gem == ERC20(0) &&
+                    offer1.buy_amt == 0 &&
+                    offer1.buy_gem == ERC20(0)) &&
+                (offer2.pay_amt != 0 &&
+                    offer2.pay_gem != ERC20(0) &&
+                    offer2.buy_amt != 0 &&
+                    offer2.buy_gem != ERC20(0))
+            ) {
+                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
+                emit Cancel(
+                    outstandingPairIDs[x][0],
+                    offer1.pay_gem,
+                    offer1.pay_amt
+                );
+                delete outstandingPairIDs[x][0];
+            } else if (
+                (offer1.pay_amt != 0 &&
+                    offer1.pay_gem != ERC20(0) &&
+                    offer1.buy_amt != 0 &&
+                    offer1.pay_gem != ERC20(0)) &&
+                (offer2.pay_amt == 0 &&
+                    offer2.pay_gem == ERC20(0) &&
+                    offer2.buy_amt == 0 &&
+                    offer2.buy_gem == ERC20(0))
+            ) {
+                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
+                emit Cancel(
+                    outstandingPairIDs[x][1],
+                    offer2.pay_gem,
+                    offer2.pay_amt
+                );
+                delete outstandingPairIDs[x][1];
+            } else if (
+                (offer1.pay_amt != 0 &&
+                    offer1.pay_gem != ERC20(0) &&
+                    offer1.buy_amt != 0 &&
+                    offer1.pay_gem != ERC20(0)) &&
+                (offer2.pay_amt != 0 &&
+                    offer2.pay_gem != ERC20(0) &&
+                    offer2.buy_amt != 0 &&
+                    offer2.buy_gem != ERC20(0))
+            ) {
+                delete outstandingPairIDs[x];
+            }
+        }
+    }
+
+        function getOfferInfo(uint256 id) internal view returns (order memory) {
+        (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
+            RubiconMarket(RubiconMarketAddress).getOffer(id);
+        order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
+        return offerInfo;
+    }
+
     function executeStrategy(
         address targetStrategy,
         uint256 askNumerator, // Quote / Asset
@@ -215,6 +286,11 @@ contract BathPair {
         // TODO: enforce order size as a proportion of inventory
         // TODO: enforce a spread must exist
         // TODO: enforce a bid must be less than best Ask (+ some spread) and an ask must be greater than best bid (+some spread)
+        
+        // 1. Cancel Outstanding Orders
+        cancelPartialFills();
+        
+        // 2. Strategist executes a pair trade
         IStrategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
@@ -226,8 +302,8 @@ contract BathPair {
             bidDenominator // bid buy_amt
         );
 
+        // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
         // TODO: Add logic to pay strategists
-        // Log the trade in a Strategist struct so strategists get paid and time is checked
         strategistRecord.push(
             StrategistTrade(
                 underlyingAsset,
@@ -242,6 +318,7 @@ contract BathPair {
                 now
             )
         );
+        
         // Return any filled yield to the appropriate bathToken
         rebalancePair();
     }
