@@ -38,10 +38,12 @@ contract BathPair {
         address bathAssetAddress;
         address underlyingQuote;
         address bathQuoteAddress;
-        uint256 askNumerator; // ask pay_amt
-        uint256 askDenominator; // ask buy_amt
-        uint256 bidNumerator; // bid pay_amt
-        uint256 bidDenominator; // bid buy_amt
+        uint256 askNumerator;
+        uint256 askDenominator; 
+        uint256 bidNumerator; 
+        uint256 bidDenominator; 
+        address strategist;
+        uint256 timestamp;
     }
 
     function initialize() public {
@@ -235,7 +237,9 @@ contract BathPair {
                 askNumerator,
                 askDenominator,
                 bidNumerator,
-                bidDenominator
+                bidDenominator,
+                msg.sender,
+                now
             )
         );
         // Return any filled yield to the appropriate bathToken
