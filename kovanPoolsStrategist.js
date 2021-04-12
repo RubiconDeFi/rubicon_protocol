@@ -10,26 +10,26 @@ let web3 = new Web3("https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY);
 // console.log("Web3 Version: ", web3.version);
 
 // Load the RubiconMarket contract
-var { abi } = require("../build/contracts/RubiconMarket.json");
+var { abi } = require("./build/contracts/RubiconMarket.json");
 var rubiconMarketKovanAddr = process.env.RUBICONMARKET_V0_KOVAN;
 var RubiconMarketContractKovan = new web3.eth.Contract(abi, rubiconMarketKovanAddr);
 
 // Load in Pools contract addresses on Kovan
-var { abi } = require("../build/contracts/BathHouse.json");
+var { abi } = require("./build/contracts/BathHouse.json");
 var bathHouseKovanAddr = "0x5ccF8360344646727E36c1E2877aaF151d46B2d9";
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
-var { abi } = require("../build/contracts/Strategy.json");
+var { abi } = require("./build/contracts/Strategy.json");
 var strategyKovanAddr = "0xFd9146ea9F19df448E63e96B25dD880DDFa9Cc3C";
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 // Load in WAYNE Contract
-var { abi } = require("../build/contracts/EquityToken.json");
+var { abi } = require("./build/contracts/EquityToken.json");
 var WAYNEKovanAddr = "0xC61812684385910CF8E93Fa0B04c572E6051F679";
 var WAYNEContractKovan = new web3.eth.Contract(abi, WAYNEKovanAddr);
 
 // Load in Dai Contract
-var { abi } = require("../build/contracts/EquityToken.json");
+var { abi } = require("./build/contracts/EquityToken.json");
 var DAIKovanAddr = "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a";
 var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 
@@ -56,7 +56,7 @@ var bathAssetToken = "0x09fe4e229615c2b76d524481a03ec46981a9f62e"
 var bathQuoteToken = "0xd154e2e5322f2501de9ce041d99b3c1fed77e59b"
 
 // Load in BathPair Contract
-var { abi } = require("../build/contracts/BathPair.json");
+var { abi } = require("./build/contracts/BathPair.json");
 var bathPairKovanAddr = "0xe6de87cf75110c28a488091668aace99fa93703e";
 var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 
