@@ -31,13 +31,24 @@ contract BathPair {
 
     bool public initialized;
 
+    StrategistTrade[] public strategistRecord;
+
+    struct StrategistTrade {
+        address underlyingAsset;
+        address bathAssetAddress;
+        address underlyingQuote;
+        address bathQuoteAddress;
+        uint256 askNumerator; // ask pay_amt
+        uint256 askDenominator; // ask buy_amt
+        uint256 bidNumerator; // bid pay_amt
+        uint256 bidDenominator; // bid buy_amt
+    }
+
     function initialize() public {
         require(!initialized);
         bathHouse = msg.sender;
         initialized = true;
     }
-
-    // TODO: add onlyKeeper modifier while using permissioned keepers
 
     modifier onlyBathHouse {
         require(msg.sender == bathHouse);
@@ -199,6 +210,9 @@ contract BathPair {
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
     ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+        // TODO: enforce order size as a proportion of inventory
+        // TODO: enforce a spread must exist
+        // TODO: enforce a bid must be less than best Ask (+ some spread) and an ask must be greater than best bid (+some spread)
         IStrategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
@@ -210,6 +224,20 @@ contract BathPair {
             bidDenominator // bid buy_amt
         );
 
+        // TODO: Add logic to pay strategists
+        // Log the trade in a Strategist struct so strategists get paid and time is checked
+        strategistRecord.push(
+            StrategistTrade(
+                underlyingAsset,
+                bathAssetAddress,
+                underlyingQuote,
+                bathQuoteAddress,
+                askNumerator,
+                askDenominator,
+                bidNumerator,
+                bidDenominator
+            )
+        );
         // Return any filled yield to the appropriate bathToken
         rebalancePair();
     }

@@ -113,11 +113,15 @@ contract BathHouse {
         }
     }
 
-    function doesQuoteExist(address quote) public returns (bool) {
+    function doesQuoteExist(address quote) public view returns (bool) {
         return bathQuoteExists[quote];
     }
 
-    function quoteToBathQuoteCheck(address quote) public returns (address) {
+    function quoteToBathQuoteCheck(address quote)
+        public
+        view
+        returns (address)
+    {
         return quoteToBathQuote[quote];
     }
 }
