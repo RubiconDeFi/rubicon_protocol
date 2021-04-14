@@ -200,12 +200,15 @@ contract BathPair {
         require(quote == underlyingQuote, "wrong quote nerd");
 
         // mint the bathTokens to the user in accordance to weights, send underlying assets to each Bath Token
-        IERC20(asset).transferFrom(msg.sender, bathAssetAddress, assetAmount);
-        IERC20(quote).transferFrom(msg.sender, bathQuoteAddress, quoteAmount);
+        IERC20(asset).transferFrom(msg.sender, address(this), assetAmount);
+        IERC20(quote).transferFrom(msg.sender, address(this), quoteAmount);
+
+        IERC20(asset).approve(bathAssetAddress, assetAmount);
+        IERC20(quote).approve(bathQuoteAddress, quoteAmount);
 
         IBathToken(bathAssetAddress).mint(msg.sender, assetAmount);
         IBathToken(bathQuoteAddress).mint(msg.sender, quoteAmount);
-
+ 
         //filler for return values
         return (assetAmount, quoteAmount);
     }

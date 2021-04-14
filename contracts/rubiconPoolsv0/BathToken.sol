@@ -133,8 +133,11 @@ contract BathToken is IBathToken {
     }
 
     function mint(address to, uint256 value) external onlyPair {
+        require(IERC20(underlyingToken).balanceOf(msg.sender) >= value, "not enough token to mint");
+        IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
         _mint(to, value);
-        IERC20(underlyingToken).approve(msg.sender, value);
+        // IERC20(underlyingToken).approve(msg.sender, value);
+
         // TODO: emit
     }
 
