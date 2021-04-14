@@ -93,7 +93,7 @@ contract BathPair {
         uint256 askD,
         uint256 bidN,
         uint256 bidD
-    ) internal {
+    ) internal view {
         // A spread must exist: (askN / askD) < (bidN / bidD)
         require(
             (askN * bidD) < (bidN * askD),
@@ -256,7 +256,13 @@ contract BathPair {
         );
     }
 
+    function addOutstandingPair(uint[2] calldata IDPair) external onlyApprovedStrategy(msg.sender) {
+        require(IDPair.length == 2);
+        outstandingPairIDs.push(IDPair);
+    }
+
     function cancelPartialFills() internal {
+        // TODO: make this constraint variable
         require(outstandingPairIDs.length < 10, "too many outstanding pairs");
 
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
@@ -273,13 +279,14 @@ contract BathPair {
                     offer2.buy_amt != 0 &&
                     offer2.buy_gem != ERC20(0))
             ) {
+                // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
                 BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
                 emit Cancel(
-                    outstandingPairIDs[x][0],
+                    outstandingPairIDs[x][1],
                     offer1.pay_gem,
                     offer1.pay_amt
                 );
-                delete outstandingPairIDs[x][0];
+                delete outstandingPairIDs[x];
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -292,11 +299,11 @@ contract BathPair {
             ) {
                 BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
                 emit Cancel(
-                    outstandingPairIDs[x][1],
+                    outstandingPairIDs[x][0],
                     offer2.pay_gem,
                     offer2.pay_amt
                 );
-                delete outstandingPairIDs[x][1];
+                delete outstandingPairIDs[x];
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&

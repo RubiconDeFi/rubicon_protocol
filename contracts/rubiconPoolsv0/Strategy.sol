@@ -8,6 +8,7 @@ import "./BathToken.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/SafeMath.sol";
 import "./BathHouse.sol";
+import "./BathPair.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract Strategy {
@@ -98,7 +99,7 @@ contract Strategy {
         // emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
         // emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
 
-        placeTrades(bathAssetAddress, bathQuoteAddress, ask, bid);
+        placeTrades(bathAssetAddress, bathQuoteAddress, ask, bid, underlyingAsset, underlyingQuote);
     }
 
     function getNewOrders(
@@ -133,7 +134,9 @@ contract Strategy {
         address bathAssetAddress,
         address bathQuoteAddress,
         order memory ask,
-        order memory bid
+        order memory bid,
+        address asset,
+        address quote
     ) internal returns (bool) {
         uint256 newAskID =
             BathToken(bathAssetAddress).placeOffer(
@@ -152,7 +155,9 @@ contract Strategy {
                 bid.buy_gem
             );
         emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
-        outstandingPairIDs.push([newAskID, newBidID]);
+
+        address pair = BathHouse(bathHouse).getBathPair(asset, quote);
+        BathPair(pair).addOutstandingPair([newAskID, newBidID]);
     }
 
     function execute(
