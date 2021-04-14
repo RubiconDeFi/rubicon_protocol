@@ -88,28 +88,44 @@ contract BathPair {
 
     // Takes the proposed bid and ask as a parameter - ensures that there is a spread and that ask price > best bid and
     // bid price > best ask
-    function enforceSpread(uint askN, uint askD, uint bidN, uint bidD) internal {
-        // TODO: enforce a spread must exist
-        // TODO: enforce a bid must be less than best Ask (+ some spread) and an ask must be greater than best bid (+some spread)
-        uint bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(ERC20(underlyingAsset), ERC20(underlyingQuote));
-        uint bestBidID = RubiconMarket(RubiconMarketAddress).getBestOffer(ERC20(underlyingQuote), ERC20(underlyingAsset));
- 
+    function enforceSpread(
+        uint256 askN,
+        uint256 askD,
+        uint256 bidN,
+        uint256 bidD
+    ) internal {
+        // A spread must exist: (askN / askD) < (bidN / bidD)
+        require(
+            (askN * bidD) < (bidN * askD),
+            "there is not a spread on strategist's pair trade"
+        );
+        uint256 bestAskID =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20(underlyingAsset),
+                ERC20(underlyingQuote)
+            );
+        uint256 bestBidID =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20(underlyingQuote),
+                ERC20(underlyingAsset)
+            );
+
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
-        emit LogOffer("bestAsk", bestAsk);
-        emit LogOffer("bestBid", bestBid);
-        emit LogNote("askN", askN);
-        emit LogNote("askD", askD);
-        emit LogNote("bidN", bidN);
-        emit LogNote("bidD", bidD);
 
         // Goal is for (askNumerator / askDenominator) < (bestBid.buy_amt / bestBid.pay_amt)
         // Therefore: askNumerator * bestBid.pay_amt < bestBid.buy_amt * askDenominator
-        require((askN * bestBid.pay_amt) < (bestBid.buy_amt * askD), "ask price is not greater than the best bid");
+        require(
+            (askN * bestBid.pay_amt) < (bestBid.buy_amt * askD),
+            "ask price is not greater than the best bid"
+        );
 
         // Goal is for (bestAsk.pay_amt / bestAsk.buy_amt) < (bidNumerator / bidDenominator)
         // Therefore: bestAskNumerator * bidDenominator < bidNumerator * bestAskDenominator
-        require((bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN), "bid price is not less than the best ask");
+        require(
+            (bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN),
+            "bid price is not less than the best ask"
+        );
     }
 
     modifier onlyApprovedStrategy(address targetStrategy) {
@@ -310,13 +326,25 @@ contract BathPair {
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
     ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
-        require(askNumerator > 0 && askDenominator > 0 && bidNumerator > 0 && bidDenominator > 0);
+        require(
+            askNumerator > 0 &&
+                askDenominator > 0 &&
+                bidNumerator > 0 &&
+                bidDenominator > 0
+        );
         // TODO: enforce order size as a proportion of inventory
-        enforceSpread(askNumerator, askDenominator, bidNumerator, bidDenominator);
-        // 1. Cancel Outstanding Orders
+        // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
+        enforceSpread(
+            askNumerator,
+            askDenominator,
+            bidNumerator,
+            bidDenominator
+        );
+
+        // 2. Cancel Outstanding Orders
         cancelPartialFills();
 
-        // 2. Strategist executes a pair trade
+        // 3. Strategist executes a pair trade
         IStrategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
@@ -328,7 +356,7 @@ contract BathPair {
             bidDenominator // bid buy_amt
         );
 
-        // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
+        // 4. Strategist trade is recorded so they can get paid and the trade is logged for time
         // TODO: Add logic to pay strategists
         strategistRecord.push(
             StrategistTrade(
@@ -345,7 +373,7 @@ contract BathPair {
             )
         );
 
-        // 4. Return any filled yield to the appropriate bathToken/liquidity pool
+        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
         rebalancePair();
     }
 }
