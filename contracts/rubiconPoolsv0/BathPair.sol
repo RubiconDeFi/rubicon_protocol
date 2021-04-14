@@ -20,7 +20,8 @@ contract BathPair {
 
     uint256[] public outstandingAskIDs;
     uint256[] public outstandingBidIDs;
-    uint256[2][] public outstandingPairIDs;
+    // askID, bidID, timestamp
+    uint256[3][] public outstandingPairIDs;
 
     // Risk Parameters
     uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
@@ -32,6 +33,9 @@ contract BathPair {
     event LogOffer(string, order);
 
     bool public initialized;
+
+    // TODO: make this a variable with setter
+    uint256 public timeDelay = 3 days;
 
     StrategistTrade[] public strategistRecord;
 
@@ -256,12 +260,12 @@ contract BathPair {
         );
     }
 
-    function addOutstandingPair(uint256[2] calldata IDPair) external {
+    function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
             BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
             "not an approved strategy"
         );
-        require(IDPair.length == 2);
+        require(IDPair.length == 3);
         outstandingPairIDs.push(IDPair);
     }
 
@@ -318,7 +322,26 @@ contract BathPair {
                     offer2.buy_amt != 0 &&
                     offer2.buy_gem != ERC20(0))
             ) {
-                delete outstandingPairIDs[x];
+                // delete the offer if it is too old
+                if (outstandingPairIDs[x][2] < (now - timeDelay)) {
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][0]
+                    );
+                    emit Cancel(
+                        outstandingPairIDs[x][0],
+                        offer2.pay_gem,
+                        offer2.pay_amt
+                    );
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][1]
+                    );
+                    emit Cancel(
+                        outstandingPairIDs[x][1],
+                        offer2.pay_gem,
+                        offer2.pay_amt
+                    );
+                    delete outstandingPairIDs[x];
+                }
             }
         }
     }
@@ -343,7 +366,7 @@ contract BathPair {
                 bidNumerator > 0 &&
                 bidDenominator > 0
         );
-        // TODO: enforce order size as a proportion of inventory
+        // TODO: enforce order size as a proportion of inventory -- inventory management
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(
             askNumerator,

@@ -42,8 +42,6 @@ contract Strategy {
     event LogNote128(string, int128);
     event BothFilled();
 
-    event Cancel(uint256, ERC20, uint256);
-
     struct order {
         uint256 pay_amt;
         ERC20 pay_gem;
@@ -164,7 +162,7 @@ contract Strategy {
         emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
 
         address pair = BathHouse(bathHouse).getBathPair(asset, quote);
-        BathPair(pair).addOutstandingPair([newAskID, newBidID]);
+        BathPair(pair).addOutstandingPair([newAskID, newBidID, now]);
     }
 
     function execute(
