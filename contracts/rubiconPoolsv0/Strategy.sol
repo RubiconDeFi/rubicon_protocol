@@ -129,13 +129,6 @@ contract Strategy {
         return (newAsk, newBid);
     }
 
-    function getOfferInfo(uint256 id) internal view returns (order memory) {
-        (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
-            RubiconMarket(RubiconMarketAddress).getOffer(id);
-        order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
-        return offerInfo;
-    }
-
     function placeTrades(
         address bathAssetAddress,
         address bathQuoteAddress,
@@ -162,65 +155,6 @@ contract Strategy {
         outstandingPairIDs.push([newAskID, newBidID]);
     }
 
-    function cancelPartialFills(
-        address bathAssetAddress,
-        address bathQuoteAddress
-    ) internal {
-        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
-
-        for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
-            order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-            order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
-
-            if (
-                (offer1.pay_amt == 0 &&
-                    offer1.pay_gem == ERC20(0) &&
-                    offer1.buy_amt == 0 &&
-                    offer1.buy_gem == ERC20(0)) &&
-                (offer2.pay_amt != 0 &&
-                    offer2.pay_gem != ERC20(0) &&
-                    offer2.buy_amt != 0 &&
-                    offer2.buy_gem != ERC20(0))
-            ) {
-                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
-                emit Cancel(
-                    outstandingPairIDs[x][0],
-                    offer1.pay_gem,
-                    offer1.pay_amt
-                );
-                delete outstandingPairIDs[x][0];
-            } else if (
-                (offer1.pay_amt != 0 &&
-                    offer1.pay_gem != ERC20(0) &&
-                    offer1.buy_amt != 0 &&
-                    offer1.pay_gem != ERC20(0)) &&
-                (offer2.pay_amt == 0 &&
-                    offer2.pay_gem == ERC20(0) &&
-                    offer2.buy_amt == 0 &&
-                    offer2.buy_gem == ERC20(0))
-            ) {
-                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
-                emit Cancel(
-                    outstandingPairIDs[x][1],
-                    offer2.pay_gem,
-                    offer2.pay_amt
-                );
-                delete outstandingPairIDs[x][1];
-            } else if (
-                (offer1.pay_amt != 0 &&
-                    offer1.pay_gem != ERC20(0) &&
-                    offer1.buy_amt != 0 &&
-                    offer1.pay_gem != ERC20(0)) &&
-                (offer2.pay_amt != 0 &&
-                    offer2.pay_gem != ERC20(0) &&
-                    offer2.buy_amt != 0 &&
-                    offer2.buy_gem != ERC20(0))
-            ) {
-                delete outstandingPairIDs[x];
-            }
-        }
-    }
-
     function execute(
         address underlyingAsset,
         address bathAssetAddress,
@@ -236,9 +170,6 @@ contract Strategy {
         require(askDenominator > 0);
         require(bidNumerator > 0);
         require(bidDenominator > 0);
-
-        // 1. Cancel Outstanding Orders
-        cancelPartialFills(bathAssetAddress, bathQuoteAddress);
 
         // 2. Place pairs trade
         placePairsTrade(

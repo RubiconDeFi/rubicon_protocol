@@ -1,4 +1,5 @@
 pragma solidity ^0.5.16;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
@@ -28,6 +29,7 @@ contract BathPair {
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event Cancel(uint256, ERC20, uint256);
+    event LogOffer(string, order);
 
     bool public initialized;
 
@@ -39,14 +41,14 @@ contract BathPair {
         address underlyingQuote;
         address bathQuoteAddress;
         uint256 askNumerator;
-        uint256 askDenominator; 
-        uint256 bidNumerator; 
-        uint256 bidDenominator; 
+        uint256 askDenominator;
+        uint256 bidNumerator;
+        uint256 bidDenominator;
         address strategist;
         uint256 timestamp;
     }
 
-        struct order {
+    struct order {
         uint256 pay_amt;
         ERC20 pay_gem;
         uint256 buy_amt;
@@ -82,6 +84,32 @@ contract BathPair {
             (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
+    }
+
+    // Takes the proposed bid and ask as a parameter - ensures that there is a spread and that ask price > best bid and
+    // bid price > best ask
+    function enforceSpread(uint askN, uint askD, uint bidN, uint bidD) internal {
+        // TODO: enforce a spread must exist
+        // TODO: enforce a bid must be less than best Ask (+ some spread) and an ask must be greater than best bid (+some spread)
+        uint bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(ERC20(underlyingAsset), ERC20(underlyingQuote));
+        uint bestBidID = RubiconMarket(RubiconMarketAddress).getBestOffer(ERC20(underlyingQuote), ERC20(underlyingAsset));
+ 
+        order memory bestAsk = getOfferInfo(bestAskID);
+        order memory bestBid = getOfferInfo(bestBidID);
+        emit LogOffer("bestAsk", bestAsk);
+        emit LogOffer("bestBid", bestBid);
+        emit LogNote("askN", askN);
+        emit LogNote("askD", askD);
+        emit LogNote("bidN", bidN);
+        emit LogNote("bidD", bidD);
+
+        // Goal is for (askNumerator / askDenominator) < (bestBid.buy_amt / bestBid.pay_amt)
+        // Therefore: askNumerator * bestBid.pay_amt < bestBid.buy_amt * askDenominator
+        require((askN * bestBid.pay_amt) < (bestBid.buy_amt * askD), "ask price is not greater than the best bid");
+
+        // Goal is for (bestAsk.pay_amt / bestAsk.buy_amt) < (bidNumerator / bidDenominator)
+        // Therefore: bestAskNumerator * bidDenominator < bidNumerator * bestAskDenominator
+        require((bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN), "bid price is not less than the best ask");
     }
 
     modifier onlyApprovedStrategy(address targetStrategy) {
@@ -212,8 +240,7 @@ contract BathPair {
         );
     }
 
-        function cancelPartialFills(
-    ) internal {
+    function cancelPartialFills() internal {
         require(outstandingPairIDs.length < 10, "too many outstanding pairs");
 
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
@@ -269,7 +296,7 @@ contract BathPair {
         }
     }
 
-        function getOfferInfo(uint256 id) internal view returns (order memory) {
+    function getOfferInfo(uint256 id) internal view returns (order memory) {
         (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
             RubiconMarket(RubiconMarketAddress).getOffer(id);
         order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
@@ -283,13 +310,12 @@ contract BathPair {
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
     ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+        require(askNumerator > 0 && askDenominator > 0 && bidNumerator > 0 && bidDenominator > 0);
         // TODO: enforce order size as a proportion of inventory
-        // TODO: enforce a spread must exist
-        // TODO: enforce a bid must be less than best Ask (+ some spread) and an ask must be greater than best bid (+some spread)
-        
+        enforceSpread(askNumerator, askDenominator, bidNumerator, bidDenominator);
         // 1. Cancel Outstanding Orders
         cancelPartialFills();
-        
+
         // 2. Strategist executes a pair trade
         IStrategy(targetStrategy).execute(
             underlyingAsset,
@@ -318,8 +344,8 @@ contract BathPair {
                 now
             )
         );
-        
-        // Return any filled yield to the appropriate bathToken
+
+        // 4. Return any filled yield to the appropriate bathToken/liquidity pool
         rebalancePair();
     }
 }
