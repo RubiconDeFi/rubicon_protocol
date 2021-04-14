@@ -119,26 +119,29 @@ contract BathToken is IBathToken {
     }
 
     function withdraw(address from, uint256 value) external onlyPair {
-        // add security checks
         IERC20(underlyingToken).transfer(from, value);
         _burn(from, value);
-        // TODO: emit
     }
 
-    function rebalance(address sisterBath, address underlying) external onlyPair {
+    function rebalance(address sisterBath, address underlying)
+        external
+        onlyPair
+    {
         IERC20(underlying).transfer(
             sisterBath,
             IERC20(underlying).balanceOf(address(this))
         );
     }
 
-    function mint(address to, uint256 value) external onlyPair {
-        require(IERC20(underlyingToken).balanceOf(msg.sender) >= value, "not enough token to mint");
+    // TODO: implement a burn function that pays a user yield
+
+    function mint(address to, uint256 value) external {
+        require(
+            IERC20(underlyingToken).balanceOf(msg.sender) >= value,
+            "not enough token to mint"
+        );
         IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
         _mint(to, value);
-        // IERC20(underlyingToken).approve(msg.sender, value);
-
-        // TODO: emit
     }
 
     function _mint(address to, uint256 value) internal {

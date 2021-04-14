@@ -208,7 +208,7 @@ contract BathPair {
 
         IBathToken(bathAssetAddress).mint(msg.sender, assetAmount);
         IBathToken(bathQuoteAddress).mint(msg.sender, quoteAmount);
- 
+
         //filler for return values
         return (assetAmount, quoteAmount);
     }
@@ -244,12 +244,18 @@ contract BathPair {
             ERC20(underlyingAsset).balanceOf(bathQuoteAddress);
 
         if (bathAssetYield > 0) {
-            BathToken(bathAssetAddress).rebalance(bathQuoteAddress, underlyingQuote);
+            BathToken(bathAssetAddress).rebalance(
+                bathQuoteAddress,
+                underlyingQuote
+            );
             emit LogYield(bathQuoteAddress, bathAssetYield);
         }
 
         if (bathQuoteYield > 0) {
-            BathToken(bathQuoteAddress).rebalance(bathAssetAddress, underlyingAsset);
+            BathToken(bathQuoteAddress).rebalance(
+                bathAssetAddress,
+                underlyingAsset
+            );
             emit LogYield(bathAssetAddress, bathQuoteYield);
         }
 
