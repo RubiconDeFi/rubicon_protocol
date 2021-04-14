@@ -59,10 +59,6 @@ contract("Rubicon Pools Test", async function(accounts) {
             assert.equal(await bathAssetInstance.symbol(), "bathWETH");
             assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
         });
-        it("bathTokens are auth'd to the pair", async function() {
-            assert.equal(await bathPairInstance.address, await bathAssetInstance.pair());
-            assert.equal(await bathPairInstance.address, await bathQuoteInstance.pair());
-        });
         it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
             await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
             await WETHInstance.approve(bathPairInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});

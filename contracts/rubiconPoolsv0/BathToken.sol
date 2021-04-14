@@ -10,7 +10,6 @@ import "./BathHouse.sol";
 contract BathToken is IBathToken {
     using SafeMath for uint256;
 
-    address public pair;
     string public symbol;
     address public underlyingToken;
     address public RubiconMarketAddress;
@@ -48,10 +47,9 @@ contract BathToken is IBathToken {
         string memory bathName,
         address token,
         address market,
-        address _bathHouse,
+        address _bathHouse
     ) public {
         require(!initialized);
-        pair = msg.sender;
         symbol = bathName;
         underlyingToken = token;
         RubiconMarketAddress = market;
@@ -75,8 +73,12 @@ contract BathToken is IBathToken {
         initialized = true;
     }
 
+    // TODO: make only pair check that it is a registered pair
     modifier onlyPair {
-        require(msg.sender == pair);
+        require(
+            BathHouse(bathHouse).isApprovedPair(msg.sender) == true,
+            "not an approved pair - bathToken"
+        );
         _;
     }
 
@@ -132,7 +134,7 @@ contract BathToken is IBathToken {
 
     function mint(address to, uint256 value) external onlyPair {
         _mint(to, value);
-        IERC20(underlyingToken).approve(pair, value);
+        IERC20(underlyingToken).approve(msg.sender, value);
         // TODO: emit
     }
 

@@ -164,8 +164,7 @@ contract BathPair {
             string(abi.encodePacked("bath", (assetName))),
             asset,
             market,
-            bathHouse,
-            quote
+            bathHouse
         );
         bathAssetAddress = address(bathAsset);
 
@@ -181,8 +180,7 @@ contract BathPair {
                 string(abi.encodePacked("bath", (quoteName))),
                 quote,
                 market,
-                bathHouse,
-                asset
+                bathHouse
             );
             bathQuoteAddress = address(bathQuote);
         }
@@ -274,6 +272,7 @@ contract BathPair {
 
     function cancelPartialFills() internal {
         // TODO: make this constraint variable
+        // ** Optimistically assume that any partialFill or totalFill resulted in yield?
         require(outstandingPairIDs.length < 10, "too many outstanding pairs");
 
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
