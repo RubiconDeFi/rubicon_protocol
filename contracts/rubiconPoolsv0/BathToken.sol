@@ -14,7 +14,6 @@ contract BathToken is IBathToken {
     string public symbol;
     address public underlyingToken;
     address public RubiconMarketAddress;
-    address public pairedUnderlying;
 
     // admin
     address public bathHouse;
@@ -50,7 +49,6 @@ contract BathToken is IBathToken {
         address token,
         address market,
         address _bathHouse,
-        address _paired
     ) public {
         require(!initialized);
         pair = msg.sender;
@@ -58,7 +56,6 @@ contract BathToken is IBathToken {
         underlyingToken = token;
         RubiconMarketAddress = market;
         bathHouse = _bathHouse;
-        pairedUnderlying = _paired;
 
         uint256 chainId;
         assembly {
@@ -126,10 +123,10 @@ contract BathToken is IBathToken {
         // TODO: emit
     }
 
-    function rebalance(address sisterBath) external onlyPair {
-        IERC20(pairedUnderlying).transfer(
+    function rebalance(address sisterBath, address underlying) external onlyPair {
+        IERC20(underlying).transfer(
             sisterBath,
-            IERC20(pairedUnderlying).balanceOf(address(this))
+            IERC20(underlying).balanceOf(address(this))
         );
     }
 
