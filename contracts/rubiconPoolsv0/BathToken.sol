@@ -86,17 +86,14 @@ contract BathToken is IBathToken {
     modifier onlyApprovedStrategy() {
         require(
             BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
-            "not an approved sender"
+            "not an approved strategy - bathToken"
         );
         _;
     }
 
-    // Should this be auth'd to pair or strategy
-    function cancel(uint256 id) external onlyApprovedStrategy {
+    function cancel(uint256 id) external onlyPair {
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
-
-    //onlyRubiconMarket - functionality that only allows the smart contract to send funds to the live Rubicon Market instance
 
     // function that places a bid/ask in the orderbook for a given pair
     function placeOffer(

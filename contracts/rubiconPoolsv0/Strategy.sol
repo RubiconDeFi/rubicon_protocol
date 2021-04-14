@@ -99,7 +99,14 @@ contract Strategy {
         // emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
         // emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
 
-        placeTrades(bathAssetAddress, bathQuoteAddress, ask, bid, underlyingAsset, underlyingQuote);
+        placeTrades(
+            bathAssetAddress,
+            bathQuoteAddress,
+            ask,
+            bid,
+            underlyingAsset,
+            underlyingQuote
+        );
     }
 
     function getNewOrders(

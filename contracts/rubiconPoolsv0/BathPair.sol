@@ -131,7 +131,7 @@ contract BathPair {
     modifier onlyApprovedStrategy(address targetStrategy) {
         require(
             BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true,
-            "not an approved sender"
+            "not an approved strategy - bathPair"
         );
         _;
     }
@@ -256,7 +256,11 @@ contract BathPair {
         );
     }
 
-    function addOutstandingPair(uint[2] calldata IDPair) external onlyApprovedStrategy(msg.sender) {
+    function addOutstandingPair(uint256[2] calldata IDPair) external {
+        require(
+            BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
+            "not an approved strategy"
+        );
         require(IDPair.length == 2);
         outstandingPairIDs.push(IDPair);
     }
