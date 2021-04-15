@@ -428,8 +428,6 @@ contract BathPair {
         );
 
         // 4. Strategist trade is recorded so they can get paid and the trade is logged for time
-        // TODO: Add logic to pay strategists
-
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         strategistRecord.push(
             StrategistTrade(
