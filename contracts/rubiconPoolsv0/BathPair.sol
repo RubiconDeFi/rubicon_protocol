@@ -291,6 +291,11 @@ contract BathPair {
         );
     }
 
+    // function logYield(uint id, address bath) internal {
+
+    //     BathToken(bath).logYield(yieldAmount, timestamp);
+    // }
+
     function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
             BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
