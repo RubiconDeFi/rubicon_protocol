@@ -29,7 +29,7 @@ jobs:
           npm install -g ganache-cli
 
       - name: Start Ganache for Layer 1
-        run: ganache-cli --gasLimit=0x1fffffffffffff &
+        run: ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize &
         # Backgrounding ganache-cli like this should not cause timing issues, and
         # is recommended by https://soliditydeveloper.com/continuous-integration
         # For the error "Something went wrong while attempting to connect to the
