@@ -144,6 +144,16 @@ contract BathToken is IBathToken {
         _mint(to, value);
     }
 
+    // TODO: add a burn test
+    function burn(uint256 value) external {
+        require(
+            balanceOf[msg.sender] >= value,
+            "not enough token to burn"
+        );
+        IERC20(underlyingToken).transfer(msg.sender, value);
+        _burn(msg.sender, value);
+    }
+
     function _mint(address to, uint256 value) internal {
         totalSupply = totalSupply.add(value);
         balanceOf[to] = balanceOf[to].add(value);
