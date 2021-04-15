@@ -29,7 +29,7 @@ contract BathPair {
     event LogNote(string, uint256);
     event Cancel(uint256, ERC20, uint256);
     event LogOffer(string, order);
-    event LogYield(address, uint256);
+    event LogGrossYield(address, uint256);
 
     bool public initialized;
 
@@ -268,7 +268,7 @@ contract BathPair {
                 bathQuoteAddress,
                 underlyingQuote
             );
-            emit LogYield(bathQuoteAddress, bathAssetYield);
+            emit LogGrossYield(bathQuoteAddress, bathAssetYield);
         }
 
         if (bathQuoteYield > 0) {
@@ -276,7 +276,7 @@ contract BathPair {
                 bathAssetAddress,
                 underlyingAsset
             );
-            emit LogYield(bathAssetAddress, bathQuoteYield);
+            emit LogGrossYield(bathAssetAddress, bathQuoteYield);
         }
 
         // Return settled trades to the appropriate bathToken
