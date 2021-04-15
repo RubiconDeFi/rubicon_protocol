@@ -174,7 +174,7 @@ contract Strategy {
         uint256 askDenominator,
         uint256 bidNumerator,
         uint256 bidDenominator
-    ) external onlyPairs {
+    ) external onlyPairs returns (uint, uint) {
         // main function to chain the actions of a single strategic market making transaction
         require(askNumerator > 0);
         require(askDenominator > 0);

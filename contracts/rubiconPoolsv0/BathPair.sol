@@ -18,8 +18,6 @@ contract BathPair {
 
     address public RubiconMarketAddress;
 
-    uint256[] public outstandingAskIDs;
-    uint256[] public outstandingBidIDs;
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
@@ -38,6 +36,7 @@ contract BathPair {
     // TODO: make this a variable with setter
     uint256 public timeDelay = 3 days;
 
+    mapping (uint => StrategistTrade) public strategistRecordMapping;
     StrategistTrade[] public strategistRecord;
 
     struct StrategistTrade {
@@ -51,6 +50,8 @@ contract BathPair {
         uint256 bidDenominator;
         address strategist;
         uint256 timestamp;
+        uint256 midpointPrice;
+        uint[3] tradeIDs;
     }
 
     struct order {
@@ -89,6 +90,25 @@ contract BathPair {
             (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
+    }
+
+    function getMidpointPrice(address asset, address quote) internal returns (uint) {
+        uint256 bestAskID =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20(underlyingAsset),
+                ERC20(underlyingQuote)
+            );
+        uint256 bestBidID =
+            RubiconMarket(RubiconMarketAddress).getBestOffer(
+                ERC20(underlyingQuote),
+                ERC20(underlyingAsset)
+            );
+
+        order memory bestAsk = getOfferInfo(bestAskID);
+        order memory bestBid = getOfferInfo(bestBidID);
+        uint midpoint = ((bestAsk.buy_amt / bestAsk.pay_amt) + (bestBid.pay_amt / bestBid.buy_amt)) / 2;
+        emit LogNote("midpoint calculated:", midpoint);
+        return midpoint;
     }
 
     // Takes the proposed bid and ask as a parameter - ensures that there is a spread and that ask price > best bid and
@@ -364,6 +384,12 @@ contract BathPair {
         return offerInfo;
     }
 
+    // TODO: make sure this works as intended
+    function newTradeIDs() internal returns (uint[3] memory) {
+        require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
+        return outstandingPairIDs[outstandingPairIDs.length - 1];
+    }
+
     function executeStrategy(
         address targetStrategy,
         uint256 askNumerator, // Quote / Asset
@@ -403,6 +429,8 @@ contract BathPair {
 
         // 4. Strategist trade is recorded so they can get paid and the trade is logged for time
         // TODO: Add logic to pay strategists
+
+        // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         strategistRecord.push(
             StrategistTrade(
                 underlyingAsset,
@@ -414,7 +442,9 @@ contract BathPair {
                 bidNumerator,
                 bidDenominator,
                 msg.sender,
-                now
+                now,
+                getMidpointPrice(underlyingAsset, underlyingQuote),
+                newTradeIDs()
             )
         );
 
