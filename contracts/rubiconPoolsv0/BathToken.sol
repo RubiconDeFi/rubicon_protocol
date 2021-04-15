@@ -25,7 +25,7 @@ contract BathToken is IBathToken {
 
     // This tracks cumulative yield over time [amount, timestmap]
     // amount should be token being passed from another bathToken to this one (pair) - market price at the time
-    uint[2][] public yieldTracker;
+    uint256[2][] public yieldTracker;
 
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -148,19 +148,20 @@ contract BathToken is IBathToken {
     // Function that is called to log yield over time
     // This function should track cumulative yield at a given timestamp
     // e.g. [5 USDC, 2:30pm], [7 USDC, 2:45pm]
-    // This way we can log when a user enters the pool (mint) and when they exit give them: 
+    // This way we can log when a user enters the pool (mint) and when they exit give them:
     // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
     // TODO: add a test for yield tracking
-    function logYield(uint yieldAmount, uint timestamp) external onlyPair {
-        yieldTracker.push([yieldAmount, timestamp]);
+    function logYield(uint256 yieldAmount, uint256 timestamp)
+        external
+        onlyPair
+    {
+        uint oldTotal = yieldTracker[yieldTracker.length - 1][0];
+        yieldTracker.push([yieldAmount + oldTotal, timestamp]);
     }
 
     // TODO: add a burn test
     function burn(uint256 value) external {
-        require(
-            balanceOf[msg.sender] >= value,
-            "not enough token to burn"
-        );
+        require(balanceOf[msg.sender] >= value, "not enough token to burn");
         IERC20(underlyingToken).transfer(msg.sender, value);
         _burn(msg.sender, value);
     }

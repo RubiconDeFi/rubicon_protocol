@@ -37,7 +37,7 @@ contract BathPair {
     uint256 public timeDelay = 3 days;
 
     // Unique identifier is ID OF THE ASK***
-    mapping (uint => StrategistTrade) public strategistRecordMapping;
+    mapping(uint256 => StrategistTrade) public strategistRecordMapping;
     StrategistTrade[] public strategistRecord;
 
     struct StrategistTrade {
@@ -52,7 +52,7 @@ contract BathPair {
         address strategist;
         uint256 timestamp;
         uint256 midpointPrice;
-        uint[3] tradeIDs;
+        uint256[3] tradeIDs;
     }
 
     struct order {
@@ -93,7 +93,10 @@ contract BathPair {
         );
     }
 
-    function getMidpointPrice(address asset, address quote) internal returns (uint) {
+    function getMidpointPrice(address asset, address quote)
+        internal
+        returns (uint256)
+    {
         uint256 bestAskID =
             RubiconMarket(RubiconMarketAddress).getBestOffer(
                 ERC20(underlyingAsset),
@@ -107,7 +110,9 @@ contract BathPair {
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
-        uint midpoint = ((bestAsk.buy_amt / bestAsk.pay_amt) + (bestBid.pay_amt / bestBid.buy_amt)) / 2;
+        uint256 midpoint =
+            ((bestAsk.buy_amt / bestAsk.pay_amt) +
+                (bestBid.pay_amt / bestBid.buy_amt)) / 2;
         emit LogNote("midpoint calculated:", midpoint);
         return midpoint;
     }
@@ -291,10 +296,31 @@ contract BathPair {
         );
     }
 
-    // function logYield(uint id, address bath) internal {
-
-    //     BathToken(bath).logYield(yieldAmount, timestamp);
-    // }
+    function logYield(
+        uint256 id,
+        uint256 askIDIdentifier,
+        address bath
+    ) internal {
+        StrategistTrade memory data = strategistRecordMapping[askIDIdentifier];
+        if (askIDIdentifier == id) {
+            // The ask was filled for yield - yield Amount is in asset
+            // ((Filled ask Price / midpoint price at that time) - 1) * askNumerator
+            uint256 yieldPriceDelta =
+                data.midpointPrice - (data.askDenominator / data.askNumerator);
+            uint256 yieldAmount =
+                (yieldPriceDelta * data.askNumerator) / data.askDenominator;
+            emit LogNote("yieldAmount in logYield 301", yieldAmount);
+            BathToken(bath).logYield(yieldAmount, now);
+        } else {
+            // The bid was filled for yield
+            uint256 yieldPriceDelta =
+                (data.bidNumerator / data.bidDenominator) - data.midpointPrice;
+            uint256 yieldAmount =
+                (yieldPriceDelta * data.bidDenominator) / data.bidNumerator;
+            emit LogNote("yieldAmount in logYield 301", yieldAmount);
+            BathToken(bath).logYield(yieldAmount, now);
+        }
+    }
 
     function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
@@ -352,7 +378,6 @@ contract BathPair {
                 );
                 delete outstandingPairIDs[x];
                 // logYield(outstandingPairIDs[x][1]);
-
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -383,8 +408,8 @@ contract BathPair {
                     );
                     delete outstandingPairIDs[x];
                 } else {
-                // logYield(outstandingPairIDs[x][1]);
-                // logYield(outstandingPairIDs[x][0]);
+                    // logYield(outstandingPairIDs[x][1]);
+                    // logYield(outstandingPairIDs[x][0]);
                 }
             }
         }
@@ -398,7 +423,7 @@ contract BathPair {
     }
 
     // TODO: make sure this works as intended
-    function newTradeIDs() internal returns (uint[3] memory) {
+    function newTradeIDs() internal returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
