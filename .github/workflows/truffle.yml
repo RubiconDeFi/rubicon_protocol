@@ -38,6 +38,9 @@ jobs:
       - name: Run Core Protocol Tests
         run: npm run test:protocol
       
+      - name: Run Rubicon Pools Tests
+        run: npm run test:pools
+
       - name: OVM Compilation
         run: npm run compile:ovm
       
