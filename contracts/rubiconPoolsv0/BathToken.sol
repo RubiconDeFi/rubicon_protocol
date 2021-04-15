@@ -23,6 +23,10 @@ contract BathToken is IBathToken {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
+    // This tracks cumulative yield over time [amount, timestmap]
+    // amount should be token being passed from another bathToken to this one (pair) - market price at the time
+    uint[2][] public yieldTracker;
+
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH =
@@ -73,7 +77,6 @@ contract BathToken is IBathToken {
         initialized = true;
     }
 
-    // TODO: make only pair check that it is a registered pair
     modifier onlyPair {
         require(
             BathHouse(bathHouse).isApprovedPair(msg.sender) == true,
@@ -133,8 +136,6 @@ contract BathToken is IBathToken {
         );
     }
 
-    // TODO: implement a burn function that pays a user yield
-
     function mint(address to, uint256 value) external {
         require(
             IERC20(underlyingToken).balanceOf(msg.sender) >= value,
@@ -142,6 +143,16 @@ contract BathToken is IBathToken {
         );
         IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
         _mint(to, value);
+    }
+
+    // Function that is called to log yield over time
+    // This function should track cumulative yield at a given timestamp
+    // e.g. [5 USDC, 2:30pm], [7 USDC, 2:45pm]
+    // This way we can log when a user enters the pool (mint) and when they exit give them: 
+    // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
+    // TODO: add a test for yield tracking
+    function logYield(uint yieldAmount, uint timestamp) external onlyPair {
+        yieldTracker.push([yieldAmount, timestamp]);
     }
 
     // TODO: add a burn test
