@@ -36,6 +36,7 @@ contract BathPair {
     // TODO: make this a variable with setter
     uint256 public timeDelay = 3 days;
 
+    // Unique identifier is ID OF THE ASK***
     mapping (uint => StrategistTrade) public strategistRecordMapping;
     StrategistTrade[] public strategistRecord;
 
@@ -326,6 +327,8 @@ contract BathPair {
                     offer1.pay_amt
                 );
                 delete outstandingPairIDs[x];
+                // emit LogNote("Yield:", null);
+                // logYield(outstandingPairIDs[x][0]);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -343,6 +346,8 @@ contract BathPair {
                     offer2.pay_amt
                 );
                 delete outstandingPairIDs[x];
+                // logYield(outstandingPairIDs[x][1]);
+
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -372,6 +377,9 @@ contract BathPair {
                         offer2.pay_amt
                     );
                     delete outstandingPairIDs[x];
+                } else {
+                // logYield(outstandingPairIDs[x][1]);
+                // logYield(outstandingPairIDs[x][0]);
                 }
             }
         }
