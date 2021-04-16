@@ -468,7 +468,7 @@ contract BathPair {
             bidDenominator
         );
 
-        // 3. Strategist executes a pair trade
+        // 2. Strategist executes a pair trade
         IStrategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
@@ -480,7 +480,7 @@ contract BathPair {
             bidDenominator // bid buy_amt
         );
 
-        // 4. Strategist trade is recorded so they can get paid and the trade is logged for time
+        // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         StrategistTrade memory newTrades =
             StrategistTrade(
@@ -500,7 +500,7 @@ contract BathPair {
         strategistRecord.push(newTrades);
         strategistRecordMapping[newTradeIDs()[0]] = newTrades;
 
-        // 2. Cancel Outstanding Orders
+        // 4. Cancel Outstanding Orders
         cancelPartialFills();
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool
