@@ -93,10 +93,7 @@ contract BathPair {
         );
     }
 
-    function getMidpointPrice(address asset, address quote)
-        internal
-        returns (uint256)
-    {
+    function getMidpointPrice() internal returns (uint256) {
         uint256 bestAskID =
             RubiconMarket(RubiconMarketAddress).getBestOffer(
                 ERC20(underlyingAsset),
@@ -296,30 +293,35 @@ contract BathPair {
         );
     }
 
+    // Calls logYield on the bathToken to add the recognized trade's yield
     function logYield(
         uint256 id,
-        uint256 askIDIdentifier,
+        uint256 askIDIdentifier, //askID always passed for strategistRecordMapping
         address bath
     ) internal {
-        StrategistTrade memory data = strategistRecordMapping[askIDIdentifier];
-        if (askIDIdentifier == id) {
-            // The ask was filled for yield - yield Amount is in asset
-            // ((Filled ask Price / midpoint price at that time) - 1) * askNumerator
-            uint256 yieldPriceDelta =
-                data.midpointPrice - (data.askDenominator / data.askNumerator);
-            uint256 yieldAmount =
-                (yieldPriceDelta * data.askNumerator) / data.askDenominator;
-            emit LogNote("yieldAmount in logYield 301", yieldAmount);
-            BathToken(bath).logYield(yieldAmount, now);
-        } else {
-            // The bid was filled for yield
-            uint256 yieldPriceDelta =
-                (data.bidNumerator / data.bidDenominator) - data.midpointPrice;
-            uint256 yieldAmount =
-                (yieldPriceDelta * data.bidDenominator) / data.bidNumerator;
-            emit LogNote("yieldAmount in logYield 301", yieldAmount);
-            BathToken(bath).logYield(yieldAmount, now);
-        }
+        // StrategistTrade memory data = strategistRecordMapping[askIDIdentifier];
+        // if (askIDIdentifier == id) {
+        //     // The ask was filled for yield - yield Amount is in asset
+        //     // ((Filled ask Price / midpoint price at that time) - 1) * askNumerator
+        //     uint256 yieldPriceDelta =
+        //         data.midpointPrice - (data.askDenominator / data.askNumerator);
+        //     uint256 yieldAmount =
+        //         (yieldPriceDelta * data.askNumerator) / data.askDenominator;
+        //     // emit LogNote("yieldAmount in logYield 301", yieldAmount);
+        //     BathToken(bath).logYield(yieldAmount, now);
+        // } else {
+        //     // The bid was filled for yield
+        //     // emit LogNote("1", data.bidNumerator);
+        //     // emit LogNote("2", data.bidDenominator);
+        //     // emit LogNote("3", data.midpointPrice);
+        //     uint256 yieldPriceDelta =
+        //         (data.bidNumerator / data.bidDenominator) - data.midpointPrice;
+        //     uint256 yieldAmount =
+        //         (yieldPriceDelta * data.bidDenominator) / data.bidNumerator;
+        //     // uint yieldAmount = 1;
+        //     // emit LogNote("yieldAmount in logYield 301", yieldAmount);
+        //     BathToken(bath).logYield(yieldAmount, now);
+        // }
     }
 
     function addOutstandingPair(uint256[3] calldata IDPair) external {
@@ -359,7 +361,11 @@ contract BathPair {
                 );
                 delete outstandingPairIDs[x];
                 // emit LogNote("Yield:", null);
-                // logYield(outstandingPairIDs[x][0]);
+                logYield(
+                    outstandingPairIDs[x][0],
+                    outstandingPairIDs[x][0],
+                    bathAssetAddress
+                );
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -377,7 +383,11 @@ contract BathPair {
                     offer2.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                // logYield(outstandingPairIDs[x][1]);
+                logYield(
+                    outstandingPairIDs[x][0],
+                    outstandingPairIDs[x][1],
+                    bathQuoteAddress
+                );
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -408,8 +418,16 @@ contract BathPair {
                     );
                     delete outstandingPairIDs[x];
                 } else {
-                    // logYield(outstandingPairIDs[x][1]);
-                    // logYield(outstandingPairIDs[x][0]);
+                    logYield(
+                        outstandingPairIDs[x][1],
+                        outstandingPairIDs[x][1],
+                        bathQuoteAddress
+                    );
+                    logYield(
+                        outstandingPairIDs[x][0],
+                        outstandingPairIDs[x][1],
+                        bathQuoteAddress
+                    );
                 }
             }
         }
@@ -450,9 +468,6 @@ contract BathPair {
             bidDenominator
         );
 
-        // 2. Cancel Outstanding Orders
-        cancelPartialFills();
-
         // 3. Strategist executes a pair trade
         IStrategy(targetStrategy).execute(
             underlyingAsset,
@@ -467,7 +482,7 @@ contract BathPair {
 
         // 4. Strategist trade is recorded so they can get paid and the trade is logged for time
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
-        strategistRecord.push(
+        StrategistTrade memory newTrades =
             StrategistTrade(
                 underlyingAsset,
                 bathAssetAddress,
@@ -479,10 +494,14 @@ contract BathPair {
                 bidDenominator,
                 msg.sender,
                 now,
-                getMidpointPrice(underlyingAsset, underlyingQuote),
+                getMidpointPrice(),
                 newTradeIDs()
-            )
-        );
+            );
+        strategistRecord.push(newTrades);
+        strategistRecordMapping[newTradeIDs()[0]] = newTrades;
+
+        // 2. Cancel Outstanding Orders
+        cancelPartialFills();
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool
         rebalancePair();

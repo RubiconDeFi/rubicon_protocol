@@ -155,7 +155,7 @@ contract BathToken is IBathToken {
         external
         onlyPair
     {
-        uint oldTotal = yieldTracker[yieldTracker.length - 1][0];
+        uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
         yieldTracker.push([yieldAmount + oldTotal, timestamp]);
     }
 
