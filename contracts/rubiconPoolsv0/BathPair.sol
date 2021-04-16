@@ -481,8 +481,9 @@ contract BathPair {
         );
 
         // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
-        // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time    
-        strategistRecord.push(StrategistTrade(
+        // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
+        strategistRecord.push(
+            StrategistTrade(
                 underlyingAsset,
                 bathAssetAddress,
                 underlyingQuote,
@@ -495,7 +496,8 @@ contract BathPair {
                 now,
                 getMidpointPrice(),
                 newTradeIDs()
-            ));
+            )
+        );
 
         // 4. Cancel Outstanding Orders
         cancelPartialFills();
