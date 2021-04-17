@@ -38,7 +38,8 @@ contract BathPair {
 
     // Maps a trade ID to each of their strategists
     mapping(uint256 => address) public ID2strategist;
-    mapping(address => uint256) public strategist2Fills;
+    mapping(address => uint256) public strategist2FillsAsset;
+    mapping(address => uint256) public strategist2FillsQuote;
     StrategistTrade[] public strategistRecord;
 
     struct StrategistTrade {
@@ -293,6 +294,10 @@ contract BathPair {
         );
     }
 
+    // function strategistBounty() external {
+
+    // }
+
     function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
             BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
@@ -303,11 +308,16 @@ contract BathPair {
     }
 
     // orderID of the fill
-    // only log fills for each strategist
-    function logFill(uint256 orderID) internal {
+    // only log fills for each strategist - needs to be asset specific
+    // isAssetFill are *quotes* that result in asset yield
+    function logFill(uint256 orderID, bool isAssetFill) internal {
         // Goal is to map a fill to a strategist
         address strategist = ID2strategist[orderID];
-        strategist2Fills[strategist] += 1;
+        if (isAssetFill) {
+            strategist2FillsAsset[strategist] += 1;
+        } else {
+            strategist2FillsQuote[strategist] += 1;
+        }
     }
 
     function cancelPartialFills() internal {
@@ -337,7 +347,8 @@ contract BathPair {
                     offer1.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                logFill(outstandingPairIDs[x][0]);
+                // true if quote fills -> asset yield
+                logFill(outstandingPairIDs[x][0], false);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -355,7 +366,7 @@ contract BathPair {
                     offer2.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                logFill(outstandingPairIDs[x][1]);
+                logFill(outstandingPairIDs[x][1], true);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -386,8 +397,8 @@ contract BathPair {
                     );
                     delete outstandingPairIDs[x];
                 } else {
-                    logFill(outstandingPairIDs[x][1]);
-                    logFill(outstandingPairIDs[x][0]);
+                    logFill(outstandingPairIDs[x][1], false);
+                    logFill(outstandingPairIDs[x][0], true);
                 }
             }
         }
