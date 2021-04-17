@@ -41,6 +41,9 @@ contract BathPair {
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
     StrategistTrade[] public strategistRecord;
+    uint internal totalAssetFills;
+    uint internal totalQuoteFills;
+
 
     struct StrategistTrade {
         address underlyingAsset;
@@ -294,9 +297,15 @@ contract BathPair {
         );
     }
 
-    // function strategistBounty() external {
-
-    // }
+    // function where strategists claim rewards proportional to their quantity of fills
+    function strategistBootyClaim() external {
+        uint fillCountA = strategist2FillsAsset[msg.sender];
+        uint fillCountQ = strategist2FillsQuote[msg.sender];
+        if (fillCountA > 0) {
+            uint booty = fillCountA * ERC20(underlyingAsset).balanceOf(address(this)) / totalAssetFills;
+            IERC20(underlyingAsset).transfer(msg.sender, booty);
+        }
+    }
 
     function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
@@ -315,6 +324,7 @@ contract BathPair {
         address strategist = ID2strategist[orderID];
         if (isAssetFill) {
             strategist2FillsAsset[strategist] += 1;
+            totalAssetFills += 1;
         } else {
             strategist2FillsQuote[strategist] += 1;
         }
