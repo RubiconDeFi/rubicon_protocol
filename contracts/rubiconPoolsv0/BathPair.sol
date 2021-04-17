@@ -305,6 +305,10 @@ contract BathPair {
             uint booty = fillCountA * ERC20(underlyingAsset).balanceOf(address(this)) / totalAssetFills;
             IERC20(underlyingAsset).transfer(msg.sender, booty);
         }
+        if (fillCountQ > 0) {
+            uint booty = fillCountQ * ERC20(underlyingQuote).balanceOf(address(this)) / totalQuoteFills;
+            IERC20(underlyingQuote).transfer(msg.sender, booty);
+        }
     }
 
     function addOutstandingPair(uint256[3] calldata IDPair) external {
@@ -327,6 +331,7 @@ contract BathPair {
             totalAssetFills += 1;
         } else {
             strategist2FillsQuote[strategist] += 1;
+            totalQuoteFills += 1;
         }
     }
 
