@@ -293,37 +293,6 @@ contract BathPair {
         );
     }
 
-    // Calls logYield on the bathToken to add the recognized trade's yield
-    function logYield(
-        uint256 id,
-        uint256 askIDIdentifier, //askID always passed for strategistRecordMapping
-        address bath
-    ) internal {
-        StrategistTrade memory data = strategistRecordMapping[askIDIdentifier];
-        if (askIDIdentifier == id) {
-            // The ask was filled for yield - yield Amount is in asset
-            // ((Filled ask Price / midpoint price at that time) - 1) * askNumerator
-            uint256 yieldPriceDelta =
-                data.midpointPrice - (data.askDenominator / data.askNumerator);
-            uint256 yieldAmount =
-                (yieldPriceDelta * data.askNumerator) / data.askDenominator;
-            // emit LogNote("yieldAmount in logYield 301", yieldAmount);
-            BathToken(bath).logYield(yieldAmount, now);
-        } else {
-            // The bid was filled for yield
-            // emit LogNote("1", data.bidNumerator);
-            // emit LogNote("2", data.bidDenominator);
-            // emit LogNote("3", data.midpointPrice);
-            uint256 yieldPriceDelta =
-                (data.bidNumerator / data.bidDenominator) - data.midpointPrice;
-            uint256 yieldAmount =
-                (yieldPriceDelta * data.bidDenominator) / data.bidNumerator;
-            // uint yieldAmount = 1;
-            // emit LogNote("yieldAmount in logYield 301", yieldAmount);
-            BathToken(bath).logYield(yieldAmount, now);
-        }
-    }
-
     function addOutstandingPair(uint256[3] calldata IDPair) external {
         require(
             BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
@@ -494,7 +463,7 @@ contract BathPair {
                 bidDenominator,
                 msg.sender,
                 now,
-                getMidpointPrice(),
+                getMidpointPrice(), //is this needed?
                 newTradeIDs()
             )
         );

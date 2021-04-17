@@ -21,6 +21,7 @@ contract BathToken is IBathToken {
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
 
     // This tracks cumulative yield over time [amount, timestmap]
@@ -46,6 +47,7 @@ contract BathToken is IBathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     );
+    event LogYield(uint256 yield);
 
     function initialize(
         string memory bathName,
@@ -143,6 +145,11 @@ contract BathToken is IBathToken {
         );
         IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
         _mint(to, value);
+
+        diveInTheBath[msg.sender] = now;
+
+        // Time stamp and update yield
+        updateYield();
     }
 
     // Function that is called to log yield over time
@@ -151,17 +158,28 @@ contract BathToken is IBathToken {
     // This way we can log when a user enters the pool (mint) and when they exit give them:
     // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
     // TODO: add a test for yield tracking
-    function logYield(uint256 yieldAmount, uint256 timestamp)
-        external
-        onlyPair
-    {
+    function updateYield()
+        internal
+    {   
+        uint yieldAmount = IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
+        if (yieldTracker.length == 0) {
+            yieldTracker.push([yieldAmount, now]);
+           emit LogYield(yieldAmount);
+
+        }
+
         uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
-        yieldTracker.push([yieldAmount + oldTotal, timestamp]);
+        yieldTracker.push([yieldAmount + oldTotal, now]);
     }
 
     // TODO: add a burn test
     function burn(uint256 value) external {
         require(balanceOf[msg.sender] >= value, "not enough token to burn");
+        
+        // Determine underlying - issuedBath tokens
+        updateYield();
+
+        // Withdraw user's underlying and portion of yield if positive
         IERC20(underlyingToken).transfer(msg.sender, value);
         _burn(msg.sender, value);
     }
