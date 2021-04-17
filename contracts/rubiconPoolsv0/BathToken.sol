@@ -164,8 +164,8 @@ contract BathToken is IBathToken {
         uint yieldAmount = IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
         if (yieldTracker.length == 0) {
             yieldTracker.push([yieldAmount, now]);
-           emit LogYield(yieldAmount);
-
+            emit LogYield(yieldAmount);
+            return;
         }
 
         uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
