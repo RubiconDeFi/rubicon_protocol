@@ -429,6 +429,13 @@ contract BathPair {
     function getMaxOrderSize(address asset, address bathTokenAddress) public returns (uint) {
         require(asset == underlyingAsset || asset == underlyingQuote);
         uint underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
+        // if ratio = (assetBalance / propotional quote balance) > 1:
+        //      -Use dynamic order size for quote due to underweighting: n=-0.005 => MaxSize * e^(n*ratio)
+        // else: 
+        //      -Use dynamic order size for asset due to underweighting: ''
+
+        // return orderSize;
     } 
 
     // TODO: make sure this works as intended
@@ -451,7 +458,12 @@ contract BathPair {
                 bidNumerator > 0 &&
                 bidDenominator > 0
         );
-        // TODO: enforce order size as a proportion of inventory -- inventory management
+
+        // Enforce dynamic ordersizing 
+        // require(askNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
+        // require(bidNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
+
+
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(
             askNumerator,
