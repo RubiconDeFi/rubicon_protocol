@@ -304,7 +304,7 @@ contract BathPair {
 
     // orderID of the fill
     // only log fills for each strategist
-    function logFill(uint orderID) internal {
+    function logFill(uint256 orderID) internal {
         // Goal is to map a fill to a strategist
         address strategist = ID2strategist[orderID];
         strategist2Fills[strategist] += 1;
@@ -337,10 +337,7 @@ contract BathPair {
                     offer1.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                // emit LogNote("Yield:", null);
-                logFill(
-                    outstandingPairIDs[x][0]
-                );
+                logFill(outstandingPairIDs[x][0]);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -358,9 +355,7 @@ contract BathPair {
                     offer2.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                logFill(
-                    outstandingPairIDs[x][1]
-                );
+                logFill(outstandingPairIDs[x][1]);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -391,12 +386,8 @@ contract BathPair {
                     );
                     delete outstandingPairIDs[x];
                 } else {
-                    logFill(
-                        outstandingPairIDs[x][1]
-                    );
-                    logFill(
-                        outstandingPairIDs[x][0]
-                    );
+                    logFill(outstandingPairIDs[x][1]);
+                    logFill(outstandingPairIDs[x][0]);
                 }
             }
         }

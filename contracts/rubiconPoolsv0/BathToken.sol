@@ -158,10 +158,9 @@ contract BathToken is IBathToken {
     // This way we can log when a user enters the pool (mint) and when they exit give them:
     // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
     // TODO: add a test for yield tracking
-    function updateYield()
-        internal
-    {   
-        uint yieldAmount = IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
+    function updateYield() internal {
+        uint256 yieldAmount =
+            IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
         if (yieldTracker.length == 0) {
             yieldTracker.push([yieldAmount, now]);
             emit LogYield(yieldAmount);
@@ -175,18 +174,18 @@ contract BathToken is IBathToken {
     // TODO: add a burn test
     function burn(uint256 value) external {
         require(balanceOf[msg.sender] >= value, "not enough token to burn");
-        
+
         // Determine underlying - issuedBath tokens
         updateYield();
 
-        uint currentYield = yieldTracker[yieldTracker.length - 1][0];
+        uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
         // Withdraw user's underlying and portion of yield if positive
-        uint delta = currentYield -  diveInTheBath[msg.sender];
+        uint256 delta = currentYield - diveInTheBath[msg.sender];
         if (delta > 0) {
-            uint userYield = balanceOf[msg.sender] * delta / totalSupply;
+            uint256 userYield = (balanceOf[msg.sender] * delta) / totalSupply;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
         } else {
-            uint userYield = 0;
+            uint256 userYield = 0;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
         }
         // get (Yield now - starting yield) * your portion of the pool
