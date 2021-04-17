@@ -36,8 +36,9 @@ contract BathPair {
     // TODO: make this a variable with setter
     uint256 public timeDelay = 3 days;
 
-    // Unique identifier is ID OF THE ASK***
-    mapping(uint256 => StrategistTrade) public strategistRecordMapping;
+    // Maps a trade ID to each of their strategists
+    mapping(uint256 => address) public ID2strategist;
+    mapping(address => uint256) public strategist2Fills;
     StrategistTrade[] public strategistRecord;
 
     struct StrategistTrade {
@@ -51,7 +52,6 @@ contract BathPair {
         uint256 bidDenominator;
         address strategist;
         uint256 timestamp;
-        uint256 midpointPrice;
         uint256[3] tradeIDs;
     }
 
@@ -302,6 +302,13 @@ contract BathPair {
         outstandingPairIDs.push(IDPair);
     }
 
+    // orderID of the fill
+    function logFill(uint orderID) internal {
+        // Goal is to map a fill to a strategist
+        address strategist = ID2strategist[orderID];
+        strategist2Fills[strategist] += 1;
+    }
+
     function cancelPartialFills() internal {
         // TODO: make this constraint variable
         // ** Optimistically assume that any partialFill or totalFill resulted in yield?
@@ -410,6 +417,7 @@ contract BathPair {
     }
 
     // TODO: make sure this works as intended
+    // Used to map a strategist to their orders
     function newTradeIDs() internal returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
         return outstandingPairIDs[outstandingPairIDs.length - 1];
@@ -463,7 +471,6 @@ contract BathPair {
                 bidDenominator,
                 msg.sender,
                 now,
-                getMidpointPrice(), //is this needed?
                 newTradeIDs()
             )
         );
