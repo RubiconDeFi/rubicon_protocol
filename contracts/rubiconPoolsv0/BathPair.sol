@@ -303,6 +303,7 @@ contract BathPair {
     }
 
     // orderID of the fill
+    // only log fills for each strategist
     function logFill(uint orderID) internal {
         // Goal is to map a fill to a strategist
         address strategist = ID2strategist[orderID];
@@ -337,11 +338,9 @@ contract BathPair {
                 );
                 delete outstandingPairIDs[x];
                 // emit LogNote("Yield:", null);
-                // logYield(
-                //     outstandingPairIDs[x][0],
-                //     outstandingPairIDs[x][0],
-                //     bathAssetAddress
-                // );
+                logFill(
+                    outstandingPairIDs[x][0]
+                );
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -359,11 +358,9 @@ contract BathPair {
                     offer2.pay_amt
                 );
                 delete outstandingPairIDs[x];
-                // logYield(
-                //     outstandingPairIDs[x][1],
-                //     outstandingPairIDs[x][0],
-                //     bathQuoteAddress
-                // );
+                logFill(
+                    outstandingPairIDs[x][1]
+                );
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -394,16 +391,12 @@ contract BathPair {
                     );
                     delete outstandingPairIDs[x];
                 } else {
-                    // logYield(
-                    //     outstandingPairIDs[x][1],
-                    //     outstandingPairIDs[x][1],
-                    //     bathQuoteAddress
-                    // );
-                    // logYield(
-                    //     outstandingPairIDs[x][0],
-                    //     outstandingPairIDs[x][1],
-                    //     bathQuoteAddress
-                    // );
+                    logFill(
+                        outstandingPairIDs[x][1]
+                    );
+                    logFill(
+                        outstandingPairIDs[x][0]
+                    );
                 }
             }
         }
