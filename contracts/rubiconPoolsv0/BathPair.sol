@@ -426,9 +426,14 @@ contract BathPair {
         return offerInfo;
     }
 
+    function getMaxOrderSize(address asset, address bathTokenAddress) public returns (uint) {
+        require(asset == underlyingAsset || asset == underlyingQuote);
+        uint underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+    } 
+
     // TODO: make sure this works as intended
     // Used to map a strategist to their orders
-    function newTradeIDs() internal returns (uint256[3] memory) {
+    function newTradeIDs() internal view returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
