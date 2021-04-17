@@ -41,9 +41,8 @@ contract BathPair {
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
     StrategistTrade[] public strategistRecord;
-    uint internal totalAssetFills;
-    uint internal totalQuoteFills;
-
+    uint256 internal totalAssetFills;
+    uint256 internal totalQuoteFills;
 
     struct StrategistTrade {
         address underlyingAsset;
@@ -299,14 +298,18 @@ contract BathPair {
 
     // function where strategists claim rewards proportional to their quantity of fills
     function strategistBootyClaim() external {
-        uint fillCountA = strategist2FillsAsset[msg.sender];
-        uint fillCountQ = strategist2FillsQuote[msg.sender];
+        uint256 fillCountA = strategist2FillsAsset[msg.sender];
+        uint256 fillCountQ = strategist2FillsQuote[msg.sender];
         if (fillCountA > 0) {
-            uint booty = fillCountA * ERC20(underlyingAsset).balanceOf(address(this)) / totalAssetFills;
+            uint256 booty =
+                (fillCountA * ERC20(underlyingAsset).balanceOf(address(this))) /
+                    totalAssetFills;
             IERC20(underlyingAsset).transfer(msg.sender, booty);
         }
         if (fillCountQ > 0) {
-            uint booty = fillCountQ * ERC20(underlyingQuote).balanceOf(address(this)) / totalQuoteFills;
+            uint256 booty =
+                (fillCountQ * ERC20(underlyingQuote).balanceOf(address(this))) /
+                    totalQuoteFills;
             IERC20(underlyingQuote).transfer(msg.sender, booty);
         }
     }
@@ -426,17 +429,22 @@ contract BathPair {
         return offerInfo;
     }
 
-    function getMaxOrderSize(address asset, address bathTokenAddress) public returns (uint) {
+    function getMaxOrderSize(address asset, address bathTokenAddress)
+        public
+        returns (uint256)
+    {
         require(asset == underlyingAsset || asset == underlyingQuote);
-        uint underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        // Need to use SafeMath here
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         // if ratio = (assetBalance / propotional quote balance) > 1:
         //      -Use dynamic order size for quote due to underweighting: n=-0.005 => MaxSize * e^(n*ratio)
-        // else: 
+        // maxQuoteSize * (eN / eD ) ** (n *ratio)
+        // else:
         //      -Use dynamic order size for asset due to underweighting: ''
-
+        // maxAssetSize * (eN / eD ) ** (n *ratio)
         // return orderSize;
-    } 
+    }
 
     // TODO: make sure this works as intended
     // Used to map a strategist to their orders
@@ -459,10 +467,9 @@ contract BathPair {
                 bidDenominator > 0
         );
 
-        // Enforce dynamic ordersizing 
+        // Enforce dynamic ordersizing and inventory management
         // require(askNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
         // require(bidNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
-
 
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(

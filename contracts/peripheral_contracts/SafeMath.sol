@@ -15,7 +15,9 @@ library SafeMath {
         require(y == 0 || (z = x * y) / y == x, "ds-math-mul-overflow");
     }
 
+    // https://ethereum.stackexchange.com/questions/80642/how-can-i-use-the-mathematical-constant-e-in-solidity/80643
     // e represented as eN / eD
+    // Careful of integer overflow here
     uint256 constant eN = 271828;
     uint256 constant eD = 100000;
 }
