@@ -437,7 +437,6 @@ contract BathPair {
         returns (uint256)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
-        // divide the below by 100
         uint maxOrderSizeProportion = 50; //in percentage points of underlying
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
         emit LogNote("underlyingBalance", underlyingBalance);
@@ -445,13 +444,12 @@ contract BathPair {
         // Divide the below by 1000
         int128 shapeCoef = ABDKMath64x64.div(-5, 1000); // 5 / 1000
         emit LogNoteI("shapeCoef", shapeCoef);
-        // Need to use SafeMath here
+
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
             // uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
             int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
             emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct! 
-            // emit LogNote("ratio check", ABDKMath64x64.mulu(ratio, getMidpointPrice()));
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2 ** 64)) {
                 // bid at maxSize
                 emit LogNote("normal maxSize Asset", maxOrderSizeProportion * underlyingBalance / 100);
@@ -462,12 +460,11 @@ contract BathPair {
                 emit LogNote("raw maxSize", maxSize);
                 int128 e = ABDKMath64x64.divu(SafeMath.eN(), SafeMath.eD()); //Correct as a int128!
                 emit LogNoteI("e", e);
-                emit LogNoteI("raised to the", (ABDKMath64x64.mul(shapeCoef, ratio)));
-                // uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mul(shapeCoef, ratio) / 1000);
-
-                uint dynamicSize = maxSize * 1 / 100; //TODO: determine the correct precision here
-                emit LogNote("dynamic maxSize Asset", dynamicSize);
-                return dynamicSize;
+                int128 shapeFactor = ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
+                emit LogNoteI("raised to the", shapeFactor);
+                uint dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize); 
+                emit LogNote("dynamic maxSize Asset", dynamicSize); // 
+                return dynamicSize; 
             }
         } else if (asset == underlyingQuote) {
             int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingAsset).balanceOf(bathAssetAddress));
@@ -477,11 +474,15 @@ contract BathPair {
                 return maxOrderSizeProportion * underlyingBalance / 100;
             } else {
                 // return dynamic order size
-                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
-                uint shapeFactor = (SafeMath.eN() / SafeMath.eD());// ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
-                uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
-                emit LogNote("dynamic maxSize Quote", dynamicSize);
-                return dynamicSize;
+                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100; // Correct! 48000000000000000000
+                emit LogNote("raw maxSize", maxSize);
+                int128 e = ABDKMath64x64.divu(SafeMath.eN(), SafeMath.eD()); //Correct as a int128!
+                emit LogNoteI("e", e);
+                int128 shapeFactor = ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
+                emit LogNoteI("raised to the", shapeFactor);
+                uint dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize); 
+                emit LogNote("dynamic maxSize Asset", dynamicSize); // 45728245133630216043
+                return dynamicSize; 
             }
         }
 
