@@ -18,6 +18,15 @@ library SafeMath {
     // https://ethereum.stackexchange.com/questions/80642/how-can-i-use-the-mathematical-constant-e-in-solidity/80643
     // e represented as eN / eD
     // Careful of integer overflow here
-    uint256 constant eN = 271828;
-    uint256 constant eD = 100000;
+    uint256 constant eNum = 271828;
+    uint256 constant eDen = 100000;
+
+    // function eN constant returns
+    function eN() internal pure returns (uint) {
+        return eNum;
+    }
+
+    function eD() internal pure returns (uint) {
+        return eDen;
+    }
 }

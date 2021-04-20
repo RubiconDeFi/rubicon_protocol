@@ -7,6 +7,7 @@ import "./BathHouse.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/SafeMath.sol";
 import "../interfaces/IStrategy.sol";
+import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
     address public bathHouse;
@@ -434,9 +435,47 @@ contract BathPair {
         returns (uint256)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
+        // divide the below by 100
+        uint maxOrderSizeProportion = 50; //in percentage points of underlying
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        // Divide the below by 1000
+        int128 shapeCoef = -5; // 5 / 1000
         // Need to use SafeMath here
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
+        if (asset == underlyingAsset) {
+            uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
+            if (ratio * getMidpointPrice() > 1) {
+                // bid at maxSize
+                emit LogNote("normal maxSize Asset", maxOrderSizeProportion * underlyingBalance / 100);
+                return maxOrderSizeProportion * underlyingBalance / 100;
+            } else {
+                // return dynamic order size
+                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
+                emit LogNote("raw maxSize", maxSize);
+                uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
+                emit LogNote("ratio", ratio);
+                emit LogNote("shapeFactor", shapeFactor);
+                uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
+                emit LogNote("dynamic maxSize Asset", dynamicSize);
+                return dynamicSize;
+            }
+        } else if (asset == underlyingQuote) {
+            uint ratio = underlyingBalance / IERC20(underlyingAsset).balanceOf(bathAssetAddress);
+            if (ratio / getMidpointPrice() > 1) {
+                // bid at maxSize
+                emit LogNote("normal maxSize Quote", maxOrderSizeProportion * underlyingBalance / 100);
+                return maxOrderSizeProportion * underlyingBalance / 100;
+            } else {
+                // return dynamic order size
+                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
+                uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
+                uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
+                emit LogNote("dynamic maxSize Asset", dynamicSize);
+                return dynamicSize;
+            }
+        }
+
+        // PseudoCode:
         // if ratio = (assetBalance / propotional quote balance) > 1:
         //      -Use dynamic order size for quote due to underweighting: n=-0.005 => MaxSize * e^(n*ratio)
         // maxQuoteSize * (eN / eD ) ** (n *ratio)
@@ -468,8 +507,13 @@ contract BathPair {
         );
 
         // Enforce dynamic ordersizing and inventory management
-        // require(askNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
-        // require(bidNumerator <= maxOrderSize(underlyingAsset, bathAssetAddress));
+        emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingAsset, bathAssetAddress)); //49500000000000000
+        emit LogNote("actual size", askNumerator); //100000000000000000
+        emit LogNote("midpointPrice", getMidpointPrice());
+        // require(askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress), "the ask is too large in size");
+        // require(bidNumerator <= getMaxOrderSize(underlyingQuote, bathQuoteAddress), "the bid is too large in size");
+        // getMaxOrderSize(underlyingAsset, bathAssetAddress);
+        // getMaxOrderSize(underlyingQuote, bathQuoteAddress);
 
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(

@@ -17,7 +17,7 @@ contract BathToken is IBathToken {
     // admin
     address public bathHouse;
 
-    string public constant name = "BathToken V-1";
+    string public constant name = "BathToken v1";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
