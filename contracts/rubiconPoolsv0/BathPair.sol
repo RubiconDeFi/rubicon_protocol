@@ -28,6 +28,7 @@ contract BathPair {
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
+    event LogNoteI(string, int128);
     event Cancel(uint256, ERC20, uint256);
     event LogOffer(string, order);
     event LogGrossYield(address, uint256);
@@ -438,24 +439,32 @@ contract BathPair {
         // divide the below by 100
         uint maxOrderSizeProportion = 50; //in percentage points of underlying
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        emit LogNote("underlyingBalance", underlyingBalance);
+        emit LogNote("underlying other", IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
         // Divide the below by 1000
-        int128 shapeCoef = -5; // 5 / 1000
+        int128 shapeCoef = ABDKMath64x64.div(-5, 1000); // 5 / 1000
+        emit LogNoteI("shapeCoef", shapeCoef);
         // Need to use SafeMath here
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
-            uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
-            if (ratio * getMidpointPrice() > 1) {
+            // uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
+            int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
+            emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct! 
+            emit LogNote("ratio check", ABDKMath64x64.mulu(ratio, getMidpointPrice()));
+            if (ABDKMath64x64.mulu(ratio, getMidpointPrice()) > (2 ** 64)) {
                 // bid at maxSize
                 emit LogNote("normal maxSize Asset", maxOrderSizeProportion * underlyingBalance / 100);
                 return maxOrderSizeProportion * underlyingBalance / 100;
             } else {
                 // return dynamic order size
-                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
+                uint maxSize = maxOrderSizeProportion * underlyingBalance / 100; // Correct!
                 emit LogNote("raw maxSize", maxSize);
-                uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
-                emit LogNote("ratio", ratio);
-                emit LogNote("shapeFactor", shapeFactor);
-                uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
+                int128 e = ABDKMath64x64.divu(SafeMath.eN(), SafeMath.eD()); //Correct as a int128!
+                emit LogNoteI("e", e);
+                emit LogNoteI("raised to the", (ABDKMath64x64.mul(shapeCoef, ratio)));
+                // uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mul(shapeCoef, ratio) / 1000);
+
+                uint dynamicSize = maxSize * 1 / 100; //TODO: determine the correct precision here
                 emit LogNote("dynamic maxSize Asset", dynamicSize);
                 return dynamicSize;
             }
