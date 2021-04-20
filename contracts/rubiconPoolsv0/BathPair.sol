@@ -470,9 +470,8 @@ contract BathPair {
                 return dynamicSize;
             }
         } else if (asset == underlyingQuote) {
-                  int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingAsset).balanceOf(bathAssetAddress));
-
-            if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2 ** 64)) {
+            int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingAsset).balanceOf(bathAssetAddress));
+            if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2 ** 64)) {
                 // bid at maxSize
                 emit LogNote("normal maxSize Quote", maxOrderSizeProportion * underlyingBalance / 100);
                 return maxOrderSizeProportion * underlyingBalance / 100;
@@ -481,7 +480,7 @@ contract BathPair {
                 uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
                 uint shapeFactor = (SafeMath.eN() / SafeMath.eD());// ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
                 uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
-                emit LogNote("dynamic maxSize Asset", dynamicSize);
+                emit LogNote("dynamic maxSize Quote", dynamicSize);
                 return dynamicSize;
             }
         }
@@ -519,6 +518,7 @@ contract BathPair {
 
         // Enforce dynamic ordersizing and inventory management
         emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingAsset, bathAssetAddress)); //49500000000000000
+        emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingQuote, bathQuoteAddress)); //49500000000000000
         emit LogNote("actual size", askNumerator); //100000000000000000
         emit LogNoteI("midpointPrice", getMidpointPrice());
         // require(askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress), "the ask is too large in size");
