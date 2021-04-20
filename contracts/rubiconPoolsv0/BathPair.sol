@@ -98,7 +98,7 @@ contract BathPair {
         );
     }
 
-    function getMidpointPrice() internal returns (uint256) {
+    function getMidpointPrice() internal returns (int128) {
         uint256 bestAskID =
             RubiconMarket(RubiconMarketAddress).getBestOffer(
                 ERC20(underlyingAsset),
@@ -112,10 +112,11 @@ contract BathPair {
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
-        uint256 midpoint =
-            ((bestAsk.buy_amt / bestAsk.pay_amt) +
-                (bestBid.pay_amt / bestBid.buy_amt)) / 2;
-        emit LogNote("midpoint calculated:", midpoint);
+        int128 midpoint = ABDKMath64x64.divu(((bestAsk.buy_amt / bestAsk.pay_amt) +
+                (bestBid.pay_amt / bestBid.buy_amt)), 2);
+            // ((bestAsk.buy_amt / bestAsk.pay_amt) +
+            //     (bestBid.pay_amt / bestBid.buy_amt)) / 2;
+        emit LogNoteI("midpoint calculated:", midpoint);
         return midpoint;
     }
 
@@ -450,8 +451,8 @@ contract BathPair {
             // uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
             int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingQuote).balanceOf(bathQuoteAddress));
             emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct! 
-            emit LogNote("ratio check", ABDKMath64x64.mulu(ratio, getMidpointPrice()));
-            if (ABDKMath64x64.mulu(ratio, getMidpointPrice()) > (2 ** 64)) {
+            // emit LogNote("ratio check", ABDKMath64x64.mulu(ratio, getMidpointPrice()));
+            if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2 ** 64)) {
                 // bid at maxSize
                 emit LogNote("normal maxSize Asset", maxOrderSizeProportion * underlyingBalance / 100);
                 return maxOrderSizeProportion * underlyingBalance / 100;
@@ -469,15 +470,16 @@ contract BathPair {
                 return dynamicSize;
             }
         } else if (asset == underlyingQuote) {
-            uint ratio = underlyingBalance / IERC20(underlyingAsset).balanceOf(bathAssetAddress);
-            if (ratio / getMidpointPrice() > 1) {
+                  int128 ratio = ABDKMath64x64.divu(underlyingBalance, IERC20(underlyingAsset).balanceOf(bathAssetAddress));
+
+            if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2 ** 64)) {
                 // bid at maxSize
                 emit LogNote("normal maxSize Quote", maxOrderSizeProportion * underlyingBalance / 100);
                 return maxOrderSizeProportion * underlyingBalance / 100;
             } else {
                 // return dynamic order size
                 uint maxSize = maxOrderSizeProportion * underlyingBalance / 100;
-                uint shapeFactor = (SafeMath.eN() / SafeMath.eD()) ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
+                uint shapeFactor = (SafeMath.eN() / SafeMath.eD());// ** (ABDKMath64x64.mulu(shapeCoef, ratio) / 1000);
                 uint dynamicSize = maxSize * shapeFactor / 100; //TODO: determine the correct precision here
                 emit LogNote("dynamic maxSize Asset", dynamicSize);
                 return dynamicSize;
@@ -518,7 +520,7 @@ contract BathPair {
         // Enforce dynamic ordersizing and inventory management
         emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingAsset, bathAssetAddress)); //49500000000000000
         emit LogNote("actual size", askNumerator); //100000000000000000
-        emit LogNote("midpointPrice", getMidpointPrice());
+        emit LogNoteI("midpointPrice", getMidpointPrice());
         // require(askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress), "the ask is too large in size");
         // require(bidNumerator <= getMaxOrderSize(underlyingQuote, bathQuoteAddress), "the bid is too large in size");
         // getMaxOrderSize(underlyingAsset, bathAssetAddress);
