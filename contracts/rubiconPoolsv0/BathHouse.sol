@@ -127,4 +127,14 @@ contract BathHouse {
     {
         return quoteToBathQuote[quote];
     }
+
+    // toTest
+    function setCancelTimeDelay(address bathPair, uint value) public onlyAdmin {
+        BathPair(bathPair).setCancelTimeDelay(value);
+    }
+
+    // toTest
+    function setMaxOutstandingPairCount(address bathPair, uint value) public onlyAdmin {
+        BathPair(bathPair).setMaxOutstandingPairCount(value);
+    }
 }

@@ -76,6 +76,14 @@ contract BathPair {
         initialized = true;
     }
 
+    function setCancelTimeDelay(uint value) public onlyBathHouse {
+        timeDelay = value;
+    }
+
+    function setMaxOutstandingPairCount(uint value) public onlyBathHouse {
+        maxOutstandingPairCount = value;
+    }
+
     modifier onlyBathHouse {
         require(msg.sender == bathHouse);
         _;
