@@ -518,11 +518,6 @@ contract BathPair {
         );
 
         // Enforce dynamic ordersizing and inventory management
-        // emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingAsset, bathAssetAddress)); //49500000000000000
-        // emit LogNote("maxOrderSize Require", getMaxOrderSize(underlyingQuote, bathQuoteAddress)); //49500000000000000
-        // emit LogNote("actual size", askNumerator); //100000000000000000
-        // emit LogNoteI("midpointPrice", getMidpointPrice());
-
         require(askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress), "the ask is too large in size");
         require(bidNumerator <= getMaxOrderSize(underlyingQuote, bathQuoteAddress), "the bid is too large in size");
 
