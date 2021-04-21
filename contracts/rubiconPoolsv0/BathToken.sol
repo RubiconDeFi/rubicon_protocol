@@ -109,7 +109,7 @@ contract BathToken is IBathToken {
         //add a check to make sure only a fixed proportion of the pool can be outstanding on orders
 
         //place offer in RubiconMarket
-        // to do: change to make() ? also --- add infinite approval to Rubicon Market on this contract?
+        // toDo: change to make() ? also --- add infinite approval to Rubicon Market on this contract?
         IERC20(address(pay_gem)).approve(RubiconMarketAddress, pay_amt);
 
         uint256 id =
@@ -118,7 +118,7 @@ contract BathToken is IBathToken {
                 pay_gem,
                 buy_amt,
                 buy_gem
-            ); // TODO: SafeMath?
+            ); 
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);
     }

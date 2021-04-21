@@ -363,8 +363,7 @@ contract BathPair {
     }
 
     function cancelPartialFills() internal {
-        // TODO: make this constraint variable
-        // ** Optimistically assume that any partialFill or totalFill resulted in yield?
+        // ** Optimistically assume that any partialFill or totalFill resulted in yield **
         require(
             outstandingPairIDs.length < maxOutstandingPairCount,
             "too many outstanding pairs"

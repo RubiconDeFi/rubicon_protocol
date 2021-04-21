@@ -32,10 +32,6 @@ contract Strategy {
     uint256[] public outstandingBidIDs;
     uint256[2][] public outstandingPairIDs;
 
-    // TODO: make variable...
-    int128 public maxAskSize = 1;
-    int128 public maxBidSize = 1;
-
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event LogAddress(string, ERC20);
