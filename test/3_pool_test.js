@@ -38,7 +38,7 @@ contract("Rubicon Pools Test", async function(accounts) {
         it("Bath House can initialize a new bathToken Pair", async function() {
             // Call initialize on Bath house
             await bathHouseInstance.initialize(rubiconMarketInstance.address);
-            (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI", 90, 259200)); // 90% reserve ratio and 3 days cancel delay
+            (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI", 90, 259200, 10)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
         });

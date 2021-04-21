@@ -38,6 +38,9 @@ contract BathPair {
     // The delay after which unfilled orders are cancelled
     uint256 public timeDelay;
 
+    // Constraint variable for the max amount of outstanding market making pairs at a time
+    uint256 public maxOutstandingPairCount;
+
     // Maps a trade ID to each of their strategists
     mapping(uint256 => address) public ID2strategist;
     mapping(address => uint256) public strategist2FillsAsset;
@@ -178,7 +181,8 @@ contract BathPair {
         string calldata quoteName,
         address market,
         uint256 _reserveRatio,
-        uint _timeDelay
+        uint _timeDelay,
+        uint _maxOutstandingPairCount
     ) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
         require(_reserveRatio <= 100);
@@ -186,6 +190,8 @@ contract BathPair {
         reserveRatio = _reserveRatio;
 
         timeDelay = _timeDelay;
+
+        maxOutstandingPairCount = _maxOutstandingPairCount;
 
         underlyingAsset = asset;
         underlyingQuote = quote;
@@ -347,7 +353,7 @@ contract BathPair {
     function cancelPartialFills() internal {
         // TODO: make this constraint variable
         // ** Optimistically assume that any partialFill or totalFill resulted in yield?
-        require(outstandingPairIDs.length < 10, "too many outstanding pairs");
+        require(outstandingPairIDs.length < maxOutstandingPairCount, "too many outstanding pairs");
 
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
             order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
