@@ -22,11 +22,11 @@ library SafeMath {
     uint256 constant eDen = 100000;
 
     // function eN constant returns
-    function eN() internal pure returns (uint) {
+    function eN() internal pure returns (uint256) {
         return eNum;
     }
 
-    function eD() internal pure returns (uint) {
+    function eD() internal pure returns (uint256) {
         return eDen;
     }
 }

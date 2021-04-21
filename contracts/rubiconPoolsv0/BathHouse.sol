@@ -37,8 +37,8 @@ contract BathHouse {
         address quote,
         string calldata quoteName,
         uint256 _reserveRatio,
-        uint _timeDelay,
-        uint _maxOutstandingPairCount
+        uint256 _timeDelay,
+        uint256 _maxOutstandingPairCount
     ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
@@ -129,12 +129,18 @@ contract BathHouse {
     }
 
     // toTest
-    function setCancelTimeDelay(address bathPair, uint value) public onlyAdmin {
+    function setCancelTimeDelay(address bathPair, uint256 value)
+        public
+        onlyAdmin
+    {
         BathPair(bathPair).setCancelTimeDelay(value);
     }
 
     // toTest
-    function setMaxOutstandingPairCount(address bathPair, uint value) public onlyAdmin {
+    function setMaxOutstandingPairCount(address bathPair, uint256 value)
+        public
+        onlyAdmin
+    {
         BathPair(bathPair).setMaxOutstandingPairCount(value);
     }
 }
