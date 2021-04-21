@@ -35,8 +35,8 @@ contract BathPair {
 
     bool public initialized;
 
-    // TODO: make this a variable with setter
-    uint256 public timeDelay = 3 days;
+    // The delay after which unfilled orders are cancelled
+    uint256 public timeDelay;
 
     // Maps a trade ID to each of their strategists
     mapping(uint256 => address) public ID2strategist;
@@ -177,12 +177,15 @@ contract BathPair {
         address quote,
         string calldata quoteName,
         address market,
-        uint256 _reserveRatio
+        uint256 _reserveRatio,
+        uint _timeDelay
     ) external {
         require(msg.sender == bathHouse, "caller must be Bath House");
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);
         reserveRatio = _reserveRatio;
+
+        timeDelay = _timeDelay;
 
         underlyingAsset = asset;
         underlyingQuote = quote;

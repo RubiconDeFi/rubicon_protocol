@@ -36,7 +36,8 @@ contract BathHouse {
         string calldata assetName,
         address quote,
         string calldata quoteName,
-        uint256 _reserveRatio
+        uint256 _reserveRatio,
+        uint _timeDelay
     ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
@@ -58,8 +59,8 @@ contract BathHouse {
             quote,
             quoteName,
             RubiconMarketAddress,
-            // TODO: have this provided as an input:
-            _reserveRatio
+            _reserveRatio,
+            _timeDelay
         );
         getPair[asset][quote] = newPair;
 
