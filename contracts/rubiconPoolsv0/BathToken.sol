@@ -181,7 +181,7 @@ contract BathToken is IBathToken {
 
         uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
         // Withdraw user's underlying and portion of yield if positive
-        uint256 delta = currentYield - diveInTheBath[msg.sender];
+        uint256 delta = SafeMath.sub(currentYield, diveInTheBath[msg.sender]);
         if (delta > 0) {
             uint256 userYield = (balanceOf[msg.sender] * delta) / totalSupply;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
