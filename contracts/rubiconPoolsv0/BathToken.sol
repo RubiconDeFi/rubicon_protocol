@@ -118,7 +118,7 @@ contract BathToken is IBathToken {
                 pay_gem,
                 buy_amt,
                 buy_gem
-            ); 
+            );
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);
     }
@@ -169,6 +169,7 @@ contract BathToken is IBathToken {
 
         uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
         yieldTracker.push([yieldAmount + oldTotal, now]);
+        emit LogYield(yieldAmount + oldTotal);
     }
 
     // TODO: add a burn test

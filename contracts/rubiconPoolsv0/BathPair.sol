@@ -540,7 +540,7 @@ contract BathPair {
         // return orderSize;
     }
 
-    // TODO: make sure this works as intended
+    // toTest
     // Used to map a strategist to their orders
     function newTradeIDs() internal view returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
