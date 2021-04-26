@@ -15,11 +15,6 @@ contract Strategy {
     string public name;
 
     address public bathHouse;
-    // address public underlyingAsset;
-    // address public underlyingQuote;
-
-    // address public bathAssetAddress;
-    // address public bathQuoteAddress;
 
     address public RubiconMarketAddress;
 
@@ -45,9 +40,6 @@ contract Strategy {
         ERC20 buy_gem;
     }
 
-    // order private newAsk;
-    // order private newBid;
-
     constructor(
         string memory _name,
         address _bathHouse,
@@ -67,7 +59,6 @@ contract Strategy {
     }
 
     function placePairsTrade(
-        // uint256 spread,
         address underlyingAsset,
         address bathAssetAddress,
         address underlyingQuote,
@@ -77,8 +68,7 @@ contract Strategy {
         uint256 bidNumerator,
         uint256 bidDenomenator
     ) internal {
-        // 2. Calculate new bid and ask
-        // (order memory bestAsk, order memory bestBid) =
+        // 1. Calculate new bid and ask
         (order memory ask, order memory bid) =
             getNewOrders(
                 underlyingAsset,
@@ -89,10 +79,7 @@ contract Strategy {
                 bidDenomenator
             );
 
-        // 3. place new bid and ask
-        // emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
-        // emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
-
+        // 2. place new bid and ask
         placeTrades(
             bathAssetAddress,
             bathQuoteAddress,
@@ -116,16 +103,16 @@ contract Strategy {
 
         order memory newAsk =
             order(
-                askNumerator, // ...Asset amount...
+                askNumerator, 
                 ERC20underlyingAsset,
-                askDenominator, // (quote / asset ) * Asset amount
+                askDenominator, 
                 ERC20underlyingQuote
             );
         order memory newBid =
             order(
                 (bidNumerator),
                 ERC20underlyingQuote,
-                bidDenominator, // (asset / quote ) * Quote amount
+                bidDenominator, 
                 ERC20underlyingAsset
             );
         return (newAsk, newBid);
@@ -171,13 +158,13 @@ contract Strategy {
         uint256 bidNumerator,
         uint256 bidDenominator
     ) external onlyPairs returns (uint256, uint256) {
-        // main function to chain the actions of a single strategic market making transaction
+        // main function to chain the actions of a single strategic market making transaction (pairs trade w/ bid and ask)
         require(askNumerator > 0);
         require(askDenominator > 0);
         require(bidNumerator > 0);
         require(bidDenominator > 0);
 
-        // 2. Place pairs trade
+        // Place pairs trade according to input
         placePairsTrade(
             underlyingAsset,
             bathAssetAddress,
