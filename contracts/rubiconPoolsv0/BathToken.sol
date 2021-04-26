@@ -21,7 +21,7 @@ contract BathToken is IBathToken {
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
-
+    
     // This maps a user's address to cumulative pool yield at the time of deposit
     // TODO: needs to be quantity specific as well and FIFO***
     mapping(address => uint256) public diveInTheBath;
@@ -176,6 +176,7 @@ contract BathToken is IBathToken {
     }
 
     // TODO: add a burn test
+    // TODO: make pool control proportion an average?
     function burn(uint256 value) external {
         require(balanceOf[msg.sender] >= value, "not enough token to burn");
 
