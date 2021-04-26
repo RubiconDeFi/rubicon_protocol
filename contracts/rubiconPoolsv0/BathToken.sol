@@ -23,6 +23,7 @@ contract BathToken is IBathToken {
     mapping(address => uint256) public balanceOf;
 
     // This maps a user's address to cumulative pool yield at the time of deposit
+    // TODO: needs to be quantity specific as well and FIFO***
     mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -202,7 +203,6 @@ contract BathToken is IBathToken {
             );
         }
         // **toTest
-
 
         _burn(msg.sender, value);
     }
