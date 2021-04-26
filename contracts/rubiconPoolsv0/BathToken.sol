@@ -21,6 +21,8 @@ contract BathToken is IBathToken {
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
+
+    // This maps a user's address to cumulative pool yield at the time of deposit
     mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -106,8 +108,6 @@ contract BathToken is IBathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     ) external onlyApprovedStrategy returns (uint256) {
-        //add a check to make sure only a fixed proportion of the pool can be outstanding on orders
-
         //place offer in RubiconMarket
         // toDo: change to make() ? also --- add infinite approval to Rubicon Market on this contract?
         IERC20(address(pay_gem)).approve(RubiconMarketAddress, pay_amt);
@@ -123,6 +123,7 @@ contract BathToken is IBathToken {
         return (id);
     }
 
+    // TODO: update or remove
     function withdraw(address from, uint256 value) external onlyPair {
         IERC20(underlyingToken).transfer(from, value);
         _burn(from, value);
@@ -146,10 +147,11 @@ contract BathToken is IBathToken {
         IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
         _mint(to, value);
 
-        diveInTheBath[msg.sender] = now;
-
         // Time stamp and update yield
         updateYield();
+
+        // Log the pool's cumulative yield when they entered the pool
+        diveInTheBath[msg.sender] = yieldTracker[yieldTracker.length - 1][0];
     }
 
     // Function that is called to log yield over time
@@ -180,14 +182,18 @@ contract BathToken is IBathToken {
         updateYield();
 
         uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
+
         // Withdraw user's underlying and portion of yield if positive
+        // Delta represents change in yield from current to when the user entered
         int256 delta = int256(currentYield) - int256(diveInTheBath[msg.sender]);
         if (delta >= 0) {
+            // withdraw the user's yield according to (bathToken quanitity / totalSupply) * (delta)
             uint256 userYield =
                 (balanceOf[msg.sender] *
                     (currentYield - diveInTheBath[msg.sender])) / totalSupply;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
         } else {
+            // This value will be negative
             int256 userYield =
                 (int256(balanceOf[msg.sender]) * delta) / int256(totalSupply);
             IERC20(underlyingToken).transfer(
