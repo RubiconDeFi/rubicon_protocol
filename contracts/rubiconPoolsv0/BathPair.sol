@@ -263,6 +263,7 @@ contract BathPair {
         return (assetAmount, quoteAmount);
     }
 
+    // TODO: update with new burn logic
     function withdraw(
         address asset,
         uint256 assetAmount,
@@ -287,6 +288,7 @@ contract BathPair {
         IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
     }
 
+    // Returns filled liquidity to the correct bath pool
     function rebalancePair() internal {
         uint256 bathAssetYield =
             ERC20(underlyingQuote).balanceOf(bathAssetAddress);

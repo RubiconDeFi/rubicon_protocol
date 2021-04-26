@@ -180,6 +180,7 @@ contract BathToken is IBathToken {
 
     // TODO: add a burn test
     // TODO: make pool control proportion an average?
+    // TODO: pay strategists at the pair level
     function burn(uint256 value) external {
         require(balanceOf[msg.sender] >= value, "not enough token to burn");
 
