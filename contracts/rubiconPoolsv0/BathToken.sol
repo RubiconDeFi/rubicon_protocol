@@ -21,7 +21,7 @@ contract BathToken is IBathToken {
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
-    
+
     // This maps a user's address to cumulative pool yield at the time of deposit
     // TODO: needs to be quantity specific as well and FIFO***
     mapping(address => uint256) public diveInTheBath;
@@ -79,6 +79,11 @@ contract BathToken is IBathToken {
                 address(this)
             )
         );
+
+        // Add infinite approval of Rubicon Market for this asset
+        uint256 MAX_INT = 2**256 - 1;
+        IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
+
         initialized = true;
     }
 
@@ -110,9 +115,7 @@ contract BathToken is IBathToken {
         ERC20 buy_gem
     ) external onlyApprovedStrategy returns (uint256) {
         //place offer in RubiconMarket
-        // toDo: change to make() ? also --- add infinite approval to Rubicon Market on this contract?
-        IERC20(address(pay_gem)).approve(RubiconMarketAddress, pay_amt);
-
+        // toDo: change to make() 
         uint256 id =
             RubiconMarket(RubiconMarketAddress).offer(
                 pay_amt,
@@ -191,20 +194,17 @@ contract BathToken is IBathToken {
         if (delta >= 0) {
             // withdraw the user's yield according to (bathToken quanitity / totalSupply) * (delta)
             uint256 userYield =
-                (value *
-                    (currentYield - diveInTheBath[msg.sender])) / totalSupply;
+                (value * (currentYield - diveInTheBath[msg.sender])) /
+                    totalSupply;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
         } else {
             // This value will be negative
-            int256 userYield =
-                (int256(value) * delta) / int256(totalSupply);
+            int256 userYield = (int256(value) * delta) / int256(totalSupply);
             IERC20(underlyingToken).transfer(
                 msg.sender,
                 uint256(int256(value) + userYield)
             );
         }
-        // **toTest
-
         _burn(msg.sender, value);
     }
 

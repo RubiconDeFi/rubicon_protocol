@@ -103,16 +103,16 @@ contract Strategy {
 
         order memory newAsk =
             order(
-                askNumerator, 
+                askNumerator,
                 ERC20underlyingAsset,
-                askDenominator, 
+                askDenominator,
                 ERC20underlyingQuote
             );
         order memory newBid =
             order(
                 (bidNumerator),
                 ERC20underlyingQuote,
-                bidDenominator, 
+                bidDenominator,
                 ERC20underlyingAsset
             );
         return (newAsk, newBid);
