@@ -580,7 +580,7 @@ contract BathPair {
         );
 
         // 2. Strategist executes a pair trade
-        IStrategy(targetStrategy).execute(
+        Strategy(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,

@@ -181,13 +181,19 @@ contract BathToken is IBathToken {
 
         uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
         // Withdraw user's underlying and portion of yield if positive
-        int256 delta = int(currentYield) - int(diveInTheBath[msg.sender]);
+        int256 delta = int256(currentYield) - int256(diveInTheBath[msg.sender]);
         if (delta >= 0) {
-            uint256 userYield = (balanceOf[msg.sender] * (currentYield - diveInTheBath[msg.sender])) / totalSupply;
+            uint256 userYield =
+                (balanceOf[msg.sender] *
+                    (currentYield - diveInTheBath[msg.sender])) / totalSupply;
             IERC20(underlyingToken).transfer(msg.sender, value + userYield);
         } else {
-            int256 userYield = (int(balanceOf[msg.sender]) * delta) / int(totalSupply);
-            IERC20(underlyingToken).transfer(msg.sender, uint(int(value) + userYield));
+            int256 userYield =
+                (int256(balanceOf[msg.sender]) * delta) / int256(totalSupply);
+            IERC20(underlyingToken).transfer(
+                msg.sender,
+                uint256(int256(value) + userYield)
+            );
         }
         // **toTest
         // get (Yield now - starting yield) * your portion of the pool
