@@ -1,3 +1,8 @@
+/// @author Benjamin Hughes - Rubicon
+/// @notice This contract represents a single-asset liquidity pool for Rubicon Pools
+/// @notice Any user can deposit assets into this pool and earn yield from successful strategist market making with their liquidity
+/// @notice This contract looks to both BathPairs and the BathHouse as its admin
+
 pragma solidity =0.5.16;
 
 import "../interfaces/IBathToken.sol";
