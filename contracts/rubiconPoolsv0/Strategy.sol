@@ -1,4 +1,4 @@
-/// @author Benjamin Hughes
+/// @author Benjamin Hughes - Rubicon
 /// @notice This contract allows strategists to run off-chain market making strategies
 /// @notice Yield from successful market making strategies are passed to LPs
 /// @notice This contract is effectively the entrypoint for a strategist's pair trade

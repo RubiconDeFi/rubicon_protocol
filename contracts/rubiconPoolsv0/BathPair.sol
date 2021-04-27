@@ -1,3 +1,8 @@
+/// @author Benjamin Hughes - Rubicon
+/// @notice This contract allows a strategist to use user funds in order to market make for a Rubicon pair
+/// @notice The BathPair is the admin for the pair's liquidity and has many security checks in place
+/// @notice This contract is also where strategists claim rewards for successful market making
+
 pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 

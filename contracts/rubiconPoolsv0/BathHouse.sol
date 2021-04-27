@@ -1,3 +1,7 @@
+/// @author Benjamin Hughes - Rubicon
+/// @notice This contract acts as the admin for the Rubicon Pools system
+/// @notice The BathHouse approves strategist contracts and initializes bathPairs
+
 pragma solidity =0.5.16;
 
 import "./BathPair.sol";
