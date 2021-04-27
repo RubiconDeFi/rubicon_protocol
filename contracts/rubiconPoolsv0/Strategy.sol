@@ -1,6 +1,7 @@
-// contract that employs user Bath liquidity to market make and pass yield to users
 /// @author Benjamin Hughes
-/// @notice This represents a Stoikov market-making model designed for Rubicon...
+/// @notice This contract allows strategists to run off-chain market making strategies
+/// @notice Yield from successful market making strategies are passed to LPs
+/// @notice This contract is effectively the entrypoint for a strategist's pair trade
 pragma solidity ^0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
