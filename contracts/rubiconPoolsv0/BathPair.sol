@@ -6,7 +6,7 @@ import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/SafeMath.sol";
-import "../interfaces/IStrategy.sol";
+// import "../interfaces/IStrategy.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
