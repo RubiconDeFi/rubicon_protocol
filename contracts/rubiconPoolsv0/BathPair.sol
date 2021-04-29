@@ -336,12 +336,14 @@ contract BathPair {
                 (fillCountA * ERC20(underlyingAsset).balanceOf(address(this))) /
                     totalAssetFills;
             IERC20(underlyingAsset).transfer(msg.sender, booty);
+            totalAssetFills -= fillCountA;
         }
         if (fillCountQ > 0) {
             uint256 booty =
                 (fillCountQ * ERC20(underlyingQuote).balanceOf(address(this))) /
                     totalQuoteFills;
             IERC20(underlyingQuote).transfer(msg.sender, booty);
+            totalQuoteFills -= fillCountQ;
         }
     }
 
