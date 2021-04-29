@@ -15,7 +15,7 @@ module.exports = async function(deployer, network, accounts) {
     if (network == 'development' || network == 'pools'){
     await deployer.deploy(RubiconMarket).then(function() {
           return deployer.deploy(BathHouse).then(function() {
-            return deployer.deploy(PairsTrade, "Pairs Trade Market Making", BathHouse.address, RubiconMarket.address);
+            return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address);
           }); 
       });
       }
