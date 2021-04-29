@@ -3,7 +3,7 @@
 /// @notice This represents a Stoikov market-making model designed for Rubicon...
 pragma solidity ^0.5.16;
 
-interface IStrategy {
+interface IPairsTrade {
     function execute(
         address underlyingAsset,
         address bathAssetAddress,

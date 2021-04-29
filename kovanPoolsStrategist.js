@@ -19,7 +19,7 @@ var { abi } = require("./build/contracts/BathHouse.json");
 var bathHouseKovanAddr = "0x5ccF8360344646727E36c1E2877aaF151d46B2d9";
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
-var { abi } = require("./build/contracts/Strategy.json");
+var { abi } = require("./build/contracts/PairsTrade.json");
 var strategyKovanAddr = "0xFd9146ea9F19df448E63e96B25dD880DDFa9Cc3C";
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 

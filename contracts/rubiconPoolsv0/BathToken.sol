@@ -9,7 +9,7 @@ import "../interfaces/IBathToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "../peripheral_contracts/SafeMath.sol";
 import "../RubiconMarket.sol";
-import "./Strategy.sol";
+import "./PairsTrade.sol";
 import "./BathHouse.sol";
 
 contract BathToken is IBathToken {

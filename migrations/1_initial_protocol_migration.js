@@ -6,7 +6,7 @@ var RBCN = artifacts.require("./contracts/RBCN.sol");
 var Aqueduct = artifacts.require("./contracts/Aqueduct.sol");
 var TokenVesting1 = artifacts.require("./contracts/peripheral_contracts/TokenVesting1");
 var TokenVesting2 = artifacts.require("./contracts/peripheral_contracts/TokenVesting2");
-var Strategy = artifacts.require("./contracts/Strategy.sol");
+var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 

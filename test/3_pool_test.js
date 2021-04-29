@@ -5,7 +5,7 @@ const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
-const Strategy = artifacts.require("Strategy");
+const PairsTrade = artifacts.require("PairsTrade");
 
 // const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
 const _deploy_asset_contracts = require('../migrations/2_deploy_asset_contracts.js');
@@ -124,7 +124,7 @@ contract("Rubicon Pools Test", async function(accounts) {
             await rubiconMarketInstance.offer( web3.utils.toWei((4).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
         it("Can initialize an approved strategy", async function () {
-            strategyInstance = await Strategy.deployed();
+            strategyInstance = await PairsTrade.deployed();
 
             await bathHouseInstance.approveStrategy(strategyInstance.address);
         });

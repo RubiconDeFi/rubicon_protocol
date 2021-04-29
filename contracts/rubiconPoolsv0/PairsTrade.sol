@@ -11,7 +11,7 @@ import "../RubiconMarket.sol";
 import "./BathHouse.sol";
 import "./BathPair.sol";
 
-contract Strategy {
+contract PairsTrade {
     string public name;
 
     address public bathHouse;

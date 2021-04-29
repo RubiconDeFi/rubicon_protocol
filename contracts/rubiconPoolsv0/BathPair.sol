@@ -11,7 +11,7 @@ import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/SafeMath.sol";
-import "../interfaces/IStrategy.sol";
+import "../interfaces/IPairsTrade.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
@@ -587,7 +587,7 @@ contract BathPair {
         );
 
         // 2. Strategist executes a pair trade
-        IStrategy(targetStrategy).execute(
+        IPairsTrade(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,
