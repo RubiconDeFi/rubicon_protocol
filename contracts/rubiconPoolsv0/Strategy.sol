@@ -2,6 +2,7 @@
 /// @notice This contract allows strategists to run off-chain market making strategies
 /// @notice Yield from successful market making strategies are passed to LPs
 /// @notice This contract is effectively the entrypoint for a strategist's pair trade
+
 pragma solidity ^0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
