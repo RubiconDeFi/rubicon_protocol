@@ -254,7 +254,8 @@ contract BathPair {
         if (bathAssetYield > 0) {
             BathToken(bathAssetAddress).rebalance(
                 bathQuoteAddress,
-                underlyingQuote
+                underlyingQuote,
+                5
             );
             emit LogGrossYield(bathQuoteAddress, bathAssetYield);
         }
@@ -262,7 +263,8 @@ contract BathPair {
         if (bathQuoteYield > 0) {
             BathToken(bathQuoteAddress).rebalance(
                 bathAssetAddress,
-                underlyingAsset
+                underlyingAsset,
+                5
             );
             emit LogGrossYield(bathAssetAddress, bathQuoteYield);
         }
