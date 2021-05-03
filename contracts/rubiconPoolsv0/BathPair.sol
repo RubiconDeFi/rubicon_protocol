@@ -94,6 +94,14 @@ contract BathPair {
         _;
     }
 
+    modifier onlyApprovedStrategy(address targetStrategy) {
+        require(
+            BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true,
+            "not an approved strategy - bathPair"
+        );
+        _;
+    }
+
     modifier enforceReserveRatio {
         require(
             (BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <=
@@ -114,6 +122,7 @@ contract BathPair {
         );
     }
 
+    // TODO: enforce oracle sanity check to avoid order book manipulation before permissionless strategists
     function getMidpointPrice() internal returns (int128) {
         uint256 bestAskID =
             RubiconMarket(RubiconMarketAddress).getBestOffer(
@@ -180,14 +189,6 @@ contract BathPair {
             (bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN),
             "bid price is not less than the best ask"
         );
-    }
-
-    modifier onlyApprovedStrategy(address targetStrategy) {
-        require(
-            BathHouse(bathHouse).isApprovedStrat(targetStrategy) == true,
-            "not an approved strategy - bathPair"
-        );
-        _;
     }
 
     // initialize() -start the token
@@ -347,7 +348,10 @@ contract BathPair {
         }
     }
 
-    function addOutstandingPair(uint256[3] calldata IDPair) external onlyApprovedStrategy(msg.sender) {
+    function addOutstandingPair(uint256[3] calldata IDPair)
+        external
+        onlyApprovedStrategy(msg.sender)
+    {
         require(IDPair.length == 3);
         outstandingPairIDs.push(IDPair);
     }
@@ -453,6 +457,7 @@ contract BathPair {
         }
     }
 
+    // toTest ** This is relied on as a source of truth for an order filling...
     function getOfferInfo(uint256 id) internal view returns (order memory) {
         (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
             RubiconMarket(RubiconMarketAddress).getOffer(id);

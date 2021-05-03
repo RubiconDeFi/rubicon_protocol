@@ -119,14 +119,16 @@ contract BathToken is IBathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     ) external onlyApprovedStrategy returns (uint256) {
-        //place offer in RubiconMarket
-        // toDo: change to make()
+        // Place an offer in RubiconMarket
+        // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         uint256 id =
             RubiconMarket(RubiconMarketAddress).offer(
                 pay_amt,
                 pay_gem,
                 buy_amt,
-                buy_gem
+                buy_gem,
+                0,
+                false
             );
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);

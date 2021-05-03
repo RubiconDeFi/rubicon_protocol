@@ -118,6 +118,7 @@ contract PairsTrade {
         return (newAsk, newBid);
     }
 
+    // Calls offer (a,b,c,d, 0, false) on Rubicon Market to ensure to autofills
     function placeTrades(
         address bathAssetAddress,
         address bathQuoteAddress,
