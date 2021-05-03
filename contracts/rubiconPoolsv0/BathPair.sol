@@ -347,11 +347,7 @@ contract BathPair {
         }
     }
 
-    function addOutstandingPair(uint256[3] calldata IDPair) external {
-        require(
-            BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
-            "not an approved strategy"
-        );
+    function addOutstandingPair(uint256[3] calldata IDPair) external onlyApprovedStrategy(msg.sender) {
         require(IDPair.length == 3);
         outstandingPairIDs.push(IDPair);
     }
@@ -549,7 +545,7 @@ contract BathPair {
         // return orderSize;
     }
 
-    // toTest
+    // ***toTest
     // Used to map a strategist to their orders
     function newTradeIDs() internal view returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);

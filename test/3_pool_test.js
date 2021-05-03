@@ -144,6 +144,10 @@ contract("Rubicon Pools Test", async function(accounts) {
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
             assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
         });
+        // it("Funds cannot be drained by a malicious actor...", async function () {
+        //     assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
+        //     assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
+        // });
     });
 });
 
