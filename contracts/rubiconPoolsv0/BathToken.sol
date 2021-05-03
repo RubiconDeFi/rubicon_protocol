@@ -7,16 +7,19 @@ pragma solidity =0.5.16;
 
 import "../interfaces/IBathToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "../peripheral_contracts/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+// import "../peripheral_contracts/SafeMath.sol";
 import "../RubiconMarket.sol";
 import "./PairsTrade.sol";
 import "./BathHouse.sol";
 
 contract BathToken is IBathToken {
+    // using SafeERC20 for IERC20;
+    // using Address for address;
     using SafeMath for uint256;
 
     string public symbol;
-    address public underlyingToken;
+    IERC20 public underlyingToken;
     address public RubiconMarketAddress;
 
     // admin
@@ -59,7 +62,7 @@ contract BathToken is IBathToken {
 
     function initialize(
         string memory bathName,
-        address token,
+        IERC20 token,
         address market,
         address _bathHouse
     ) public {
@@ -140,6 +143,46 @@ contract BathToken is IBathToken {
         _burn(from, value);
     }
 
+    function balance() public view returns (uint256) {
+        return IERC20(underlyingToken).balanceOf(address(this));
+    }
+
+    // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
+    function depositNew(uint256 _amount) public {
+        uint256 _pool = balance();
+        uint256 _before = underlyingToken.balanceOf(address(this));
+        underlyingToken.transferFrom(msg.sender, address(this), _amount);
+        uint256 _after = underlyingToken.balanceOf(address(this));
+        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint256 shares = 0;
+        if (totalSupply == 0) {
+            shares = _amount;
+        } else {
+            shares = (_amount.mul(totalSupply)).div(_pool);
+        }
+        _mint(msg.sender, shares);
+    }
+
+    // No rebalance implementation for lower fees and faster swaps
+    function withdrawNew(uint256 _shares) public {
+        uint256 r = (balance().mul(_shares)).div(totalSupply);
+        _burn(msg.sender, _shares);
+
+        // Check balance
+        uint256 b = underlyingToken.balanceOf(address(this));
+        if (b < r) {
+            // uint256 _withdraw = r.sub(b);
+            // IController(controller).withdraw(address(underlyingToken), _withdraw);
+            // uint256 _after = underlyingToken.balanceOf(address(this));
+            // uint256 _diff = _after.sub(b);
+            // if (_diff < _withdraw) {
+            //     r = b.add(_diff);
+            // }
+        }
+
+        underlyingToken.transfer(msg.sender, r);
+    }
+
     function rebalance(address sisterBath, address underlying)
         external
         onlyPair
@@ -188,6 +231,7 @@ contract BathToken is IBathToken {
     // TODO: add a burn test
     // TODO: make pool control proportion an average?
     // TODO: pay strategists at the pair level
+    // TODO: make non reentrant
     function burn(uint256 value) external {
         require(balanceOf[msg.sender] >= value, "not enough token to burn");
 

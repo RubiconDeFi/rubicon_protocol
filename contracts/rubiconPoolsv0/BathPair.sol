@@ -10,7 +10,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
-import "../peripheral_contracts/SafeMath.sol";
+import "../peripheral_contracts/SafeMathE.sol";
 import "../interfaces/IPairsTrade.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
@@ -218,7 +218,7 @@ contract BathPair {
         BathToken bathAsset = new BathToken();
         bathAsset.initialize(
             string(abi.encodePacked("bath", (assetName))),
-            asset,
+            IERC20(asset),
             market,
             bathHouse
         );
@@ -234,7 +234,7 @@ contract BathPair {
             BathToken bathQuote = new BathToken();
             bathQuote.initialize(
                 string(abi.encodePacked("bath", (quoteName))),
-                quote,
+                IERC20(quote),
                 market,
                 bathHouse
             );
@@ -502,7 +502,7 @@ contract BathPair {
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct!
                 emit LogNote("raw maxSize", maxSize);
-                int128 e = ABDKMath64x64.divu(SafeMath.eN(), SafeMath.eD()); //Correct as a int128!
+                int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
                 emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
@@ -529,7 +529,7 @@ contract BathPair {
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct! 48000000000000000000
                 emit LogNote("raw maxSize", maxSize);
-                int128 e = ABDKMath64x64.divu(SafeMath.eN(), SafeMath.eD()); //Correct as a int128!
+                int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
                 emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
