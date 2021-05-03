@@ -95,16 +95,16 @@ contract("Rubicon Pools Test", async function(accounts) {
 
         it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
             await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((10).toString())})
-            await WETHInstance.approve(bathPairInstance.address, web3.utils.toWei((10).toString()), {from: accounts[1]});
+            await WETHInstance.approve(bathAssetInstance.address, web3.utils.toWei((10).toString()), {from: accounts[1]});
             
-            await bathPairInstance.deposit(WETHInstance.address,  web3.utils.toWei((10).toString()), DAIInstance.address, 0, {from: accounts[1]});
+            await bathAssetInstance.deposit(web3.utils.toWei((10).toString()), {from: accounts[1]});
             assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((10).toString()));            
         });
         it("Users can deposit quote funds with custom weights and receive bathTokens", async function() {
             await DAIInstance.faucet({from: accounts[2]});
-            await DAIInstance.approve(bathPairInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
+            await DAIInstance.approve(bathQuoteInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
             
-            await bathPairInstance.deposit(WETHInstance.address,  0, DAIInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
+            await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
             assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
         });
         it("Admin can initialize and whitelist WETH and DAI for trading", async function() {
@@ -151,13 +151,5 @@ contract("Rubicon Pools Test", async function(accounts) {
     });
 });
 
-
-
-// Running list of TO DOs:
-//  - Determine what lives on-chain vs off-chain for v1 schema
-
 // Rubicon Pools v1 Improvements:
-// -Yield is correctly being passed to users over time
-// -Single asset liquidity across pools *
 // -Strategists are payed a cut for good performance
-// -Add an inventory management sanity check
