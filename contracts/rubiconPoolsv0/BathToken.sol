@@ -162,9 +162,6 @@ contract BathToken is IBathToken {
         uint256 r = (balance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
 
-        // Check balance
-        uint256 b = underlyingToken.balanceOf(address(this));
-
         underlyingToken.transfer(msg.sender, r);
     }
 
