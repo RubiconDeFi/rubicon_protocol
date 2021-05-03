@@ -34,9 +34,9 @@ interface IBathToken {
     ) external returns (bool);
 
     //deposit and withdraw:
-    function mint(address to, uint256 value) external;
+    function deposit(uint256 _amount) external;
 
-    function withdraw(address from, uint256 value) external;
+    function withdraw(uint256 shares) external;
 
     // function placeOffer() external;
 

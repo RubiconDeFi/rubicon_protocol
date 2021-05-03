@@ -244,56 +244,6 @@ contract BathPair {
         RubiconMarketAddress = market;
     }
 
-    function deposit(
-        address asset,
-        uint256 assetAmount,
-        address quote,
-        uint256 quoteAmount
-    ) external returns (uint256 bathAssetAmount, uint256 bathQuoteAmount) {
-        // require(bathTokens exist)
-        require(asset != quote);
-        require(asset == underlyingAsset, "wrong asset nerd");
-        require(quote == underlyingQuote, "wrong quote nerd");
-
-        // mint the bathTokens to the user in accordance to weights, send underlying assets to each Bath Token
-        IERC20(asset).transferFrom(msg.sender, address(this), assetAmount);
-        IERC20(quote).transferFrom(msg.sender, address(this), quoteAmount);
-
-        IERC20(asset).approve(bathAssetAddress, assetAmount);
-        IERC20(quote).approve(bathQuoteAddress, quoteAmount);
-
-        IBathToken(bathAssetAddress).mint(msg.sender, assetAmount);
-        IBathToken(bathQuoteAddress).mint(msg.sender, quoteAmount);
-
-        //filler for return values
-        return (assetAmount, quoteAmount);
-    }
-
-    // TODO: update with new burn logic
-    function withdraw(
-        address asset,
-        uint256 assetAmount,
-        address quote,
-        uint256 quoteAmount
-    ) external {
-        require(asset != quote);
-        require(asset == underlyingAsset, "wrong asset nerd");
-        require(quote == underlyingQuote, "wrong quote nerd");
-
-        require(
-            IERC20(asset).balanceOf(bathAssetAddress) >= assetAmount,
-            "Not enough underlying in bathToken"
-        );
-        require(
-            IERC20(quote).balanceOf(bathQuoteAddress) >= quoteAmount,
-            "Not enough underlying in bathToken"
-        );
-
-        //Return funds to users
-        IBathToken(bathAssetAddress).withdraw(msg.sender, assetAmount);
-        IBathToken(bathQuoteAddress).withdraw(msg.sender, quoteAmount);
-    }
-
     // Returns filled liquidity to the correct bath pool
     function rebalancePair() internal {
         uint256 bathAssetYield =

@@ -137,18 +137,12 @@ contract BathToken is IBathToken {
         return (id);
     }
 
-    // TODO: update or remove
-    function withdraw(address from, uint256 value) external onlyPair {
-        IERC20(underlyingToken).transfer(from, value);
-        _burn(from, value);
-    }
-
     function balance() public view returns (uint256) {
         return IERC20(underlyingToken).balanceOf(address(this));
     }
 
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
-    function depositNew(uint256 _amount) public {
+    function deposit(uint256 _amount) public {
         uint256 _pool = balance();
         uint256 _before = underlyingToken.balanceOf(address(this));
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
@@ -164,21 +158,12 @@ contract BathToken is IBathToken {
     }
 
     // No rebalance implementation for lower fees and faster swaps
-    function withdrawNew(uint256 _shares) public {
+    function withdraw(uint256 _shares) public {
         uint256 r = (balance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
 
         // Check balance
         uint256 b = underlyingToken.balanceOf(address(this));
-        if (b < r) {
-            // uint256 _withdraw = r.sub(b);
-            // IController(controller).withdraw(address(underlyingToken), _withdraw);
-            // uint256 _after = underlyingToken.balanceOf(address(this));
-            // uint256 _diff = _after.sub(b);
-            // if (_diff < _withdraw) {
-            //     r = b.add(_diff);
-            // }
-        }
 
         underlyingToken.transfer(msg.sender, r);
     }
@@ -193,72 +178,74 @@ contract BathToken is IBathToken {
         );
     }
 
-    function mint(address to, uint256 value) external {
-        require(
-            IERC20(underlyingToken).balanceOf(msg.sender) >= value,
-            "not enough token to mint"
-        );
-        IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
-        _mint(to, value);
+    // function mint(address to, uint256 value) external {
+    //     require(
+    //         IERC20(underlyingToken).balanceOf(msg.sender) >= value,
+    //         "not enough token to mint"
+    //     );
+    //     IERC20(underlyingToken).transferFrom(msg.sender, address(this), value);
+    //     _mint(to, value);
 
-        // Time stamp and update yield
-        updateYield();
+    //     // Time stamp and update yield
+    //     updateYield();
 
-        // Log the pool's cumulative yield when they entered the pool
-        diveInTheBath[msg.sender] = yieldTracker[yieldTracker.length - 1][0];
-    }
+    //     // Log the pool's cumulative yield when they entered the pool
+    //     diveInTheBath[msg.sender] = yieldTracker[yieldTracker.length - 1][0];
+    // }
 
-    // Function that is called to log yield over time
-    // This function should track cumulative yield at a given timestamp
-    // e.g. [5 USDC, 2:30pm], [7 USDC, 2:45pm]
-    // This way we can log when a user enters the pool (mint) and when they exit give them:
-    // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
-    // TODO: add a test for yield tracking
-    function updateYield() internal {
-        uint256 yieldAmount =
-            IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
-        if (yieldTracker.length == 0) {
-            yieldTracker.push([yieldAmount, now]);
-            emit LogYield(yieldAmount);
-            return;
-        }
+    // // Function that is called to log yield over time
+    // // This function should track cumulative yield at a given timestamp
+    // // e.g. [5 USDC, 2:30pm], [7 USDC, 2:45pm]
+    // // This way we can log when a user enters the pool (mint) and when they exit give them:
+    // // (tExit - tEnter) => (ExitCumuYield - EnterCumuYield) * (bathTokenAmount / Total)
+    // // TODO: add a test for yield tracking
+    // function updateYield() internal {
+    //     uint256 yieldAmount =
+    //         IERC20(underlyingToken).balanceOf(address(this)) - totalSupply;
+    //     if (yieldTracker.length == 0) {
+    //         yieldTracker.push([yieldAmount, now]);
+    //         emit LogYield(yieldAmount);
+    //         return;
+    //     }
 
-        uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
-        yieldTracker.push([yieldAmount + oldTotal, now]);
-        emit LogYield(yieldAmount + oldTotal);
-    }
+    //     uint256 oldTotal = yieldTracker[yieldTracker.length - 1][0];
+    //     yieldTracker.push([yieldAmount + oldTotal, now]);
+    //     emit LogYield(yieldAmount + oldTotal);
+    // }
 
-    // TODO: add a burn test
-    // TODO: make pool control proportion an average?
-    // TODO: pay strategists at the pair level
-    // TODO: make non reentrant
-    function burn(uint256 value) external {
-        require(balanceOf[msg.sender] >= value, "not enough token to burn");
+    // // TODO: add a burn test
+    // // TODO: make pool control proportion an average?
+    // // TODO: pay strategists at the pair level
+    // // TODO: make non reentrant
+    // function burn(uint256 value) external {
+    //     require(balanceOf[msg.sender] >= value, "not enough token to burn");
 
-        // Determine underlying - issuedBath tokens
-        updateYield();
+    //     // Determine underlying - issuedBath tokens
+    //     updateYield();
 
-        uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
+    //     uint256 currentYield = yieldTracker[yieldTracker.length - 1][0];
 
-        // Withdraw user's underlying and portion of yield if positive
-        // Delta represents change in yield from current to when the user entered
-        int256 delta = int256(currentYield) - int256(diveInTheBath[msg.sender]);
-        if (delta >= 0) {
-            // withdraw the user's yield according to (bathToken quanitity / totalSupply) * (delta)
-            uint256 userYield =
-                (value * (currentYield - diveInTheBath[msg.sender])) /
-                    totalSupply;
-            IERC20(underlyingToken).transfer(msg.sender, value + userYield);
-        } else {
-            // This value will be negative
-            int256 userYield = (int256(value) * delta) / int256(totalSupply);
-            IERC20(underlyingToken).transfer(
-                msg.sender,
-                uint256(int256(value) + userYield)
-            );
-        }
-        _burn(msg.sender, value);
-    }
+    //     // Withdraw user's underlying and portion of yield if positive
+    //     // Delta represents change in yield from current to when the user entered
+    //     int256 delta = int256(currentYield) - int256(diveInTheBath[msg.sender]);
+    //     if (delta >= 0) {
+    //         // withdraw the user's yield according to (bathToken quanitity / totalSupply) * (delta)
+    //         uint256 userYield =
+    //             (value * (currentYield - diveInTheBath[msg.sender])) /
+    //                 totalSupply;
+    //         IERC20(underlyingToken).transfer(msg.sender, value + userYield);
+    //     } else {
+    //         // This value will be negative
+    //         int256 userYield = (int256(value) * delta) / int256(totalSupply);
+    //         IERC20(underlyingToken).transfer(
+    //             msg.sender,
+    //             uint256(int256(value) + userYield)
+    //         );
+    //     }
+    //     _burn(msg.sender, value);
+    // }
+
+    // *** Internal Functions ***
 
     function _mint(address to, uint256 value) internal {
         totalSupply = totalSupply.add(value);
