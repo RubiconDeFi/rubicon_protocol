@@ -413,7 +413,7 @@ contract BathPair {
         }
     }
 
-    // toTest ** This is relied on as a source of truth for an order filling...
+    // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
         (uint256 ask_amt, ERC20 ask_gem, uint256 bid_amt, ERC20 bid_gem) =
             RubiconMarket(RubiconMarketAddress).getOffer(id);
@@ -506,7 +506,6 @@ contract BathPair {
         // return orderSize;
     }
 
-    // ***toTest
     // Used to map a strategist to their orders
     function newTradeIDs() internal view returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);

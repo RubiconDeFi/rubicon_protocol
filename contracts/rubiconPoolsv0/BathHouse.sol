@@ -139,7 +139,6 @@ contract BathHouse {
         BathPair(bathPair).setCancelTimeDelay(value);
     }
 
-    // toTest
     function setMaxOutstandingPairCount(address bathPair, uint256 value)
         public
         onlyAdmin
