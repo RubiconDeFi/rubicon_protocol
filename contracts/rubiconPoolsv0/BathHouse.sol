@@ -132,7 +132,6 @@ contract BathHouse {
         return quoteToBathQuote[quote];
     }
 
-    // toTest
     function setCancelTimeDelay(address bathPair, uint256 value)
         public
         onlyAdmin
