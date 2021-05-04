@@ -31,7 +31,6 @@ contract BathToken is IBathToken {
     mapping(address => uint256) public balanceOf;
 
     // This maps a user's address to cumulative pool yield at the time of deposit
-    // TODO: needs to be quantity specific as well and FIFO***
     mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -124,6 +123,7 @@ contract BathToken is IBathToken {
     ) external onlyApprovedStrategy returns (uint256) {
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
+        // while also ensuring that the order is placed in the sorted list
         uint256 id =
             RubiconMarket(RubiconMarketAddress).offer(
                 pay_amt,

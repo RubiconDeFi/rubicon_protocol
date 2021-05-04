@@ -144,10 +144,11 @@ contract("Rubicon Pools Test", async function(accounts) {
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
             assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
         });
-        // it("Funds cannot be drained by a malicious actor...", async function () {
-        //     assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
-        //     assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
-        // });
+        it("Strategist can claim funds", async function () {
+            (await bathPairInstance.strategistBootyClaim());
+            // Should be 5% * 4 * 2/2 = 0.002 
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "200000000000000");
+        });
     });
 });
 

@@ -317,9 +317,11 @@ contract BathPair {
         if (isAssetFill) {
             strategist2FillsAsset[strategist] += 1;
             totalAssetFills += 1;
+            emit LogNote("logFill asset", totalAssetFills);
         } else {
             strategist2FillsQuote[strategist] += 1;
             totalQuoteFills += 1;
+            emit LogNote("logFill quote", totalQuoteFills);
         }
     }
 
@@ -354,6 +356,7 @@ contract BathPair {
                 delete outstandingPairIDs[x];
                 // true if quote fills -> asset yield
                 logFill(outstandingPairIDs[x][0], false);
+                return;
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -372,6 +375,7 @@ contract BathPair {
                 );
                 delete outstandingPairIDs[x];
                 logFill(outstandingPairIDs[x][1], true);
+                return;
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
