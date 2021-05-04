@@ -151,6 +151,3 @@ contract("Rubicon Pools Test", async function(accounts) {
         });
     });
 });
-
-// Rubicon Pools v1 Improvements:
-// -Strategists are payed a cut for good performance

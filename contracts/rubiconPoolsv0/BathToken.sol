@@ -137,13 +137,9 @@ contract BathToken is IBathToken {
         return (id);
     }
 
-    function balance() public view returns (uint256) {
-        return IERC20(underlyingToken).balanceOf(address(this));
-    }
-
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) public {
-        uint256 _pool = balance();
+        uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
         uint256 _before = underlyingToken.balanceOf(address(this));
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
         uint256 _after = underlyingToken.balanceOf(address(this));
@@ -159,7 +155,7 @@ contract BathToken is IBathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) public {
-        uint256 r = (balance().mul(_shares)).div(totalSupply);
+        uint256 r = (IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
 
         underlyingToken.transfer(msg.sender, r);
