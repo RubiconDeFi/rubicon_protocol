@@ -3,10 +3,6 @@ const Web3 = require('web3');
 var fs = require('fs');
 require("dotenv").config();
 
-// *********** Internal Helper Functions *****************
-function loadContract(name, abi, address)
-
-
 // ************ Rubicon Pools Kovan Setup ***************
 
 // Initialize Web3
