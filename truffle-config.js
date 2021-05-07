@@ -23,8 +23,8 @@ module.exports = {
       },
       network_id: 42,
       from: process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN,
-      gasPrice: 10000000000,
-      gas: 12499988,
+      gasPrice: 1800000000,
+      gas: 12487770,
       timeoutBlocks: 220,
       skipDryRun: true,
       
