@@ -22,7 +22,7 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy Pools and PairsTrade pointed at existing Kovan Exchange
     if (network == 'kovan'){
-      await  deployer.deploy(BathHouse, { gas: 12499988 }).then(function() {
+      await  deployer.deploy(BathHouse, { gas: 12487794 }).then(function() {
         return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN), { gas: 12487782 };
          }); 
       bathHouseInstance = await BathHouse.deployed();
@@ -31,9 +31,14 @@ module.exports = async function(deployer, network, accounts) {
       // Initialize WETH and DAI bathTokens and Pools
       (await bathHouseInstance.initBathPair(process.env.KOVAN_WETH, "WETH", process.env.KOVAN_DAI, "DAI", 90, 259200, 10)); // 90% reserve ratio and 3 days cancel delay
       newPair = await bathHouseInstance.getBathPair(process.env.KOVAN_WETH, process.env.KOVAN_DAI);
+      bathPairInstance = await BathPair.at(newPair);
+
+      bathAssetAddress = await bathPairInstance.bathAssetAddress();
+      bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
       
       console.log('Kovan BathHouse Address: ', BathHouse.address);
       console.log('Kovan PairsTrade Address: ', PairsTrade.address);
-      console.log('Kovan PairsTrade Address: ', PairsTrade.address);
+      console.log('Kovan bathWETH Address: ', bathAssetAddress);
+      console.log('Kovan bathDAI Address: ', bathQuoteAddress);
     }
 };

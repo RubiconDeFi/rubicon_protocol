@@ -17,14 +17,17 @@ module.exports = {
       gas: 10000000,  
     },
     kovan: {
+      networkCheckTimeout: 10000,
       provider: function() {
         return new HDWalletProvider(process.env.PRIVATE_KEY_KOVAN, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY)
       },
       network_id: 42,
       from: process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN,
-      gasPrice: 2000000000,
+      gasPrice: 10000000000,
       gas: 12499988,
-      timeoutBlocks: 220
+      timeoutBlocks: 220,
+      skipDryRun: true,
+      
     },
     mainnet: {
       provider: function() {
