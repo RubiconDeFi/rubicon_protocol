@@ -22,8 +22,8 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy Pools and PairsTrade pointed at existing Kovan Exchange
     if (network == 'kovan'){
-      await  deployer.deploy(BathHouse).then(function() {
-        return deployer.deploy(PairsTrade, "Stoikov Market Making", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);
+      await  deployer.deploy(BathHouse, { gas: 12487782 }).then(function() {
+        return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN), { gas: 12487782 };
          }); 
       bathHouseInstance = await BathHouse.deployed();
       await bathHouseInstance.initialize(process.env.RUBICONMARKET_V0_KOVAN);
