@@ -22,7 +22,7 @@ module.exports = async function(deployer, network, accounts) {
       }
 
     // Deploy Pools and PairsTrade pointed at existing Kovan Exchange
-    if (network == 'kovan'){
+    if (network == 'kovan' || network == 'kovan-fork'){
       await  deployer.deploy(BathHouse).then(function() {
         return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);
          }); 

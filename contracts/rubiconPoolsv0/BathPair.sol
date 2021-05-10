@@ -192,7 +192,7 @@ contract BathPair {
     }
 
     // initialize() -start the token
-    function initializePair(
+    constructor(
         address asset,
         string calldata assetName,
         address quote,

@@ -23,11 +23,10 @@ module.exports = {
       },
       network_id: 42,
       from: process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN,
-      gasPrice: 18000000000,
+      gasPrice: 5000000000,
       gas: 12467770,
-      timeoutBlocks: 220,
-      skipDryRun: true,
-      
+      timeoutBlocks: 220
+      // skipDryRun: true,
     },
     mainnet: {
       provider: function() {
