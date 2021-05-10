@@ -48,10 +48,7 @@ contract BathHouse {
         require(asset != quote);
         require(asset != address(0));
         require(quote != address(0));
-        require(
-            getPair[asset][quote] == address(0),
-            "Bath Pair already exists"
-        );
+        require(getPair[asset][quote] == address(0));
         require(_reserveRatio < 100);
         require(_reserveRatio > 60);
         BathPair pair = new BathPair();
@@ -133,14 +130,14 @@ contract BathHouse {
     }
 
     function setCancelTimeDelay(address bathPair, uint256 value)
-        public
+        external
         onlyAdmin
     {
         BathPair(bathPair).setCancelTimeDelay(value);
     }
 
     function setMaxOutstandingPairCount(address bathPair, uint256 value)
-        public
+        external
         onlyAdmin
     {
         BathPair(bathPair).setMaxOutstandingPairCount(value);

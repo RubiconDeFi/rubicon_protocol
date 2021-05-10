@@ -155,7 +155,10 @@ contract BathToken is IBathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) public {
-        uint256 r = (IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)).div(totalSupply);
+        uint256 r =
+            (IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)).div(
+                totalSupply
+            );
         _burn(msg.sender, _shares);
 
         underlyingToken.transfer(msg.sender, r);
