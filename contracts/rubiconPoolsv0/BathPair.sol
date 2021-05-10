@@ -38,7 +38,7 @@ contract BathPair {
     event LogOffer(string, order);
     event LogGrossYield(address, uint256);
 
-    bool public initialized;
+    // bool public initialized;
 
     // The delay after which unfilled orders are cancelled
     uint256 public timeDelay;
@@ -73,12 +73,6 @@ contract BathPair {
         ERC20 pay_gem;
         uint256 buy_amt;
         ERC20 buy_gem;
-    }
-
-    function initialize() public {
-        require(!initialized);
-        bathHouse = msg.sender;
-        initialized = true;
     }
 
     function setCancelTimeDelay(uint256 value) public onlyBathHouse {
@@ -191,18 +185,19 @@ contract BathPair {
         );
     }
 
-    // initialize() -start the token
+    // constructor called by the BathHouse to initialize a new Pair
     constructor(
         address asset,
-        string calldata assetName,
+        string memory assetName,
         address quote,
-        string calldata quoteName,
+        string memory quoteName,
         address market,
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 _maxOutstandingPairCount
     ) public {
-        require(msg.sender == bathHouse, "caller must be Bath House");
+        bathHouse = msg.sender;
+
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);
         reserveRatio = _reserveRatio;

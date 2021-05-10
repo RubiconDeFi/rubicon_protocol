@@ -51,15 +51,18 @@ contract BathHouse {
         require(getPair[asset][quote] == address(0));
         require(_reserveRatio < 100);
         require(_reserveRatio > 60);
-        BathPair pair = new BathPair(            asset,
-            assetName,
-            quote,
-            quoteName,
-            RubiconMarketAddress,
-            _reserveRatio,
-            _timeDelay,
-            _maxOutstandingPairCount);
-        // newPair = address(pair);
+        BathPair pair =
+            new BathPair(
+                asset,
+                assetName,
+                quote,
+                quoteName,
+                RubiconMarketAddress,
+                _reserveRatio,
+                _timeDelay,
+                _maxOutstandingPairCount
+            );
+        newPair = address(pair);
         allBathPairs.push(newPair);
         // pair.initialize();
         // pair.initializePair(
@@ -72,11 +75,11 @@ contract BathHouse {
         //     _timeDelay,
         //     _maxOutstandingPairCount
         // );
-        getPair[asset][quote] = address(pair);
+        getPair[asset][quote] = newPair;
 
-        approvePair(address(pair));
+        approvePair(newPair);
         addQuote(quote, address(pair.bathQuoteAddress));
-        return address(pair);
+        return newPair;
     }
 
     function getBathPair(address asset, address quote)
