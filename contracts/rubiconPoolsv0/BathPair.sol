@@ -201,7 +201,7 @@ contract BathPair {
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 _maxOutstandingPairCount
-    ) external {
+    ) public {
         require(msg.sender == bathHouse, "caller must be Bath House");
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);
