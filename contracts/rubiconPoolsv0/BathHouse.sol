@@ -64,17 +64,7 @@ contract BathHouse {
             );
         newPair = address(pair);
         allBathPairs.push(newPair);
-        // pair.initialize();
-        // pair.initializePair(
-        //     asset,
-        //     assetName,
-        //     quote,
-        //     quoteName,
-        //     RubiconMarketAddress,
-        //     _reserveRatio,
-        //     _timeDelay,
-        //     _maxOutstandingPairCount
-        // );
+
         getPair[asset][quote] = newPair;
 
         approvePair(newPair);
