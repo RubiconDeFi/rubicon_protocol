@@ -22,11 +22,11 @@ module.exports = function(deployer, network, accounts) {
   
   // Full Protocol Migration:
   var admin = accounts[0];
-  // const Founder1 = accounts[1];
-  // const Founder2 = accounts[2]; 
+  const Founder1 = accounts[1];
+  const Founder2 = accounts[2]; 
 
-  // deployer.deploy(TokenVesting1, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
-  // deployer.deploy(TokenVesting2, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
+  deployer.deploy(TokenVesting1, Founder1, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
+  deployer.deploy(TokenVesting2, Founder2, Date.now(), 0, FOUR_YEARS, true); // beneficiary, start, cliffDuration, duration, revocable
 
   deployer.deploy(Migrations).then(function() {
     return deployer.deploy(Aqueduct, FOUR_YEARS, admin).then(function() {
