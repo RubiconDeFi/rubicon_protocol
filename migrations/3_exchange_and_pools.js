@@ -26,20 +26,20 @@ module.exports = async function(deployer, network, accounts) {
       await  deployer.deploy(BathHouse).then(function() {
         return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);
          }); 
-      bathHouseInstance = await BathHouse.deployed();
-      await bathHouseInstance.initialize(process.env.RUBICONMARKET_V0_KOVAN);
-     
-      // Initialize WETH and DAI bathTokens and Pools
-      (await bathHouseInstance.initBathPair(process.env.KOVAN_WETH, "WETH", process.env.KOVAN_DAI, "DAI", 90, 259200, 10)); // 90% reserve ratio and 3 days cancel delay
-      newPair = await bathHouseInstance.getBathPair(process.env.KOVAN_WETH, process.env.KOVAN_DAI);
-      bathPairInstance = await BathPair.at(newPair);
 
-      bathAssetAddress = await bathPairInstance.bathAssetAddress();
-      bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
+      // await bathHouseInstance.initialize(process.env.RUBICONMARKET_V0_KOVAN);
+     
+      // // Initialize WETH and DAI bathTokens and Pools
+      // (await bathHouseInstance.initBathPair(process.env.KOVAN_WETH, "WETH", process.env.KOVAN_DAI, "DAI", 90, 259200, 10)); // 90% reserve ratio and 3 days cancel delay
+      // newPair = await bathHouseInstance.getBathPair(process.env.KOVAN_WETH, process.env.KOVAN_DAI);
+      // bathPairInstance = await BathPair.at(newPair);
+
+      // bathAssetAddress = await bathPairInstance.bathAssetAddress();
+      // bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
       
-      console.log('Kovan BathHouse Address: ', BathHouse.address);
-      console.log('Kovan PairsTrade Address: ', PairsTrade.address);
-      console.log('Kovan bathWETH Address: ', bathAssetAddress);
-      console.log('Kovan bathDAI Address: ', bathQuoteAddress);
+      // console.log('Kovan BathHouse Address: ', BathHouse.address);
+      // console.log('Kovan PairsTrade Address: ', PairsTrade.address);
+      // console.log('Kovan bathWETH Address: ', bathAssetAddress);
+      // console.log('Kovan bathDAI Address: ', bathQuoteAddress);
     }
 };
