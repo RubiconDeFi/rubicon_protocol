@@ -6,6 +6,7 @@ var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
 // This file will deploy Rubicon Market and Pools while wrapping everything in upgradeable proxies
+// @dev - use: ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
 module.exports = async function(deployer, network, accounts) {
     //Use below line for only migrating this file
     //truffle migrate -f 3 --network kovan
