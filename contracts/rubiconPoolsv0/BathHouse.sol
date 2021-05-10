@@ -62,14 +62,13 @@ contract BathHouse {
                 _timeDelay,
                 _maxOutstandingPairCount
             );
-        newPair = address(pair);
-        allBathPairs.push(newPair);
+        allBathPairs.push(address(pair));
 
-        getPair[asset][quote] = newPair;
+        getPair[asset][quote] = address(pair);
 
-        approvePair(newPair);
+        approvePair(address(pair));
         addQuote(quote, address(pair.bathQuoteAddress));
-        return newPair;
+        return address(pair);
     }
 
     function getBathPair(address asset, address quote)
