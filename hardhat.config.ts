@@ -25,7 +25,9 @@ module.exports = {
   networks: {
       optimism: {
       url: 'https://kovan.optimism.io/',
-      accounts: [process.env.PRIVATE_KEY_KOVAN],
+      accounts: {
+        mnemonic: 'test test test test test test test test test test test junk'
+      },
       ovm: true,
       gasPrice: 0,
       },
