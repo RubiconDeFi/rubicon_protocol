@@ -16,6 +16,6 @@ const func = async (hre) => {
       log: true
     })
   }
-  
+
   func.tags = ['RubiconMarket'] // Replace `ERC20` with your contract's file name
   module.exports = func

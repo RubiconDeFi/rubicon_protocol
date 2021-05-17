@@ -6,8 +6,6 @@ import '@eth-optimism/plugins/hardhat/compiler'
 import '@eth-optimism/plugins/hardhat/ethers'
 import 'hardhat-deploy'
 
-const launchAccount: string[] = ["49b2e9998d63ba5d342720825da2c2bb230cfc40e20b960281041e2c03983ed2"]
-
 module.exports = {
   ovm: {
     solcVersion: "0.5.16"
@@ -26,19 +24,11 @@ module.exports = {
   },
   networks: {
       optimism: {
-      url: 'http://127.0.0.1:8545',
-      accounts: {
-        mnemonic: 'test test test test test test test test test test test junk'
-      },
+      url: 'https://kovan.optimism.io/',
+      accounts: [process.env.PRIVATE_KEY_KOVAN],
       ovm: true,
       gasPrice: 0,
       },
-      optimismKovan: {
-        url: 'https://kovan.optimism.io/',
-        accounts: launchAccount,
-        ovm: true,
-        gasPrice: 0,
-        }
   },
   namedAccounts: {
     deployer: {
