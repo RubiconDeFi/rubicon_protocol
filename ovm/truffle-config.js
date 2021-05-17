@@ -17,12 +17,12 @@ module.exports = {
     // *** Launch ganache with: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize ***
     // *** Migrations working with above configuration
     test: {
-      network_id: "69",
+      network_id: "*",
       networkCheckTimeout: 100000,
       provider: function() {
         return ganache.provider({
           mnemonic: mnemonic,
-          network_id: "69",
+          network_id: "*",
           default_balance_ether: 100,
           gasLimit: GAS_LIMIT,
           gasPrice: GAS_PRICE,

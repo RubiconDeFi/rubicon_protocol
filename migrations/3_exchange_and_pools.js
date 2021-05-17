@@ -13,9 +13,9 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy the Exchange, Pools, and main PairsTrade
     // TODO: wrap this in upgradeable proxies
-    if (network == 'development' || network == 'pools' || network == "test"){
+    if (network == 'development' || network == 'pools' || network == "kovan" || network == "ganache"){
       await deployer.deploy(RubiconMarket, {gasPrice: 0}).then(function() {
-            return deployer.deploy(BathHouse, {gasPrice: 0}).then(function() {
+            return deployer.deploy(BathHouse).then(function() {
               return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
             }); 
         });
