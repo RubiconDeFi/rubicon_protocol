@@ -23,9 +23,19 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy Pools and PairsTrade pointed at existing Kovan Exchange
     if (network == 'kovan' || network == 'kovan-fork'){
-      await  deployer.deploy(BathHouse).then(function() {
-        return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);
-         }); 
+      // await deployer.deploy(RubiconMarket);
+      // rubiconMarketInstance = await RubiconMarket.deployed();
+      // await rubiconMarketInstance.initialize(false, process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN);
+      // console.log("Rubicon Market Address: ", rubiconMarketInstance.address);
+
+      // Add launch tokens to the whitelist
+      // await rubiconMarketInstance.addToWhitelist(process.env.OP_WAYNE);
+      // await rubiconMarketInstance.addToWhitelist(process.env.OP_STARK);
+      // await rubiconMarketInstance.addToWhitelist(process.env.OP_USDC);
+
+      // await  deployer.deploy(BathHouse).then(function() {
+      //   return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);
+      //    }); 
 
       // await bathHouseInstance.initialize(process.env.RUBICONMARKET_V0_KOVAN);
      
