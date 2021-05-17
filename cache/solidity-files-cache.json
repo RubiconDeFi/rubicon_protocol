@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Aqueduct.sol": {
-      "lastModificationDate": 1611677486467,
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/Aqueduct.sol": {
+      "lastModificationDate": 1615415238691,
       "contentHash": "8d557ec791db75461e1cc445cc60aa60",
       "sourceName": "contracts/Aqueduct.sol",
       "solcConfig": {
@@ -35,11 +35,13 @@
       ],
       "artifacts": [
         "Aqueduct",
-        "RBCNInterface"
+        "RBCNInterface",
+        "Aqueduct.ovm",
+        "RBCNInterface.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\RBCN.sol": {
-      "lastModificationDate": 1611167160709,
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/RBCN.sol": {
+      "lastModificationDate": 1615415238692,
       "contentHash": "9e1f43a4a1f8103606970e4da2af5ecf",
       "sourceName": "contracts/RBCN.sol",
       "solcConfig": {
@@ -69,13 +71,14 @@
         "^0.5.16"
       ],
       "artifacts": [
-        "RBCN"
+        "RBCN",
+        "RBCN.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Migrations.sol": {
-      "lastModificationDate": 1611612087050,
-      "contentHash": "4d98165ff4c13b43b407abc572aedb2d",
-      "sourceName": "contracts/Migrations.sol",
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/interfaces/IBathToken.sol": {
+      "lastModificationDate": 1620071444326,
+      "contentHash": "616e2359737211d3b2d42f7a601c41cc",
+      "sourceName": "contracts/interfaces/IBathToken.sol",
       "solcConfig": {
         "version": "0.5.16",
         "settings": {
@@ -100,52 +103,17 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.5.16"
+        ">=0.5.16"
       ],
       "artifacts": [
-        "Migrations",
-        "TimelockInterface"
+        "IBathToken",
+        "IBathToken.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\DaiWithFaucet.sol": {
-      "lastModificationDate": 1611092217981,
-      "contentHash": "03864fb2fdcc3f609d5aa629871a4e2a",
-      "sourceName": "contracts/peripheral_contracts/DaiWithFaucet.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.5.12"
-      ],
-      "artifacts": [
-        "DaiWithFaucet",
-        "LibNote"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\EquityToken.sol": {
-      "lastModificationDate": 1611092218124,
-      "contentHash": "4a8498ac8e8faf7df2fcc753045c3be4",
-      "sourceName": "contracts/peripheral_contracts/EquityToken.sol",
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/rubiconPoolsv0/BathToken.sol": {
+      "lastModificationDate": 1620667396815,
+      "contentHash": "ed1d87445657beccb0ed6f4052e095c6",
+      "sourceName": "contracts/rubiconPoolsv0/BathToken.sol",
       "solcConfig": {
         "version": "0.5.16",
         "settings": {
@@ -169,126 +137,23 @@
         }
       },
       "imports": [
-        "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
-        "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol"
+        "../interfaces/IBathToken.sol",
+        "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol",
+        "openzeppelin-solidity/contracts/math/SafeMath.sol",
+        "../RubiconMarket.sol",
+        "./PairsTrade.sol",
+        "./BathHouse.sol"
       ],
       "versionPragmas": [
-        "^0.5.0"
+        "=0.5.16"
       ],
       "artifacts": [
-        "EquityToken"
+        "BathToken",
+        "BathToken.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\ERC20.sol": {
-      "lastModificationDate": 1607701594323,
-      "contentHash": "22fd452b5721fdbf411ef554c2c80b76",
-      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../../GSN/Context.sol",
-        "./IERC20.sol",
-        "../../math/SafeMath.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "ERC20"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\ERC20Detailed.sol": {
-      "lastModificationDate": 1607701594324,
-      "contentHash": "a1a39233394f3c0a00ce348c61433faa",
-      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "ERC20Detailed"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\GSN\\Context.sol": {
-      "lastModificationDate": 1607701594321,
-      "contentHash": "32a66f6f4d0584b403f26f8e5e4d17b5",
-      "sourceName": "openzeppelin-solidity/contracts/GSN/Context.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "Context"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\IERC20.sol": {
-      "lastModificationDate": 1607701594337,
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1615415330354,
       "contentHash": "183ff1f5e5f04bcfa85cee597bcb0236",
       "sourceName": "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol",
       "solcConfig": {
@@ -318,11 +183,12 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "IERC20"
+        "IERC20",
+        "IERC20.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\math\\SafeMath.sol": {
-      "lastModificationDate": 1607701594346,
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol": {
+      "lastModificationDate": 1615415330374,
       "contentHash": "d208da96b6f6c1d204ee8248087cf2d7",
       "sourceName": "openzeppelin-solidity/contracts/math/SafeMath.sol",
       "solcConfig": {
@@ -352,264 +218,13 @@
         "^0.5.0"
       ],
       "artifacts": [
-        "SafeMath"
+        "SafeMath",
+        "SafeMath.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\token\\ERC20\\SafeERC20.sol": {
-      "lastModificationDate": 1607701594344,
-      "contentHash": "83fbce907d2b44fae67a751b83804e02",
-      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./IERC20.sol",
-        "../../math/SafeMath.sol",
-        "../../utils/Address.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "SafeERC20"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\utils\\Address.sol": {
-      "lastModificationDate": 1607701594317,
-      "contentHash": "a41701ff3cdbb98920cd49750549d127",
-      "sourceName": "openzeppelin-solidity/contracts/utils/Address.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.5.5"
-      ],
-      "artifacts": [
-        "Address"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\TokenVesting2.sol": {
-      "lastModificationDate": 1611092789857,
-      "contentHash": "a429bf22b293643104a0dfc2b707efb6",
-      "sourceName": "contracts/peripheral_contracts/TokenVesting2.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
-        "openzeppelin-solidity/contracts/ownership/Ownable.sol",
-        "openzeppelin-solidity/contracts/math/SafeMath.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "TokenVesting2"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\node_modules\\openzeppelin-solidity\\contracts\\ownership\\Ownable.sol": {
-      "lastModificationDate": 1607701594341,
-      "contentHash": "cd44b8402a71c35a4f725f828ced4cae",
-      "sourceName": "openzeppelin-solidity/contracts/ownership/Ownable.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../GSN/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "Ownable"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\TokenVesting1.sol": {
-      "lastModificationDate": 1611092798764,
-      "contentHash": "3a8f76a6da9179dd00fbe4f0c67f8c07",
-      "sourceName": "contracts/peripheral_contracts/TokenVesting1.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
-        "openzeppelin-solidity/contracts/ownership/Ownable.sol",
-        "openzeppelin-solidity/contracts/math/SafeMath.sol"
-      ],
-      "versionPragmas": [
-        "^0.5.0"
-      ],
-      "artifacts": [
-        "TokenVesting1"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\IWETH.sol": {
-      "lastModificationDate": 1611092218186,
-      "contentHash": "10465da34057b51bbad8e051a0723d15",
-      "sourceName": "contracts/peripheral_contracts/IWETH.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        ">=0.5.0"
-      ],
-      "artifacts": [
-        "IWETH"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\peripheral_contracts\\WETH9.sol": {
-      "lastModificationDate": 1614178559078,
-      "contentHash": "cdec98056c58a81148a732066eb7c166",
-      "sourceName": "contracts/peripheral_contracts/WETH9.sol",
-      "solcConfig": {
-        "version": "0.5.16",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.5.16"
-      ],
-      "artifacts": [
-        "WETH9"
-      ]
-    },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\RubiconMarket.sol": {
-      "lastModificationDate": 1611695685736,
-      "contentHash": "1f91272461f32b585b1d0690ecc9d0d0",
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/RubiconMarket.sol": {
+      "lastModificationDate": 1617908681821,
+      "contentHash": "f85f10f953d3f9ab0cf63a42437c2cb0",
       "sourceName": "contracts/RubiconMarket.sol",
       "solcConfig": {
         "version": "0.5.16",
@@ -649,11 +264,766 @@
         "IWETH",
         "MatchingEvents",
         "RubiconMarket",
-        "SimpleMarket"
+        "SimpleMarket",
+        "DSAuth.ovm",
+        "DSAuthEvents.ovm",
+        "DSMath.ovm",
+        "DSNote.ovm",
+        "ERC20.ovm",
+        "EventfulMarket.ovm",
+        "ExpiringMarket.ovm",
+        "IAqueduct.ovm",
+        "IWETH.ovm",
+        "MatchingEvents.ovm",
+        "RubiconMarket.ovm",
+        "SimpleMarket.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\SenateAlpha.sol": {
-      "lastModificationDate": 1611599228309,
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/rubiconPoolsv0/PairsTrade.sol": {
+      "lastModificationDate": 1620067469229,
+      "contentHash": "93e012900214377ff91d8cf5dc841b91",
+      "sourceName": "contracts/rubiconPoolsv0/PairsTrade.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol",
+        "./BathToken.sol",
+        "../RubiconMarket.sol",
+        "./BathHouse.sol",
+        "./BathPair.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.16"
+      ],
+      "artifacts": [
+        "PairsTrade",
+        "PairsTrade.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/rubiconPoolsv0/BathHouse.sol": {
+      "lastModificationDate": 1620871988291,
+      "contentHash": "b655d0b99e3ab0a1cfd42c3553ef6da5",
+      "sourceName": "contracts/rubiconPoolsv0/BathHouse.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BathPair.sol"
+      ],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "BathHouse",
+        "BathHouse.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/rubiconPoolsv0/BathPair.sol": {
+      "lastModificationDate": 1620871988293,
+      "contentHash": "4f9a8f9a53a7a00e4924910af8235547",
+      "sourceName": "contracts/rubiconPoolsv0/BathPair.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol",
+        "./BathToken.sol",
+        "./BathHouse.sol",
+        "../RubiconMarket.sol",
+        "../peripheral_contracts/SafeMathE.sol",
+        "../interfaces/IPairsTrade.sol",
+        "../peripheral_contracts/ABDKMath64x64.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.16"
+      ],
+      "artifacts": [
+        "BathPair",
+        "BathPair.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/SafeMathE.sol": {
+      "lastModificationDate": 1620070798494,
+      "contentHash": "edce55c43591c94a39b13da2c9302544",
+      "sourceName": "contracts/peripheral_contracts/SafeMathE.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "=0.5.16"
+      ],
+      "artifacts": [
+        "SafeMathE",
+        "SafeMathE.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/interfaces/IPairsTrade.sol": {
+      "lastModificationDate": 1619730116076,
+      "contentHash": "dc527e5894921400bc6b118189a17d70",
+      "sourceName": "contracts/interfaces/IPairsTrade.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.16"
+      ],
+      "artifacts": [
+        "IPairsTrade",
+        "IPairsTrade.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/ABDKMath64x64.sol": {
+      "lastModificationDate": 1616523604884,
+      "contentHash": "609c76310a533c81ecb136170dae4c75",
+      "sourceName": "contracts/peripheral_contracts/ABDKMath64x64.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "ABDKMath64x64",
+        "ABDKMath64x64.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol": {
+      "lastModificationDate": 1615415330372,
+      "contentHash": "83fbce907d2b44fae67a751b83804e02",
+      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol",
+        "../../math/SafeMath.sol",
+        "../../utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "SafeERC20",
+        "SafeERC20.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/utils/Address.sol": {
+      "lastModificationDate": 1615415330332,
+      "contentHash": "a41701ff3cdbb98920cd49750549d127",
+      "sourceName": "openzeppelin-solidity/contracts/utils/Address.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.5"
+      ],
+      "artifacts": [
+        "Address",
+        "Address.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/TokenVesting2.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "a429bf22b293643104a0dfc2b707efb6",
+      "sourceName": "contracts/peripheral_contracts/TokenVesting2.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+        "openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "openzeppelin-solidity/contracts/math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "TokenVesting2",
+        "TokenVesting2.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol": {
+      "lastModificationDate": 1615415330366,
+      "contentHash": "cd44b8402a71c35a4f725f828ced4cae",
+      "sourceName": "openzeppelin-solidity/contracts/ownership/Ownable.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../GSN/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "Ownable",
+        "Ownable.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/GSN/Context.sol": {
+      "lastModificationDate": 1615415330334,
+      "contentHash": "32a66f6f4d0584b403f26f8e5e4d17b5",
+      "sourceName": "openzeppelin-solidity/contracts/GSN/Context.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "Context",
+        "Context.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/TokenVesting1.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "3a8f76a6da9179dd00fbe4f0c67f8c07",
+      "sourceName": "contracts/peripheral_contracts/TokenVesting1.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+        "openzeppelin-solidity/contracts/ownership/Ownable.sol",
+        "openzeppelin-solidity/contracts/math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "TokenVesting1",
+        "TokenVesting1.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol": {
+      "lastModificationDate": 1615415330340,
+      "contentHash": "22fd452b5721fdbf411ef554c2c80b76",
+      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../GSN/Context.sol",
+        "./IERC20.sol",
+        "../../math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "ERC20",
+        "ERC20.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/EquityToken.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "4a8498ac8e8faf7df2fcc753045c3be4",
+      "sourceName": "contracts/peripheral_contracts/EquityToken.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+        "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "EquityToken",
+        "EquityToken.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol": {
+      "lastModificationDate": 1615415330342,
+      "contentHash": "a1a39233394f3c0a00ce348c61433faa",
+      "sourceName": "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.5.0"
+      ],
+      "artifacts": [
+        "ERC20Detailed",
+        "ERC20Detailed.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/interfaces/IWETH.sol": {
+      "lastModificationDate": 1619044676358,
+      "contentHash": "10465da34057b51bbad8e051a0723d15",
+      "sourceName": "contracts/interfaces/IWETH.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IWETH",
+        "IWETH.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/Migrations.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "4d98165ff4c13b43b407abc572aedb2d",
+      "sourceName": "contracts/Migrations.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.16"
+      ],
+      "artifacts": [
+        "Migrations",
+        "TimelockInterface",
+        "Migrations.ovm",
+        "TimelockInterface.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/DaiWithFaucet.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "03864fb2fdcc3f609d5aa629871a4e2a",
+      "sourceName": "contracts/peripheral_contracts/DaiWithFaucet.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.12"
+      ],
+      "artifacts": [
+        "DaiWithFaucet",
+        "LibNote",
+        "DaiWithFaucet.ovm",
+        "LibNote.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/IERC20.sol": {
+      "lastModificationDate": 1615415238692,
+      "contentHash": "e3ac00d36018c27a96f5757a40fe5985",
+      "sourceName": "contracts/peripheral_contracts/IERC20.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IERC20",
+        "IERC20.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/WETH9.sol": {
+      "lastModificationDate": 1615415238693,
+      "contentHash": "0bec54a870d23ba8dd0c6cc43345dd6b",
+      "sourceName": "contracts/peripheral_contracts/WETH9.sol",
+      "solcConfig": {
+        "version": "0.5.16",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.5.16"
+      ],
+      "artifacts": [
+        "WETH9",
+        "WETH9.ovm"
+      ]
+    },
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/SenateAlpha.sol": {
+      "lastModificationDate": 1615415238692,
       "contentHash": "142540954cce02f0c8d65db93b2ec82f",
       "sourceName": "contracts/SenateAlpha.sol",
       "solcConfig": {
@@ -685,11 +1055,14 @@
       "artifacts": [
         "RBCNInterface",
         "SenateAlpha",
-        "TimelockInterface"
+        "TimelockInterface",
+        "RBCNInterface.ovm",
+        "SenateAlpha.ovm",
+        "TimelockInterface.ovm"
       ]
     },
-    "C:\\Users\\Benjamin Hughes\\workspace\\rubicon\\rubicon_protocol\\contracts\\Timelock.sol": {
-      "lastModificationDate": 1611018136294,
+    "/Users/bghughes/workspace/rubicon_protocol/contracts/Timelock.sol": {
+      "lastModificationDate": 1615415238692,
       "contentHash": "385b9997b637628318649bf06fab475e",
       "sourceName": "contracts/Timelock.sol",
       "solcConfig": {
@@ -721,7 +1094,9 @@
       ],
       "artifacts": [
         "SafeMath",
-        "Timelock"
+        "Timelock",
+        "SafeMath.ovm",
+        "Timelock.ovm"
       ]
     }
   }

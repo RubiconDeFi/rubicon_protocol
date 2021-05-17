@@ -15,9 +15,9 @@ describe("Rubicon Protocol L2 Migrations", () => {
         beforeEach(async () => {
           RubiconMarket = await (await ethers.getContractFactory('RubiconMarket'))
               .connect(account1)
-            .deploy(14210121600, true, (await account1.getAddress()))
+            .deploy()
         })   
-        expect('1').to.equal('1')   
+        // expect('1').to.equal('1')   
         // Now we're cooking with gas!
     })
 })
