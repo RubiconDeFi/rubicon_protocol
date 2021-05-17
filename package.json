@@ -13,6 +13,7 @@
     "ethereum-waffle": "^3.2.2",
     "ethers": "^5.0.31",
     "hardhat": "^2.0.10",
+    "hardhat-deploy": "^0.7.6",
     "openzeppelin-solidity": "^2.5.1",
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.3",

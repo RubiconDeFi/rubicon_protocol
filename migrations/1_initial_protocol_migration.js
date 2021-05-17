@@ -35,7 +35,7 @@ module.exports = function(deployer, network, accounts) {
         //Give admin token balance and set total supply
         return deployer.deploy(SenateAlpha, Timelock.address, RBCN.address, admin).then(function(){ //gaurdian of senate is admin
           // Rubicon Market can be deployed independently of Gov/Token system
-          return deployer.deploy(RubiconMarket); //, /* Testing only */ WETH.address);
+          return deployer.deploy(RubiconMarket, {gas: 0x1ffffff}); //, /* Testing only */ WETH.address);
         });
       });
     });

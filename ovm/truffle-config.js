@@ -27,7 +27,7 @@ module.exports = {
       },
       gas: GAS_LIMIT,
       gasPrice: GAS_PRICE,
-    },
+    }
   },
 
   mocha: {

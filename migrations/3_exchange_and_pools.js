@@ -13,10 +13,10 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy the Exchange, Pools, and main PairsTrade
     // TODO: wrap this in upgradeable proxies
-    if (network == 'development' || network == 'pools'){
-    await deployer.deploy(RubiconMarket).then(function() {
-          return deployer.deploy(BathHouse).then(function() {
-            return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address);
+    if (network == 'development' || network == 'pools' || network == "ganache"){
+    await deployer.deploy(RubiconMarket, {gas: 0x1ffffff}).then(function() {
+          return deployer.deploy(BathHouse, {gas: 0x1ffffff}).then(function() {
+            return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
           }); 
       });
       }
@@ -29,9 +29,8 @@ module.exports = async function(deployer, network, accounts) {
       // console.log("Rubicon Market Address: ", rubiconMarketInstance.address);
 
       // Add launch tokens to the whitelist
-      // await rubiconMarketInstance.addToWhitelist(process.env.OP_WAYNE);
-      // await rubiconMarketInstance.addToWhitelist(process.env.OP_STARK);
-      // await rubiconMarketInstance.addToWhitelist(process.env.OP_USDC);
+      // await rubiconMarketInstance.addToWhitelist(process.env.KOVAN_WAYNE);
+      // await rubiconMarketInstance.addToWhitelist(process.env.KOVAN_DAI);
 
       // await  deployer.deploy(BathHouse).then(function() {
       //   return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, process.env.RUBICONMARKET_V0_KOVAN);

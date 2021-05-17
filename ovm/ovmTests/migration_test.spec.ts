@@ -10,14 +10,15 @@ describe("Rubicon Protocol L2 Migrations", () => {
         ;[account1, account2, account3] = await ethers.getSigners()
     })
 
-    it("deploy  Rubicon Market", async () => {
+    it("deploy and initialize Rubicon Market", async () => {
         let RubiconMarket: Contract
         beforeEach(async () => {
           RubiconMarket = await (await ethers.getContractFactory('RubiconMarket'))
-              .connect(account1)
+            .connect(account1)
             .deploy()
-        })   
-        // expect('1').to.equal('1')   
+        })
+        // Initialize
+        await RubiconMarket.initialize(false, await account1.getAddress())   
         // Now we're cooking with gas!
     })
 })
