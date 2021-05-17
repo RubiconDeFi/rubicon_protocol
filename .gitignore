@@ -11,4 +11,5 @@ artifacts/
 .DS_Store
 randomNotes.txt
 cache
+deployments/*
 deployments/
