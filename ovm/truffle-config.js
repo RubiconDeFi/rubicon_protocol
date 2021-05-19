@@ -59,9 +59,11 @@ module.exports = {
   compilers: {
     solc: {
       version: "../node_modules/@eth-optimism/solc",
+      settings:  {
       optimizer: {
         enabled: true,
         runs: 200
+      },
     },
     }
   }
