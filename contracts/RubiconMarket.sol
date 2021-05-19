@@ -575,6 +575,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     bool public buyEnabled = true; //buy enabled
     bool public matchingEnabled = true; //true: enable matching,
     //false: revert to expiring market
+    /// @dev Below is variable to allow for a proxy-friendly constructor
+    bool public initialized;
+    
+    bool public AqueductDistributionLive;
+    address public AqueductAddress;
+
     struct sortInfo {
         uint256 next; //points to id of next higher offer
         uint256 prev; //points to id of previous lower offer
@@ -587,11 +593,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(uint256 => uint256) public _near; //next unsorted offer id
     uint256 _head; //first unsorted offer id
     uint256 public dustId; // id of the latest offer marked as dust
-    address public AqueductAddress;
-    bool public AqueductDistributionLive;
-
-    /// @dev Below is variable to allow for a proxy-friendly constructor
-    bool public initialized;
 
     function initialize(bool RBCNDist, address _feeTo) public {
         // require(msg.sender == ___deployer____);
