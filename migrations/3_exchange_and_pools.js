@@ -13,11 +13,20 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy the Exchange, Pools, and main PairsTrade
     // TODO: wrap this in upgradeable proxies
+    var admin = "0xC96495C314879586761d991a2B68ebeab12C03FE";
+
     if (network == 'development' || network == 'pools' || network == "kovan" || network == "ganache" || network == "kovan-fork"){
-      await deployer.deploy(RubiconMarket, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
-            return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
-              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
-            }); 
+      await deployer.deploy(RubiconMarket, {gasPrice: 1, gas: 0x1fffffffffffff}).then(async function() {
+            rubiconMarketInstance = await RubiconMarket.deployed();
+            await rubiconMarketInstance.initialize(false, admin);
+
+            // Add launch tokens to the whitelist
+            // await rubiconMarketInstance.addToWhitelist(process.env.KOVAN_WAYNE);
+            // await rubiconMarketInstance.addToWhitelist(process.env.KOVAN_DAI);
+
+            // return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
+            //   return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
+            // }); 
         });
       }
 

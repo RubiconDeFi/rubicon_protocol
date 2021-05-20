@@ -44,7 +44,7 @@ module.exports = {
         })
       },
       network_id: "69",
-      from: process.env.EXCHANGE_LAUNCH_ADDRESS_KOVAN,
+      from: process.env.OP_KOVAN_ADMIN,
       gasPrice: 0,
       timeoutBlocks: 220,
       gas: GAS_LIMIT
