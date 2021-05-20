@@ -15,7 +15,7 @@ const BigNumber = require('bignumber.js');
 
 module.exports = function(deployer, network, accounts) {
 
-  var admin = accounts[0];
+  var admin = "0xC96495C314879586761d991a2B68ebeab12C03FE";
   // Core Assets (Asset / Quote) used in protocol testing
   deployer.deploy(WETH);
   deployer.deploy(DAI, 42);
