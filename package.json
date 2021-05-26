@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@eth-optimism/hardhat-ovm": "^0.2.2",
     "@eth-optimism/ovm-toolchain": "0.0.2-alpha.2",
     "@eth-optimism/plugins": "0.0.12",
     "@eth-optimism/solc": "^0.5.16-alpha.7",

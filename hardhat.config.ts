@@ -1,11 +1,9 @@
-import { HardhatUserConfig } from 'hardhat/types'
 require("dotenv").config();
 
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@eth-optimism/plugins/hardhat/compiler'
-import '@eth-optimism/plugins/hardhat/ethers'
 import 'hardhat-deploy'
+import '@eth-optimism/hardhat-ovm'
 
 module.exports = {
   ovm: {
@@ -41,6 +39,11 @@ module.exports = {
         accounts: [process.env.PRIVATE_KEY_KOVAN]
       }
   },
+  // etherscan: {
+  //   // Your API key for Etherscan
+  //   // Obtain one at https://etherscan.io/
+  //   apiKey: process.env.ETHERSCAN_API
+  // },
   namedAccounts: {
     deployer: {
       default: 0
