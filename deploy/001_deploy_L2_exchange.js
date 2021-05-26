@@ -11,7 +11,7 @@ const func = async (hre) => {
     console.log("deployer", deployer)
     // const sender = new ethers.Wallet(process.env.PRIVATE_KEY_KOVAN, new ethers.providers.JsonRpcProvider('https://kovan.optimism.io'))
     
-    await deploy('RubiconMarket', { 
+    await deploy('WETH9', { 
       from: deployer,
       gasPrice: hre.ethers.BigNumber.from('0'),
       gasLimit: 8999999,
@@ -19,5 +19,5 @@ const func = async (hre) => {
     })
   }
 
-  func.tags = ['RubiconMarket'] // Replace `ERC20` with your contract's file name
+  func.tags = ['WETH9'] // Replace `ERC20` with your contract's file name
   module.exports = func
