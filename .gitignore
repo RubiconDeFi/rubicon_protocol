@@ -14,3 +14,5 @@ cache
 deployments/*
 deployments/
 cache/
+artifacts-ovm/
+cache-ovm/
