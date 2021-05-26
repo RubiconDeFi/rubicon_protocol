@@ -26,12 +26,12 @@ module.exports = {
   networks: {
     // https://community.optimism.io/docs/developers/integration.html#using-the-optimism-repo
       optimismLocal: {
-      url: 'http://127.0.0.1:8545',
-      accounts: {
-        mnemonic: 'test test test test test test test test test test test junk'
-      },
-      ovm: true,
-      gasPrice: 0,
+        url: 'http://127.0.0.1:8545',
+        accounts: {
+          mnemonic: 'test test test test test test test test test test test junk'
+        },
+        ovm: true,
+        gasPrice: 0,
       },
       optimismKovan: {
         url: 'https://kovan.optimism.io',
