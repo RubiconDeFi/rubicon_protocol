@@ -271,8 +271,8 @@
       ]
     },
     "/Users/bghughes/workspace/rubicon_protocol/contracts/RubiconMarket.sol": {
-      "lastModificationDate": 1617908681821,
-      "contentHash": "f85f10f953d3f9ab0cf63a42437c2cb0",
+      "lastModificationDate": 1621535095505,
+      "contentHash": "6e694c02ebc7585276ed19f772637a6c",
       "sourceName": "contracts/RubiconMarket.sol",
       "solcConfig": {
         "version": "0.5.16",
@@ -1108,8 +1108,8 @@
       ]
     },
     "/Users/bghughes/workspace/rubicon_protocol/contracts/peripheral_contracts/DaiWithFaucet.sol": {
-      "lastModificationDate": 1615415238692,
-      "contentHash": "03864fb2fdcc3f609d5aa629871a4e2a",
+      "lastModificationDate": 1621535298409,
+      "contentHash": "83a1309224044b2246475012ac723585",
       "sourceName": "contracts/peripheral_contracts/DaiWithFaucet.sol",
       "solcConfig": {
         "version": "0.5.16",

@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from 'hardhat/types'
+require("dotenv").config();
 
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
@@ -36,12 +37,13 @@ module.exports = {
         url: 'https://kovan.optimism.io',
         ovm: true,
         gasPrice: 0,
+        chainId: 69,
+        accounts: [process.env.PRIVATE_KEY_KOVAN]
       }
   },
   namedAccounts: {
     deployer: {
-      default: 0,
-      69: "0x75E7aBED3406df8f2fD4E036Cbb5f6830bce525d",
+      default: 0
     }
   }
 };
