@@ -85,7 +85,7 @@ contract("Rubicon Migrations and Governance Test", async function(accounts) {
 
     describe("RubiconMarket", async function() {
         it("has been initialized with the proper variables", async function() {
-            await rubiconMarketInstance.initialize(true, accounts[0]);
+            // await rubiconMarketInstance.initialize(true, accounts[0]);
             assert.equal((await rubiconMarketInstance.initialized()), true);
         });
     });

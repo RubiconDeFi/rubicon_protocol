@@ -28,5 +28,5 @@ module.exports = function(deployer, network, accounts) {
   deployer.deploy(SPXE, admin, new BigNumber(1000e18));
   deployer.deploy(WBTC, admin, new BigNumber(1000e18));
   deployer.deploy(COIN, admin, new BigNumber(1000e18));
-  deployer.deploy(RBCN, admin, admin);
+  // deployer.deploy(RBCN, admin, admin);
 };
