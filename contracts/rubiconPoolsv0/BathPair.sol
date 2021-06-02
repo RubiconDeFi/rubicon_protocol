@@ -4,7 +4,7 @@
 /// @notice This contract is also where strategists claim rewards for successful market making
 
 pragma solidity ^0.5.16;
-pragma experimental ;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
@@ -187,6 +187,10 @@ contract BathPair {
 
     function getThisBathQuote() external view returns (address) {
         return bathQuoteAddress;
+    }
+
+    function getThisBathAsset() external view returns (address) {
+        return bathAssetAddress;
     }
 
     // constructor called by the BathHouse to initialize a new Pair
