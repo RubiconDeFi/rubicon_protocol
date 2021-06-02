@@ -4,6 +4,9 @@ var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
 var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 
+var WETH = artifacts.require("./contracts/WETH9.sol");
+var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
+
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const { deploy } = require('@openzeppelin/truffle-upgrades/dist/utils');
 
@@ -45,11 +48,21 @@ module.exports = async function(deployer, network, accounts) {
             // assetsToWhitelist.forEach(async function(e) {
             //   await rubiconMarketInstance.addToWhitelist(e);   
             // });
-            return deployer.deploy(BathHouse, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(function() {
+            return deployer.deploy(BathHouse, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(async function() {
               // bathHouseInstance = await BathHouse.deployed();
-              // await deployer.deploy(BathPair,
-
-              //   );
+              wethInstance = await WETH.deployed();
+              daiInstance = await DAI.deployed();
+              await deployer.deploy(BathPair,
+                  wethInstance.address,
+                  "WETH",
+                  daiInstance.address,
+                  "DAI",
+                  rubiconMarketInstance.address,
+                  90,
+                  259200,
+                  10,
+                  BathHouse.address
+                );
               return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
             }); 
         });

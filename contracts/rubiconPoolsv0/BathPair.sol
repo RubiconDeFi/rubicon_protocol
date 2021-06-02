@@ -4,7 +4,7 @@
 /// @notice This contract is also where strategists claim rewards for successful market making
 
 pragma solidity ^0.5.16;
-pragma experimental ABIEncoderV2;
+pragma experimental ;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
