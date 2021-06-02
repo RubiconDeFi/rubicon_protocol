@@ -137,6 +137,11 @@ contract BathToken is IBathToken {
         return (id);
     }
 
+    function underlying() external view returns (address) {
+        require(initialized);
+        return underlyingToken;
+    }
+
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) public {
         uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));

@@ -17,9 +17,12 @@ contract BathHouse {
 
     // List of approved strategies
     mapping(address => bool) approvedStrategies;
+    mapping(address => bool) approvedBathTokens;
     mapping(address => bool) approvedPairs;
     mapping(address => bool) bathQuoteExists;
+    mapping(address => bool) bathAssetExists;
     mapping(address => address) quoteToBathQuote;
+    mapping(address => address) assetToBathAsset;
 
     bool public initialized;
 
@@ -83,6 +86,22 @@ contract BathHouse {
         approvedStrategies[strategy] = true;
     }
 
+    function isApprovedBathToken(address bathToken) external view returns (bool) {
+        if (approvedBathTokens[bathToken] == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function approveBathToken(address bathToken)
+        external
+        onlyAdmin
+        returns (bool)
+    {
+        approvedBathTokens[bathToken] = true;
+    }
+
     function isApprovedPair(address pair) external view returns (bool) {
         if (approvedPairs[pair] == true) {
             return true;
@@ -104,8 +123,21 @@ contract BathHouse {
         }
     }
 
+    function addAsset(address asset, address bathAsset) internal {
+        if (bathAssetExists[asset]) {
+            return;
+        } else {
+            bathAssetExists[asset] = true;
+            assetToBathAsset[asset] = bathAsset;
+        }
+    }
+
     function doesQuoteExist(address quote) public view returns (bool) {
         return bathQuoteExists[quote];
+    }
+
+    function doesAssetExist(address asset) public view returns (bool) {
+        return bathAssetExists[asset];
     }
 
     function quoteToBathQuoteCheck(address quote)

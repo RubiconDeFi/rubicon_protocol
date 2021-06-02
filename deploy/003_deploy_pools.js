@@ -30,16 +30,16 @@ const func = async (hre) => {
     // Deploy BathPair for WAYNE / DAI
   const deployResultBP = await deploy('BathPair', {
     from: deployer,
-    args: [      
-      WI.address,
-      "WAYNE",
-      UI.address,
-      "DAI",
-      RMI.address,
-      90,
-      259200,
-      10,
-      BHI.address],
+    // args: [      
+    //   WI.address,
+    //   "WAYNE",
+    //   UI.address,
+    //   "DAI",
+    //   RMI.address,
+    //   90,
+    //   259200,
+    //   10,
+    //   BHI.address],
     log: true,
     gasLimit: 9000000
   });
@@ -51,8 +51,18 @@ const func = async (hre) => {
         // Load BathPair if not deployed
         const bp = await hre.ethers.getContractFactory("BathPair");
         const BPI = await bp.attach(deployResult.address);
+        await BPI.initialize(WI.address,
+            "WAYNE",
+            UI.address,
+            "DAI",
+            RMI.address,
+            90,
+            259200,
+            10,
+            BHI.address, {gasLimit: 8999999}).then((r ) => console.log(r));
         const bathQuote = await BPI.getThisBathQuote();
         const bathAsset = await BPI.getThisBathAsset();
+        // ** initBath pair on bathhouse....
         console.log('New bathQuote at: ', bathQuote);
         console.log('New bathAsset at: ', bathAsset);
 }

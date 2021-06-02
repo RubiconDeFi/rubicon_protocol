@@ -38,7 +38,7 @@ contract BathPair {
     event LogOffer(string, order);
     event LogGrossYield(address, uint256);
 
-    // bool public initialized;
+    bool public initialized;
 
     // The delay after which unfilled orders are cancelled
     uint256 public timeDelay;
@@ -194,17 +194,16 @@ contract BathPair {
     }
 
     // constructor called by the BathHouse to initialize a new Pair
-    constructor(
-        address asset,
-        string memory assetName,
-        address quote,
-        string memory quoteName,
+    function initialize(
+        address _bathAssetAddress,
+        address _bathQuoteAddress,
         address market,
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 _maxOutstandingPairCount,
         address _bathHouse
     ) public {
+        require(!initialized);
         bathHouse = _bathHouse;
 
         require(_reserveRatio <= 100);
@@ -215,37 +214,16 @@ contract BathPair {
 
         maxOutstandingPairCount = _maxOutstandingPairCount;
 
-        underlyingAsset = asset;
-        underlyingQuote = quote;
+        require(BathHouse(bathHouse).isApprovedBathToken(_bathAssetAddress));
+        require(BathHouse(bathHouse).isApprovedBathToken(_bathQuoteAddress));
+        bathAssetAddress = _bathAssetAddress;
+        bathQuoteAddress = _bathQuoteAddress;
 
-        //deploy new BathTokens:
-        BathToken bathAsset = new BathToken();
-        bathAsset.initialize(
-            string(abi.encodePacked("bath", (assetName))),
-            IERC20(asset),
-            market,
-            bathHouse
-        );
-        bathAssetAddress = address(bathAsset);
-
-        if (BathHouse(bathHouse).doesQuoteExist(quote)) {
-            // don't deploy the new
-            address bathQuote =
-                BathHouse(bathHouse).quoteToBathQuoteCheck(quote);
-            bathQuoteAddress = address(bathQuote);
-        } else {
-            // deploy a new bathQuote
-            BathToken bathQuote = new BathToken();
-            bathQuote.initialize(
-                string(abi.encodePacked("bath", (quoteName))),
-                IERC20(quote),
-                market,
-                bathHouse
-            );
-            bathQuoteAddress = address(bathQuote);
-        }
+        underlyingAsset = BathToken(bathAssetAddress).underlying();
+        underlyingQuote = BathToken(bathQuoteAddress).underlying();
 
         RubiconMarketAddress = market;
+        initialized = true;
     }
 
     // Returns filled liquidity to the correct bath pool
