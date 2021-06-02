@@ -37,37 +37,39 @@ contract BathHouse {
 
     function initBathPair(
         address asset,
-        string calldata assetName,
+        // string calldata assetName,
         address quote,
-        string calldata quoteName,
-        uint256 _reserveRatio,
-        uint256 _timeDelay,
-        uint256 _maxOutstandingPairCount
+        // string calldata quoteName,
+        // uint256 _reserveRatio,
+        // uint256 _timeDelay,
+        // uint256 _maxOutstandingPairCount
+        address pair
     ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
         require(asset != address(0));
         require(quote != address(0));
         require(getPair[asset][quote] == address(0));
-        require(_reserveRatio < 100);
-        require(_reserveRatio > 60);
-        BathPair pair =
-            new BathPair(
-                asset,
-                assetName,
-                quote,
-                quoteName,
-                RubiconMarketAddress,
-                _reserveRatio,
-                _timeDelay,
-                _maxOutstandingPairCount
-            );
+        // require(_reserveRatio < 100);
+        // require(_reserveRatio > 60);
+        // BathPair pair =
+        //     new BathPair(
+        //         asset,
+        //         assetName,
+        //         quote,
+        //         quoteName,
+        //         RubiconMarketAddress,
+        //         _reserveRatio,
+        //         _timeDelay,
+        //         _maxOutstandingPairCount
+        //     );
         allBathPairs.push(address(pair));
 
         getPair[asset][quote] = address(pair);
 
+        // address bathQuote = BathPair(pair).bathQuoteAddress;
         approvePair(address(pair));
-        addQuote(quote, address(pair.bathQuoteAddress));
+        addQuote(quote, BathPair(pair).getThisBathQuote());
         return address(pair);
     }
 

@@ -185,6 +185,10 @@ contract BathPair {
         );
     }
 
+    function getThisBathQuote() external view returns (address) {
+        return bathQuoteAddress;
+    }
+
     // constructor called by the BathHouse to initialize a new Pair
     constructor(
         address asset,
@@ -194,9 +198,10 @@ contract BathPair {
         address market,
         uint256 _reserveRatio,
         uint256 _timeDelay,
-        uint256 _maxOutstandingPairCount
+        uint256 _maxOutstandingPairCount,
+        address _bathHouse
     ) public {
-        bathHouse = msg.sender;
+        bathHouse = _bathHouse;
 
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);

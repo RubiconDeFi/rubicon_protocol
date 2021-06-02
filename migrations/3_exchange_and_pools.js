@@ -1,9 +1,11 @@
 require('dotenv').config();
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
+var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
 var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { deploy } = require('@openzeppelin/truffle-upgrades/dist/utils');
 
 // This file will deploy Rubicon Market and Pools while wrapping everything in upgradeable proxies
 // @dev - use: ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
@@ -33,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
     // ];
 
     if (network == 'development' || network == 'pools' || network == "kovan" || network == "ganache" || network == "kovan-fork"){
-      await deployer.deploy(RubiconMarket, {gasPrice: 1, gas: 0x1fffffffffffff}).then(async function() {
+      await deployer.deploy(RubiconMarket, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(async function() {
             rubiconMarketInstance = await RubiconMarket.deployed();
 
             // Initialize immediately on deployment
@@ -43,8 +45,12 @@ module.exports = async function(deployer, network, accounts) {
             // assetsToWhitelist.forEach(async function(e) {
             //   await rubiconMarketInstance.addToWhitelist(e);   
             // });
-            return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
-              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
+            return deployer.deploy(BathHouse, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(function() {
+              // bathHouseInstance = await BathHouse.deployed();
+              // await deployer.deploy(BathPair,
+
+              //   );
+              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
             }); 
         });
       }
