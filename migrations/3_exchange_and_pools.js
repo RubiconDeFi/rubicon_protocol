@@ -53,15 +53,15 @@ module.exports = async function(deployer, network, accounts) {
               wethInstance = await WETH.deployed();
               daiInstance = await DAI.deployed();
               await deployer.deploy(BathPair,
-                  wethInstance.address,
-                  "WETH",
-                  daiInstance.address,
-                  "DAI",
-                  rubiconMarketInstance.address,
-                  90,
-                  259200,
-                  10,
-                  BathHouse.address
+                  // wethInstance.address,
+                  // "WETH",
+                  // daiInstance.address,
+                  // "DAI",
+                  // rubiconMarketInstance.address,
+                  // 90,
+                  // 259200,
+                  // 10,
+                  // BathHouse.address
                 );
               return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
             }); 

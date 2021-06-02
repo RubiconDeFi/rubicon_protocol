@@ -139,7 +139,7 @@ contract BathToken is IBathToken {
 
     function underlying() external view returns (address) {
         require(initialized);
-        return underlyingToken;
+        return address(underlyingToken);
     }
 
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
