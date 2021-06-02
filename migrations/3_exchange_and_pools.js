@@ -43,9 +43,9 @@ module.exports = async function(deployer, network, accounts) {
             // assetsToWhitelist.forEach(async function(e) {
             //   await rubiconMarketInstance.addToWhitelist(e);   
             // });
-            // return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
-            //   return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
-            // }); 
+            return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
+              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
+            }); 
         });
       }
 
