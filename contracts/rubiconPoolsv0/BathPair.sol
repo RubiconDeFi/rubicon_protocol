@@ -80,8 +80,6 @@ contract BathPair {
         require(!initialized);
         bathHouse = _bathHouse;
 
-        require(BathHouse(bathHouse).isApprovedBathToken(_bathAssetAddress));
-        require(BathHouse(bathHouse).isApprovedBathToken(_bathQuoteAddress));
         bathAssetAddress = _bathAssetAddress;
         bathQuoteAddress = _bathQuoteAddress;
 

@@ -2,6 +2,7 @@ require('dotenv').config();
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
+var BathToken = artifacts.require("./contracts/rubiconPoolsv0/BathToken.sol");
 var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 
 var WETH = artifacts.require("./contracts/WETH9.sol");
@@ -44,14 +45,23 @@ module.exports = async function(deployer, network, accounts) {
             // Initialize immediately on deployment
             await rubiconMarketInstance.initialize(false, admin);
 
+            // Deploy liquidity pools for WETH / DAI - see 3_pool_test.js
+            wethInstance = await WETH.deployed();
+            daiInstance = await DAI.deployed();
+
+            // await deployer.deploy(BathToken)
+            // rubiconMarketInstance = await RubiconMarket.deployed();
+
             // Add launch tokens to the whitelist
             // assetsToWhitelist.forEach(async function(e) {
             //   await rubiconMarketInstance.addToWhitelist(e);   
             // });
             return deployer.deploy(BathHouse, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(async function() {
               // bathHouseInstance = await BathHouse.deployed();
-              wethInstance = await WETH.deployed();
-              daiInstance = await DAI.deployed();
+              
+              // await deployer.deploy(BathToken);
+              // await deployer.deploy(BathToken);
+
               await deployer.deploy(BathPair,
                   // wethInstance.address,
                   // "WETH",

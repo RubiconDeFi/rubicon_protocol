@@ -35,23 +35,28 @@ contract("Rubicon Pools Test", async function(accounts) {
     });
 
     describe("Bath House Initialization of Bath Pair and Bath Tokens", async function() {
-        it("Bath Token liquidity pools are deployed and initialized", async function() {
-            // Call initialize on Bath house
-            await bathHouseInstance.initialize(rubiconMarketInstance.address);
-            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
-            newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
-            logIndented("New BathPair: ", newPair);
-        });
-        it("BathPair for the assets is deployed and initialized", async function() {
-            // Call initialize on Bath house
-            await bathHouseInstance.initialize(rubiconMarketInstance.address);
-            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
-            newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
-            logIndented("New BathPair: ", newPair);
-        });
+
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            await bathHouseInstance.initialize(rubiconMarketInstance.address);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 259200, 10);
+
+        });
+        it("Bath Token for asset is deployed and initialized", async function() {
+            return await BathToken.new().then(async function(instance) {
+                await instance.initialize("bathWETH", WETHInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
+                bathAssetInstance = await instance;
+            });
+        });
+        it("Bath Token for quote is deployed and initialized", async function() {
+            return await BathToken.new().then(async function(instance) {
+                await instance.initialize("bathDAI", DAIInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
+                bathQuoteInstance = await instance;
+                console.log("new bathDAI addr", bathQuoteInstance.address);
+            })
+        });
+        it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
+            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
+
             (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
@@ -63,8 +68,8 @@ contract("Rubicon Pools Test", async function(accounts) {
             bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
             logIndented("bathDAI address: ", bathQuoteAddress);
 
-            bathAssetInstance = await BathToken.at(bathAssetAddress);
-            bathQuoteInstance = await BathToken.at(bathQuoteAddress);
+            // bathAssetInstance = await BathToken.at(bathAssetAddress);
+            // bathQuoteInstance = await BathToken.at(bathQuoteAddress);
 
             assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
             assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);
