@@ -24,20 +24,6 @@ contract BathPair {
 
     address public RubiconMarketAddress;
 
-    // askID, bidID, timestamp
-    uint256[3][] public outstandingPairIDs;
-
-    // Risk Parameters
-    uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
-    uint256 public maximumOrderSize; // max order size that can be places in a single order
-
-    event LogTrade(uint256, ERC20, uint256, ERC20);
-    event LogNote(string, uint256);
-    event LogNoteI(string, int128);
-    event Cancel(uint256, ERC20, uint256);
-    event LogOffer(string, order);
-    event LogGrossYield(address, uint256);
-
     bool public initialized;
 
     // The delay after which unfilled orders are cancelled
@@ -46,13 +32,30 @@ contract BathPair {
     // Constraint variable for the max amount of outstanding market making pairs at a time
     uint256 public maxOutstandingPairCount;
 
+    // askID, bidID, timestamp
+    uint256[3][] public outstandingPairIDs;
+
+    uint256 internal totalAssetFills;
+    uint256 internal totalQuoteFills;
+
+    // Risk Parameters
+    uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
+    uint256 public maximumOrderSize; // max order size that can be places in a single order
+
+    StrategistTrade[] public strategistRecord;
+
+    event LogTrade(uint256, ERC20, uint256, ERC20);
+    event LogNote(string, uint256);
+    event LogNoteI(string, int128);
+    event Cancel(uint256, ERC20, uint256);
+    event LogOffer(string, order);
+    event LogGrossYield(address, uint256);
+
     // Maps a trade ID to each of their strategists
     mapping(uint256 => address) public ID2strategist;
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
-    StrategistTrade[] public strategistRecord;
-    uint256 internal totalAssetFills;
-    uint256 internal totalQuoteFills;
+
 
     struct StrategistTrade {
         address underlyingAsset;
@@ -73,6 +76,39 @@ contract BathPair {
         ERC20 pay_gem;
         uint256 buy_amt;
         ERC20 buy_gem;
+    }
+
+    // constructor called by the BathHouse to initialize a new Pair
+    function initialize(
+        address _bathAssetAddress,
+        address _bathQuoteAddress,
+        address market,
+        // uint256 _reserveRatio,
+        // uint256 _timeDelay,
+        // uint256 _maxOutstandingPairCount,
+        address _bathHouse
+    ) public {
+        require(!initialized);
+        bathHouse = _bathHouse;
+
+        // require(_reserveRatio <= 100);
+        // require(_reserveRatio > 0);
+        // reserveRatio = _reserveRatio;
+
+        // timeDelay = _timeDelay;
+
+        // maxOutstandingPairCount = _maxOutstandingPairCount;
+
+        require(BathHouse(bathHouse).isApprovedBathToken(_bathAssetAddress));
+        require(BathHouse(bathHouse).isApprovedBathToken(_bathQuoteAddress));
+        bathAssetAddress = _bathAssetAddress;
+        bathQuoteAddress = _bathQuoteAddress;
+
+        underlyingAsset = BathToken(bathAssetAddress).underlying();
+        underlyingQuote = BathToken(bathQuoteAddress).underlying();
+
+        // RubiconMarketAddress = market;
+        initialized = true;
     }
 
     function setCancelTimeDelay(uint256 value) public onlyBathHouse {
@@ -191,39 +227,6 @@ contract BathPair {
 
     function getThisBathAsset() external view returns (address) {
         return bathAssetAddress;
-    }
-
-    // constructor called by the BathHouse to initialize a new Pair
-    function initialize(
-        address _bathAssetAddress,
-        address _bathQuoteAddress,
-        address market,
-        uint256 _reserveRatio,
-        uint256 _timeDelay,
-        uint256 _maxOutstandingPairCount,
-        address _bathHouse
-    ) public {
-        require(!initialized);
-        bathHouse = _bathHouse;
-
-        require(_reserveRatio <= 100);
-        require(_reserveRatio > 0);
-        reserveRatio = _reserveRatio;
-
-        timeDelay = _timeDelay;
-
-        maxOutstandingPairCount = _maxOutstandingPairCount;
-
-        require(BathHouse(bathHouse).isApprovedBathToken(_bathAssetAddress));
-        require(BathHouse(bathHouse).isApprovedBathToken(_bathQuoteAddress));
-        bathAssetAddress = _bathAssetAddress;
-        bathQuoteAddress = _bathQuoteAddress;
-
-        underlyingAsset = BathToken(bathAssetAddress).underlying();
-        underlyingQuote = BathToken(bathQuoteAddress).underlying();
-
-        RubiconMarketAddress = market;
-        initialized = true;
     }
 
     // Returns filled liquidity to the correct bath pool
