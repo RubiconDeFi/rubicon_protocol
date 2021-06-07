@@ -49,7 +49,6 @@ const USDCdeployResult = await deploy('DaiWithFaucet', {
        `contract WAYNE deployed at ${deployResult.address}`
     );
     }
-
 }
   
 

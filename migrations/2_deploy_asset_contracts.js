@@ -21,12 +21,12 @@ module.exports = function(deployer, network, accounts) {
   deployer.deploy(DAI, 42);
 
   deployer.deploy(WAYNE,admin, new BigNumber(1000e18));
-  deployer.deploy(STARK, admin, new BigNumber(1000e18));
+  // deployer.deploy(STARK, admin, new BigNumber(1000e18));
 
-  deployer.deploy(GME, admin, new BigNumber(1000e18));
-  deployer.deploy(OPT, admin, new BigNumber(1000e18));
-  deployer.deploy(SPXE, admin, new BigNumber(1000e18));
-  deployer.deploy(WBTC, admin, new BigNumber(1000e18));
-  deployer.deploy(COIN, admin, new BigNumber(1000e18));
+  // deployer.deploy(GME, admin, new BigNumber(1000e18));
+  // deployer.deploy(OPT, admin, new BigNumber(1000e18));
+  // deployer.deploy(SPXE, admin, new BigNumber(1000e18));
+  // deployer.deploy(WBTC, admin, new BigNumber(1000e18));
+  // deployer.deploy(COIN, admin, new BigNumber(1000e18));
   // deployer.deploy(RBCN, admin, admin);
 };

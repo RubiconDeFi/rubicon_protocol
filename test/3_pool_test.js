@@ -30,27 +30,46 @@ contract("Rubicon Pools Test", async function(accounts) {
             bathHouseInstance = await BathHouse.deployed();
             DAIInstance = await DAI.deployed();
             WETHInstance = await WETH.deployed();
+            bathPairInstance = await BathPair.deployed();
         });
     });
 
     describe("Bath House Initialization of Bath Pair and Bath Tokens", async function() {
 
-        it("Bath House can initialize a new bathToken Pair", async function() {
+        it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            await bathHouseInstance.initialize(rubiconMarketInstance.address);
-            (await bathHouseInstance.initBathPair(WETHInstance.address, "WETH", DAIInstance.address, "DAI", 90, 259200, 10)); // 90% reserve ratio and 3 days cancel delay
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 259200, 10);
+
+        });
+        it("Bath Token for asset is deployed and initialized", async function() {
+            return await BathToken.new().then(async function(instance) {
+                await instance.initialize("bathWETH", WETHInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
+                bathAssetInstance = await instance;
+            });
+        });
+        it("Bath Token for quote is deployed and initialized", async function() {
+            return await BathToken.new().then(async function(instance) {
+                await instance.initialize("bathDAI", DAIInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
+                bathQuoteInstance = await instance;
+                console.log("new bathDAI addr", bathQuoteInstance.address);
+            })
+        });
+        it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
+            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
+
+            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
         });
         it("can correctly spawn bathWETH and bathDAI", async function() {
-            bathPairInstance = await BathPair.at(newPair);
+            // bathPairInstance = await BathPair.at(newPair);
             bathAssetAddress = await bathPairInstance.bathAssetAddress();
             logIndented("bathWETH address: ", bathAssetAddress);
             bathQuoteAddress = await bathPairInstance.bathQuoteAddress();
             logIndented("bathDAI address: ", bathQuoteAddress);
 
-            bathAssetInstance = await BathToken.at(bathAssetAddress);
-            bathQuoteInstance = await BathToken.at(bathQuoteAddress);
+            // bathAssetInstance = await BathToken.at(bathAssetAddress);
+            // bathQuoteInstance = await BathToken.at(bathQuoteAddress);
 
             assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
             assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);

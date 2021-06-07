@@ -1,9 +1,15 @@
 require('dotenv').config();
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
+var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
+var BathToken = artifacts.require("./contracts/rubiconPoolsv0/BathToken.sol");
 var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
 
+var WETH = artifacts.require("./contracts/WETH9.sol");
+var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
+
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { deploy } = require('@openzeppelin/truffle-upgrades/dist/utils');
 
 // This file will deploy Rubicon Market and Pools while wrapping everything in upgradeable proxies
 // @dev - use: ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
@@ -33,18 +39,41 @@ module.exports = async function(deployer, network, accounts) {
     // ];
 
     if (network == 'development' || network == 'pools' || network == "kovan" || network == "ganache" || network == "kovan-fork"){
-      await deployer.deploy(RubiconMarket, {gasPrice: 1, gas: 0x1fffffffffffff}).then(async function() {
+      await deployer.deploy(RubiconMarket, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(async function() {
             rubiconMarketInstance = await RubiconMarket.deployed();
 
             // Initialize immediately on deployment
             await rubiconMarketInstance.initialize(false, admin);
 
+            // Deploy liquidity pools for WETH / DAI - see 3_pool_test.js
+            wethInstance = await WETH.deployed();
+            daiInstance = await DAI.deployed();
+
+            // await deployer.deploy(BathToken)
+            // rubiconMarketInstance = await RubiconMarket.deployed();
+
             // Add launch tokens to the whitelist
             // assetsToWhitelist.forEach(async function(e) {
             //   await rubiconMarketInstance.addToWhitelist(e);   
             // });
-            return deployer.deploy(BathHouse, {gasPrice: 1, gas: 0x1fffffffffffff}).then(function() {
-              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address, {gas: 0x1ffffff});
+            return deployer.deploy(BathHouse, /*{gasPrice: 1, gas: 0x1fffffffffffff}*/).then(async function() {
+              // bathHouseInstance = await BathHouse.deployed();
+              
+              // await deployer.deploy(BathToken);
+              // await deployer.deploy(BathToken);
+
+              await deployer.deploy(BathPair,
+                  // wethInstance.address,
+                  // "WETH",
+                  // daiInstance.address,
+                  // "DAI",
+                  // rubiconMarketInstance.address,
+                  // 90,
+                  // 259200,
+                  // 10,
+                  // BathHouse.address
+                );
+              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
             }); 
         });
       }

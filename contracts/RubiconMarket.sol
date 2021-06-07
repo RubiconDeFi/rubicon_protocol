@@ -577,7 +577,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     //false: revert to expiring market
     /// @dev Below is variable to allow for a proxy-friendly constructor
     bool public initialized;
-    
+
     bool public AqueductDistributionLive;
     address public AqueductAddress;
 
