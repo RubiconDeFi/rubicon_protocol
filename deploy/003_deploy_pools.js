@@ -38,6 +38,20 @@ const func = async (hre) => {
     // });
 
 // -----------------------------------------------
+  // Deploy pairs trade
+  const deployResultPT = await deploy('PairsTrade', {
+    from: deployer,
+    args: ["Pairs Trade", process.env.OP_KOVAN_BATHHOUSE, process.env.OP_KOVAN_MARKET],
+    log: true
+  });
+  if (deployResultPT.newlyDeployed) {
+    console.log(
+      `contract Pairs Trade deployed at ${deployResultPT.address}`
+    );
+
+    }
+
+// -----------------------------------------------
   // Deploy BathTokens
 //   // Deploy BathToken for WAYNE
 //   const bathTokenFactory = await hre.ethers.getContractFactory("BathToken");
