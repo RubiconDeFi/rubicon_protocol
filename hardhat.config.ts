@@ -36,7 +36,9 @@ module.exports = {
         ovm: true,
         gasPrice: 0,
         chainId: 69,
-        accounts: [process.env.PRIVATE_KEY_KOVAN]
+        accounts: [process.env.PRIVATE_KEY_KOVAN],
+        gasLimit: 9000000,
+        timeout: 4000
       }
   },
   // etherscan: {

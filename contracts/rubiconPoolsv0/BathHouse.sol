@@ -26,9 +26,26 @@ contract BathHouse {
 
     bool public initialized;
 
-    function initialize(address market) public {
+    // Key, system-wide risk parameters for Pools
+    uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
+
+    // The delay after which unfilled orders are cancelled
+    uint256 public timeDelay;
+
+    // Constraint variable for the max amount of outstanding market making pairs at a time
+    uint256 public maxOutstandingPairCount;
+
+    function initialize(address market, uint _reserveRatio, uint _timeDelay, uint mopc) public {
         require(!initialized);
         admin = msg.sender;
+        
+        timeDelay = _timeDelay;
+        require(_reserveRatio <= 100);
+        require(_reserveRatio > 0);
+        reserveRatio = _reserveRatio;
+
+        maxOutstandingPairCount = mopc;
+
         RubiconMarketAddress = market;
         initialized = true;
     }
@@ -36,6 +53,18 @@ contract BathHouse {
     modifier onlyAdmin {
         require(msg.sender == admin);
         _;
+    }
+
+    function setCancelTimeDelay(uint256 value) public onlyAdmin {
+        timeDelay = value;
+    }
+
+    function setMaxOutstandingPairCount(uint256 value) public onlyAdmin {
+        maxOutstandingPairCount = value;
+    }
+
+    function getMarket() public view returns(address) {
+        return RubiconMarketAddress;
     }
 
     function initBathPair(
@@ -146,19 +175,5 @@ contract BathHouse {
         returns (address)
     {
         return quoteToBathQuote[quote];
-    }
-
-    function setCancelTimeDelay(address bathPair, uint256 value)
-        external
-        onlyAdmin
-    {
-        BathPair(bathPair).setCancelTimeDelay(value);
-    }
-
-    function setMaxOutstandingPairCount(address bathPair, uint256 value)
-        external
-        onlyAdmin
-    {
-        BathPair(bathPair).setMaxOutstandingPairCount(value);
     }
 }

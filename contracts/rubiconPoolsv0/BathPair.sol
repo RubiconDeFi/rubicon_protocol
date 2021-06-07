@@ -26,23 +26,16 @@ contract BathPair {
 
     bool public initialized;
 
-    // The delay after which unfilled orders are cancelled
-    uint256 public timeDelay;
-
-    // Constraint variable for the max amount of outstanding market making pairs at a time
-    uint256 public maxOutstandingPairCount;
-
-    // askID, bidID, timestamp
-    uint256[3][] public outstandingPairIDs;
-
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
 
     // Risk Parameters
-    uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
     uint256 public maximumOrderSize; // max order size that can be places in a single order
 
     StrategistTrade[] public strategistRecord;
+
+    // askID, bidID, timestamp
+    uint256[3][] public outstandingPairIDs;
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
@@ -82,22 +75,10 @@ contract BathPair {
     function initialize(
         address _bathAssetAddress,
         address _bathQuoteAddress,
-        address market,
-        // uint256 _reserveRatio,
-        // uint256 _timeDelay,
-        // uint256 _maxOutstandingPairCount,
         address _bathHouse
     ) public {
         require(!initialized);
         bathHouse = _bathHouse;
-
-        // require(_reserveRatio <= 100);
-        // require(_reserveRatio > 0);
-        // reserveRatio = _reserveRatio;
-
-        // timeDelay = _timeDelay;
-
-        // maxOutstandingPairCount = _maxOutstandingPairCount;
 
         require(BathHouse(bathHouse).isApprovedBathToken(_bathAssetAddress));
         require(BathHouse(bathHouse).isApprovedBathToken(_bathQuoteAddress));
@@ -107,17 +88,10 @@ contract BathPair {
         underlyingAsset = BathToken(bathAssetAddress).underlying();
         underlyingQuote = BathToken(bathQuoteAddress).underlying();
 
-        // RubiconMarketAddress = market;
+        RubiconMarketAddress = BathHouse(bathHouse).getMarket();
         initialized = true;
     }
 
-    function setCancelTimeDelay(uint256 value) public onlyBathHouse {
-        timeDelay = value;
-    }
-
-    function setMaxOutstandingPairCount(uint256 value) public onlyBathHouse {
-        maxOutstandingPairCount = value;
-    }
 
     modifier onlyBathHouse {
         require(msg.sender == bathHouse);
@@ -134,20 +108,20 @@ contract BathPair {
 
     modifier enforceReserveRatio {
         require(
-            (BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <=
+            (BathToken(bathAssetAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
+            (BathToken(bathQuoteAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
         _;
         require(
-            (BathToken(bathAssetAddress).totalSupply() * reserveRatio) / 100 <=
+            (BathToken(bathAssetAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() * reserveRatio) / 100 <=
+            (BathToken(bathQuoteAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
     }
@@ -313,7 +287,7 @@ contract BathPair {
     function cancelPartialFills() internal {
         // ** Optimistically assume that any partialFill or totalFill resulted in yield **
         require(
-            outstandingPairIDs.length < maxOutstandingPairCount,
+            outstandingPairIDs.length < BathHouse(bathHouse).maxOutstandingPairCount(),
             "too many outstanding pairs"
         );
 
@@ -372,7 +346,7 @@ contract BathPair {
                     offer2.buy_gem != ERC20(0))
             ) {
                 // delete the offer if it is too old
-                if (outstandingPairIDs[x][2] < (now - timeDelay)) {
+                if (outstandingPairIDs[x][2] < (now - BathHouse(bathHouse).timeDelay())) {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
                     );
@@ -413,14 +387,14 @@ contract BathPair {
         require(asset == underlyingAsset || asset == underlyingQuote);
         uint256 maxOrderSizeProportion = 50; //in percentage points of underlying
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
-        emit LogNote("underlyingBalance", underlyingBalance);
-        emit LogNote(
-            "underlying other",
-            IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
-        );
+        // emit LogNote("underlyingBalance", underlyingBalance);
+        // emit LogNote(
+        //     "underlying other",
+        //     IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+        // );
         // Divide the below by 1000
         int128 shapeCoef = ABDKMath64x64.div(-5, 1000); // 5 / 1000
-        emit LogNoteI("shapeCoef", shapeCoef);
+        // emit LogNoteI("shapeCoef", shapeCoef);
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
@@ -430,26 +404,26 @@ contract BathPair {
                     underlyingBalance,
                     IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
                 );
-            emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct!
+            // emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct!
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
-                emit LogNote(
-                    "normal maxSize Asset",
-                    (maxOrderSizeProportion * underlyingBalance) / 100
-                );
+                // emit LogNote(
+                //     "normal maxSize Asset",
+                //     (maxOrderSizeProportion * underlyingBalance) / 100
+                // );
                 return (maxOrderSizeProportion * underlyingBalance) / 100;
             } else {
                 // return dynamic order size
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct!
-                emit LogNote("raw maxSize", maxSize);
+                // emit LogNote("raw maxSize", maxSize);
                 int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
-                emit LogNoteI("e", e);
+                // emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
-                emit LogNoteI("raised to the", shapeFactor);
+                // emit LogNoteI("raised to the", shapeFactor);
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
-                emit LogNote("dynamic maxSize Asset", dynamicSize); //
+                // emit LogNote("dynamic maxSize Asset", dynamicSize); //
                 return dynamicSize;
             }
         } else if (asset == underlyingQuote) {
@@ -460,23 +434,23 @@ contract BathPair {
                 );
             if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
-                emit LogNote(
-                    "normal maxSize Quote",
-                    (maxOrderSizeProportion * underlyingBalance) / 100
-                );
+                // emit LogNote(
+                //     "normal maxSize Quote",
+                //     (maxOrderSizeProportion * underlyingBalance) / 100
+                // );
                 return (maxOrderSizeProportion * underlyingBalance) / 100;
             } else {
                 // return dynamic order size
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct! 48000000000000000000
-                emit LogNote("raw maxSize", maxSize);
+                // emit LogNote("raw maxSize", maxSize);
                 int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
-                emit LogNoteI("e", e);
+                // emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
-                emit LogNoteI("raised to the", shapeFactor);
+                // emit LogNoteI("raised to the", shapeFactor);
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
-                emit LogNote("dynamic maxSize Asset", dynamicSize); // 45728245133630216043
+                // emit LogNote("dynamic maxSize Asset", dynamicSize); // 45728245133630216043
                 return dynamicSize;
             }
         }
