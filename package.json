@@ -39,6 +39,6 @@
     "test:poolsE": "truffle test ./test/3_pool_test.js --network pools --show-events",
     "test:protocol": "truffle test ./test/1_migration_test.js && truffle test ./test/2_RBCN_distribution_and_trade_tests.js",
     "clean": "npx prettier --write 'contracts/**/*.sol'",
-    "poolsStrategy": "node ./test/kovanPoolsStrategist.js"
+    "poolsStrategy": "node ./kovanPoolsStrategist.js"
   }
 }

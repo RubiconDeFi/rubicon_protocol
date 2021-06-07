@@ -28,6 +28,14 @@ const func = async (hre) => {
         });
     }
 
+    // // Approve the Pairs Trade strategy
+    // const bh = await hre.ethers.getContractFactory("BathHouse");
+    // const BHI = await bh.attach(process.env.OP_KOVAN_BATHHOUSE);
+    // await BHI.estimateGas.approveStrategy(process.env.OP_KOVAN_PAIRSTRADE).then(async function(g) {
+    //   await BHI.approveStrategy(process.env.OP_KOVAN_PAIRSTRADE, {gasLimit: g._hex}).then((r) => console.log("BH Init \n" + r));
+    //   console.log('Bath House initialized');
+    // });
+
     // If already deployed 
     // const bh = await hre.ethers.getContractFactory("BathHouse");
     // const BHI = await bh.attach("0xcFdee663d4a4520a69Ed5a6dE05a2e81365919fc");
