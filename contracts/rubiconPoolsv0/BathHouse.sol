@@ -81,7 +81,9 @@ contract BathHouse {
         require(asset != quote);
         require(asset != address(0));
         require(quote != address(0));
-        require(getPair[asset][quote] == address(0));
+
+        // Ensure the pair doesn't exist and approved
+        require(!isApprovedPair(getPair[asset][quote]));
         allBathPairs.push(address(pair));
 
         getPair[asset][quote] = address(pair);
@@ -131,7 +133,7 @@ contract BathHouse {
         approvedBathTokens[bathToken] = true;
     }
 
-    function isApprovedPair(address pair) external view returns (bool) {
+    function isApprovedPair(address pair) public view returns (bool) {
         if (approvedPairs[pair] == true) {
             return true;
         } else {
@@ -144,7 +146,7 @@ contract BathHouse {
     }
 
     function removePair(address pair) external onlyAdmin {
-        approvedPairs[pair] = address(0);
+        approvedPairs[pair] = false;
     }
 
     function addQuote(address quote, address bathQuote) internal {
