@@ -83,9 +83,12 @@ contract BathPair {
         bathAssetAddress = _bathAssetAddress;
         bathQuoteAddress = _bathQuoteAddress;
 
+        require(BathToken(bathAssetAddress).underlying() != address(0x0000000000000000000000000000000000000000));
+        require(BathToken(bathQuoteAddress).underlying() != address(0x0000000000000000000000000000000000000000));
         underlyingAsset = BathToken(bathAssetAddress).underlying();
         underlyingQuote = BathToken(bathQuoteAddress).underlying();
 
+        require(BathHouse(bathHouse).getMarket() != address(0x0000000000000000000000000000000000000000));
         RubiconMarketAddress = BathHouse(bathHouse).getMarket();
         initialized = true;
     }

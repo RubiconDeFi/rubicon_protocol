@@ -60,8 +60,12 @@ var key = process.env.OP_KOVAN_ADMIN_KEY;
 
 function sendTx(tx, msg) {
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
-        console.log(msg);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log).then((r) => {
+            console.log("success", msg);
+            console.log(r);
+        }).catch((c) =>  {
+            console.log("failure", c);
+        });
     });
 }
 
@@ -77,7 +81,7 @@ function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "Approve bathPair to recieve WAYNE and DAI first");
 
-// var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_BATHUSDC, web3.utils.toWei("400")).encodeABI();
+// var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_BATHUSDC, web3.utils.toWei("300")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -100,15 +104,18 @@ function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 
-// console.log(DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_ADMIN).call().then((r) => console.log(r)));
+// 384078440000000000000
+// console.log(bathUsdcContractKovan.methods.symbol().call().then((r) => console.log(r)));
+// console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
+
 // // Deposit USDC into BathToken USDC
-// var txData = bathUsdcContractKovan.methods.deposit("304078440000000000000").encodeABI();
+// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("300")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
 //     from: sender,
 //     to: process.env.OP_KOVAN_BATHUSDC,
-//     gasPrice: web3.utils.toWei("0", "Gwei")
+//     gasPrice: "0"
 // }
 // // Send the transaction
 // sendTx(tx, "Deposit USDC into BathToken USDC");
@@ -124,6 +131,16 @@ function sendTx(tx, msg) {
 // }
 // // Send the transaction
 // sendTx(tx);
+
+// Validate parameters
+// Strategy is Approved
+// console.log(bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_PAIRSTRADE).call().then((r) => console.log(r)));
+
+// Bath pair ask and bid 
+console.log(bathPairContractKovan.methods.underlyingAsset().call().then((r) => console.log(r)));
+console.log(bathPairContractKovan.methods.initialized().call().then((r) => console.log(r)));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log(r)));
+
 
 // ************ The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan *************
 
@@ -151,7 +168,7 @@ async function marketMake(a, b, im) {
 
     // ***Market Maker Inputs***
     const spreadFactor = 0.02; // the % of the spread we want to improve
-    const maxOrderSize =  10;//size in *quote currency* of the orders
+    const maxOrderSize =  5;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
     var newAskPrice = a * (1-spreadFactor);
@@ -201,16 +218,14 @@ async function marketMake(a, b, im) {
         web3.utils.toWei(bidDen.toString())
     ).encodeABI();
     var tx = {
-        gas: 12500000,
+        gas: 9000000,
         data: txData.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
         to: bathPairKovanAddr,
-        gasPrice: web3.utils.toWei("40", "Gwei")
+        gasPrice: web3.utils.toWei("0", "Gwei")
     }
     // Send the transaction
-    web3.eth.accounts.signTransaction(tx, process.env.OP_KOVAN_ADMIN_KEY).then((signedTx) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
-    });
+    // sendTx(tx, "strategist market making trade")
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -219,27 +234,30 @@ async function manageInventory(currentAsk, currentBid) {
     var quoteBalance = await DAIContractKovan.methods.balanceOf(bathQuoteToken).call();
 
     if (assetBalance == 0 || quoteBalance == 0) {
+        console.log('Current asset liquidity balance: ', assetBalance);
+        console.log('Current quote liquidity balance: ', quoteBalance);
+
         throw ("ERROR: no liquidity in quote or asset bathToken");
     }
     console.log("Asset liquidity in bathToken: ", assetBalance);
     console.log("Quote liquidity in bathToken: ", quoteBalance);
     console.log('current price / midpoint', (currentAsk + currentBid) / 2)
-    console.log('quote over asset', (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2));
 
     // Ratio targets the current orderbook midpoint as the ideal ratio (50/50)
     return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
-stoikov().then((data) => {
-    // console.log(data);
-    var currentAsk = data[0];
-    var currentBid = data[1];
-    console.log('current Ask price: ', currentAsk);
-    console.log('current Bid price: ', currentBid);
+// stoikov().then(async function(data) {
+//     // console.log(data);
+//     var currentAsk = data[0];
+//     var currentBid = data[1];
+//     console.log('current Ask price: ', currentAsk);
+//     console.log('current Bid price: ', currentBid);
 
-    const IMfactor = manageInventory(currentAsk, currentBid);
-    // marketMake(currentAsk, currentBid, IMfactor);
-});
+//     const IMfactor = manageInventory(currentAsk, currentBid);
+//     console.log('IM factor', await IMfactor);
+//     marketMake(currentAsk, currentBid, IMfactor);
+// });
 
 // This function sets off the chain of calls to successfully marketMake
 // stoikov();

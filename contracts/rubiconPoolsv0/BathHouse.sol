@@ -143,6 +143,10 @@ contract BathHouse {
         approvedPairs[pair] = true;
     }
 
+    function removePair(address pair) external onlyAdmin {
+        approvedPairs[pair] = address(0);
+    }
+
     function addQuote(address quote, address bathQuote) internal {
         if (bathQuoteExists[quote]) {
             return;
