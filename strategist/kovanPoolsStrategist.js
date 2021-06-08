@@ -14,36 +14,36 @@ let web3 = new Web3("https://kovan.optimism.io");
 // console.log("Web3 Version: ", web3.version);
 
 // Load the RubiconMarket contract
-var { abi } = require("./build/contracts/RubiconMarket.json");
+var { abi } = require("../build/contracts/RubiconMarket.json");
 var rubiconMarketKovanAddr = process.env.OP_KOVAN_MARKET;
 var RubiconMarketContractKovan = new web3.eth.Contract(abi, rubiconMarketKovanAddr);
 
 // Load in Pools contract addresses on Kovan
-var { abi } = require("./build/contracts/BathHouse.json");
+var { abi } = require("../build/contracts/BathHouse.json");
 var bathHouseKovanAddr = process.env.OP_KOVAN_BATHHOUSE;
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
 // Load in bath token asset contract addresses on Kovan
-var { abi } = require("./build/contracts/BathToken.json");
+var { abi } = require("../build/contracts/BathToken.json");
 var bathWayneKovanAddr = process.env.OP_KOVAN_BATHWAYNE;
 var bathWayneContractKovan = new web3.eth.Contract(abi, bathWayneKovanAddr);
 
 // Load in bath token quote contract addresses on Kovan
-var { abi } = require("./build/contracts/BathToken.json");
+var { abi } = require("../build/contracts/BathToken.json");
 var bathUsdcKovanAddr = process.env.OP_KOVAN_BATHUSDC;
 var bathUsdcContractKovan = new web3.eth.Contract(abi, bathUsdcKovanAddr);
 
-var { abi } = require("./build/contracts/PairsTrade.json");
+var { abi } = require("../build/contracts/PairsTrade.json");
 var strategyKovanAddr = process.env.OP_KOVAN_PAIRSTRADE;
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 // Load in WAYNE Contract
-var { abi } = require("./build/contracts/EquityToken.json");
+var { abi } = require("../build/contracts/EquityToken.json");
 var WAYNEKovanAddr = process.env.OP_KOVAN_WAYNE;
 var WAYNEContractKovan = new web3.eth.Contract(abi, WAYNEKovanAddr);
 
 // Load in Dai Contract
-var { abi } = require("./build/contracts/DaiWithFaucet.json");
+var { abi } = require("../build/contracts/DaiWithFaucet.json");
 var DAIKovanAddr = process.env.OP_KOVAN_USDC;
 var DAIContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 
@@ -51,7 +51,7 @@ var bathAssetToken = process.env.OP_KOVAN_BATHWAYNE;
 var bathQuoteToken = process.env.OP_KOVAN_BATHUSDC;
 
 // Load in BathPair Contract
-var { abi } = require("./build/contracts/BathPair.json");
+var { abi } = require("../build/contracts/BathPair.json");
 var bathPairKovanAddr = process.env.OP_KOVAN_BATHWAYNEUSDC;
 var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 
@@ -100,18 +100,18 @@ function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 
-console.log(DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_ADMIN).call().then((r) => console.log(r)));
-// Deposit USDC into BathToken USDC
-var txData = bathUsdcContractKovan.methods.deposit("304078440000000000000").encodeABI();
-var tx = {
-    gas: 12500000,
-    data: txData.toString(),
-    from: sender,
-    to: process.env.OP_KOVAN_BATHUSDC,
-    gasPrice: web3.utils.toWei("0", "Gwei")
-}
-// Send the transaction
-sendTx(tx, "Deposit USDC into BathToken USDC");
+// console.log(DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_ADMIN).call().then((r) => console.log(r)));
+// // Deposit USDC into BathToken USDC
+// var txData = bathUsdcContractKovan.methods.deposit("304078440000000000000").encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: process.env.OP_KOVAN_BATHUSDC,
+//     gasPrice: web3.utils.toWei("0", "Gwei")
+// }
+// // Send the transaction
+// sendTx(tx, "Deposit USDC into BathToken USDC");
 
 // // Withdraw assets from BathPair
 // var txData = bathPairContractKovan.methods.withdraw("0xC61812684385910CF8E93Fa0B04c572E6051F679", web3.utils.toWei("200"), "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", web3.utils.toWei("400")).encodeABI();
