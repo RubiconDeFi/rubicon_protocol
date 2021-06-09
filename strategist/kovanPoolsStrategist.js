@@ -250,6 +250,7 @@ async function logInfo(mA, mB, a, b, im) {
     console.log('\n---------- Market Information ----------');
     console.log('Current Best Ask Price: ', mA);
     console.log('Current Best Bid Price: ', mB);
+    console.log('Current Midpoint Price: ', (mA + mB) / 2);
     console.log('\n---------- Pools Information ----------');
     console.log('New Pools Ask Price: ', a);
     console.log('New Pools Bid Price: ', b);
@@ -268,7 +269,7 @@ async function logInfo(mA, mB, a, b, im) {
         naiveAPR = "-" + ((1- (await (underlying / r))) *100).toFixed(3).toString() + "%";
     }
     console.log("Return on Assets for bathWAYNE since Inception: ", naiveAPR);
-}));
+    }));
 
      (await bathUsdcContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
@@ -282,7 +283,7 @@ async function logInfo(mA, mB, a, b, im) {
         naiveAPR = "-" + ((1- (await (underlying / r))) *100).toFixed(3).toString() + "%";
     }
     console.log("Return on Assets for bathUSDC since Inception: ", naiveAPR);
-}));
+    }));
 console.log('--------------------------------------\n')
 }
 
@@ -367,14 +368,29 @@ async function marketMake(a, b, im) {
 
 // This function should return a positive or negative number reflecting the balance.
 async function manageInventory(currentAsk, currentBid) {
+    var currentReserveRatio = (80.00 / 100.00);
     var assetBalance = await WAYNEContractKovan.methods.balanceOf(bathAssetToken).call();
     var quoteBalance = await DAIContractKovan.methods.balanceOf(bathQuoteToken).call();
+    const bathQuoteSupply = await bathUsdcContractKovan.methods.totalSupply().call();
+
+    const bathAssetSupply = await bathWayneContractKovan.methods.totalSupply().call();
+    // console.log(bathQuoteSupply);
 
     if (assetBalance == 0 || quoteBalance == 0) {
         // console.log('Current asset liquidity balance: ', assetBalance);
         // console.log('Current quote liquidity balance: ', quoteBalance);
 
         throw ("ERROR: no liquidity in quote or asset bathToken");
+    }
+    if ((bathAssetSupply * currentReserveRatio) >= (assetBalance)) {
+        console.log('Hurdle Rate: ', (bathAssetSupply * currentReserveRatio));
+        console.log('Asset balance: ', assetBalance);
+        throw ("ERROR: insufficient asset liquidity to clear reserve ratio");
+    }
+    if ((bathQuoteSupply * currentReserveRatio) >= (quoteBalance)) {
+        console.log('Hurdle Rate: ', (bathQuoteSupply * currentReserveRatio));
+        console.log('Quote balance: ', assetBalance);
+        throw ("ERROR: insufficient quote liquidity to clear reserve ratio");
     }
     // console.log("Asset liquidity in bathToken: ", assetBalance);
     // console.log("Quote liquidity in bathToken: ", quoteBalance);
