@@ -226,21 +226,7 @@ function sendTx(tx, msg) {
 //     if (r == process.env.OP_KOVAN_WAYNE) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **")}
 // }));
 // ------------------------------------
-// APR CALCULATIONS
-// expected return on assets from inception to present: () / ()
-console.log(bathWayneContractKovan.methods.totalSupply().call().then(async function(r) {
-    console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_BATHWAYNE).call();
-    console.log("Total Underlying: ", underlying);
-    var uOverC = (await (underlying / r));
-    let naiveAPR;
-    if (uOverC >= 1) {
-        naiveAPR = "+" +(((await (underlying / r)) - 1)*100).toFixed(3).toString() + "%";
-    } else {
-        naiveAPR = "-" + ((1- (await (underlying / r))) *100).toFixed(3).toString() + "%";
-    }
-    console.log("Naive APR: ",naiveAPR );
-}));
+
 // ************ The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan *************
 
 // MarketMake:
@@ -260,11 +246,47 @@ async function stoikov() {
     return [bestAskPrice, bestBidPrice];
 }
 
-async function marketMake(a, b, im) {
-    console.log('Current best ask: ', a);
-    console.log('Current best bid: ', b);
-    console.log('IM Factor', await im); // ratio of current inventory balance divided by the target balance
+async function logInfo(mA, mB, a, b, im) {
+    console.log('\n---------- Market Information ----------');
+    console.log('Current Best Ask Price: ', mA);
+    console.log('Current Best Bid Price: ', mB);
+    console.log('\n---------- Pools Information ----------');
+    console.log('New Pools Ask Price: ', a);
+    console.log('New Pools Bid Price: ', b);
+    console.log('Pools Inventory Ratio [(Quote / Asset) ~ 1]: ', im);
 
+    // APR CALCULATIONS
+ (await bathWayneContractKovan.methods.totalSupply().call().then(async function(r) {
+    // console.log("Total Supply of bathWAYNE: ", r);
+    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_BATHWAYNE).call();
+    // console.log("Total Underlying: ", underlying);
+    var uOverC = (await (underlying / r));
+    let naiveAPR;
+    if (uOverC >= 1) {
+        naiveAPR = "+" +(((await (underlying / r)) - 1)*100).toFixed(3).toString() + "%";
+    } else {
+        naiveAPR = "-" + ((1- (await (underlying / r))) *100).toFixed(3).toString() + "%";
+    }
+    console.log("Return on Assets for bathWAYNE since Inception: ", naiveAPR);
+}));
+
+     (await bathUsdcContractKovan.methods.totalSupply().call().then(async function(r) {
+    // console.log("Total Supply of bathWAYNE: ", r);
+    var underlying = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_BATHUSDC).call();
+    // console.log("Total Underlying: ", underlying);
+    var uOverC = (await (underlying / r));
+    let naiveAPR;
+    if (uOverC >= 1) {
+        naiveAPR = "+" +(((await (underlying / r)) - 1)*100).toFixed(3).toString() + "%";
+    } else {
+        naiveAPR = "-" + ((1- (await (underlying / r))) *100).toFixed(3).toString() + "%";
+    }
+    console.log("Return on Assets for bathUSDC since Inception: ", naiveAPR);
+}));
+console.log('--------------------------------------\n')
+}
+
+async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
     const spreadFactor = 0.002; // the % of the spread we want to improve
     const maxOrderSize =  2;//size in *quote currency* of the orders
@@ -305,6 +327,8 @@ async function marketMake(a, b, im) {
         // console.log(dynDen);
     }
 
+    await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
+
     // console.log('new ask price', askDen / askNum);
     // console.log('new bid price', bidNum / bidDen);
     // console.log("askNum: ", web3.utils.toWei(askNum.toString()));
@@ -327,7 +351,7 @@ async function marketMake(a, b, im) {
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     // Send the transaction
-    // sendTx(tx, "strategist market making trade")
+    // sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n')
     
     // Estimate the gas
     // bathPairContractKovan.methods.executeStrategy(
@@ -339,7 +363,6 @@ async function marketMake(a, b, im) {
     //         console.log('e', e);
     //         console.log('d', d);
     //     })
-        console.log('New trades placed at ' + newBidPrice.toString() + ' and ' + newAskPrice.toString());
 }
 
 // This function should return a positive or negative number reflecting the balance.
