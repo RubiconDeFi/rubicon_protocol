@@ -247,7 +247,7 @@ async function stoikov() {
 }
 
 async function logInfo(mA, mB, a, b, im) {
-    console.log('\n---------- Market Information ----------');
+    console.log('---------- Market Information ----------');
     console.log('Current Best Ask Price: ', mA);
     console.log('Current Best Bid Price: ', mB);
     console.log('Current Midpoint Price: ', (mA + mB) / 2);
@@ -290,7 +290,7 @@ console.log('--------------------------------------\n')
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
     const spreadFactor = 0.002; // the % of the spread we want to improve
-    const maxOrderSize =  2;//size in *quote currency* of the orders
+    const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
     var newAskPrice = a * (1-spreadFactor);
@@ -355,15 +355,16 @@ async function marketMake(a, b, im) {
     // sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n')
     
     // Estimate the gas
-    // bathPairContractKovan.methods.executeStrategy(
-    //     strategyKovanAddr, 
-    //     web3.utils.toWei(askNum.toFixed(18).toString()),
-    //     web3.utils.toWei(askDen.toFixed(18).toString()),
-    //     web3.utils.toWei(bidNum.toFixed(18).toString()),
-    //     web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(async function(e, d) {
-    //         console.log('e', e);
-    //         console.log('d', d);
-    //     })
+    bathPairContractKovan.methods.executeStrategy(
+        strategyKovanAddr, 
+        web3.utils.toWei(askNum.toFixed(18).toString()),
+        web3.utils.toWei(askDen.toFixed(18).toString()),
+        web3.utils.toWei(bidNum.toFixed(18).toString()),
+        web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(async function(e, d) {
+            if (d != 0 ) {
+                console.log('Pools Successful ~DRY RUN~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+            }
+        })
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -392,32 +393,35 @@ async function manageInventory(currentAsk, currentBid) {
         console.log('Quote balance: ', assetBalance);
         throw ("ERROR: insufficient quote liquidity to clear reserve ratio");
     }
-    // console.log("Asset liquidity in bathToken: ", assetBalance);
-    // console.log("Quote liquidity in bathToken: ", quoteBalance);
-    // console.log('current price / midpoint', (currentAsk + currentBid) / 2)
+
 
     // Ratio targets the current orderbook midpoint as the ideal ratio (50/50)
     return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
-stoikov().then(async function(data) {
-    // console.log(data);
-    var currentAsk = data[0];
-    var currentBid = data[1];
-    // console.log('current Ask price: ', currentAsk);
-    // console.log('current Bid price: ', currentBid);
+async function startBot() {
+    
+    setTimeout(async function() {
+        await stoikov().then(async function(data) {
+            var currentAsk = data[0];
+            var currentBid = data[1];
+    
+            const IMfactor = manageInventory(currentAsk, currentBid);
+            marketMake(currentAsk, currentBid, IMfactor);
+        });
+        console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
-    const IMfactor = manageInventory(currentAsk, currentBid);
-    // console.log('IM factor', await IMfactor);
-    marketMake(currentAsk, currentBid, IMfactor);
-});
+      // Again
+      startBot();
 
-// This function sets off the chain of calls to successfully marketMake
-// stoikov();
+      // Every 3 sec
+    }, 5000);
+ 
+    // This function sets off the chain of calls to successfully marketMake
+}
 
-
-
-
-
+console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
+console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
+startBot();
 
 
