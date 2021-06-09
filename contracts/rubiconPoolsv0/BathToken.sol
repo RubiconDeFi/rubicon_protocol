@@ -58,6 +58,7 @@ contract BathToken is IBathToken {
         ERC20 buy_gem
     );
     event LogYield(uint256 yield);
+    event LogInit(uint256 timeOfInit);
 
     function initialize(
         string memory bathName,
@@ -90,7 +91,8 @@ contract BathToken is IBathToken {
         // Add infinite approval of Rubicon Market for this asset
         uint256 MAX_INT = 2**256 - 1;
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
-
+        emit LogInit(now);
+        
         initialized = true;
     }
 
