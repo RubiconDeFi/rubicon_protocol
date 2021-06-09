@@ -287,14 +287,22 @@ async function logInfo(mA, mB, a, b, im) {
 console.log('--------------------------------------\n')
 }
 
+let oldMidpoint;
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
-    const spreadFactor = 0.002; // the % of the spread we want to improve
+    const targetSpread = 0.05; // the % of the spread we want to improve
     const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
-    var newAskPrice = a * (1-spreadFactor);
-    var newBidPrice = b * (1+spreadFactor);
+    var midPoint = (a + b) / 2;
+    if (midPoint == oldMidpoint) {
+        console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
+        return;
+    } else {
+        oldMidpoint = await midPoint;
+    }
+    var newAskPrice = midPoint * (1-targetSpread);
+    var newBidPrice = midPoint * (1+targetSpread);
     
     // Oversupply of bathQuote -> dynamic ask size
     if (im > 1) {
@@ -414,7 +422,7 @@ async function startBot() {
       // Again
       startBot();
 
-      // Every 3 sec
+      // Every 5 sec
     }, 5000);
  
     // This function sets off the chain of calls to successfully marketMake
