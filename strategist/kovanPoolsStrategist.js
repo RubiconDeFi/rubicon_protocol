@@ -60,8 +60,8 @@ var key = process.env.OP_KOVAN_ADMIN_KEY;
 
 function sendTx(tx, msg) {
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log).then((r) => {
-            console.log("success", msg);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
+            console.log("*transaction success*", msg);
             // console.log(r);
         }).catch((c) =>  {
             console.log("failure", c);
@@ -70,8 +70,8 @@ function sendTx(tx, msg) {
 }
 
 
-// **Approve bathPair to recieve WAYNE and DAI first**
-// var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_BATHWAYNE, web3.utils.toWei("200")).encodeABI();
+// // **Approve bathPair to recieve WAYNE and DAI first**
+// var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_BATHWAYNE, web3.utils.toWei("200000")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -82,7 +82,7 @@ function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "Approve bathPair to recieve WAYNE and DAI first");
 
-// var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_BATHUSDC, web3.utils.toWei("300")).encodeABI();
+// var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_BATHUSDC, web3.utils.toWei("300000")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -94,7 +94,7 @@ function sendTx(tx, msg) {
 // sendTx(tx, "dai approve");
 // ---------------------------------------------------------
 // // Deposit WAYNE into BathToken WAYNE
-// var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("200")).encodeABI();
+// var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -110,7 +110,7 @@ function sendTx(tx, msg) {
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
 // // Deposit USDC into BathToken USDC
-// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("150")).encodeABI();
+// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -252,8 +252,8 @@ async function marketMake(a, b, im) {
     console.log('IM Factor', await im); // ratio of current inventory balance divided by the target balance
 
     // ***Market Maker Inputs***
-    const spreadFactor = 0.02; // the % of the spread we want to improve
-    const maxOrderSize =  5;//size in *quote currency* of the orders
+    const spreadFactor = 0.002; // the % of the spread we want to improve
+    const maxOrderSize =  2;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
     var newAskPrice = a * (1-spreadFactor);
@@ -300,10 +300,10 @@ async function marketMake(a, b, im) {
     // execute strategy with tighter spread
     var txData = bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
-        web3.utils.toWei(askNum.toString()),
-        web3.utils.toWei(askDen.toString()),
-        web3.utils.toWei(bidNum.toString()),
-        web3.utils.toWei(bidDen.toString())
+        web3.utils.toWei(askNum.toFixed(18).toString()),
+        web3.utils.toWei(askDen.toFixed(18).toString()),
+        web3.utils.toWei(bidNum.toFixed(18).toString()),
+        web3.utils.toWei(bidDen.toFixed(18).toString())
     ).encodeABI();
     var tx = {
         gas: 9000000,
@@ -314,12 +314,17 @@ async function marketMake(a, b, im) {
     }
     // Send the transaction
     // sendTx(tx, "strategist market making trade")
+    
+    // Estimate the gas
     bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
-        web3.utils.toWei(askNum.toString()),
-        web3.utils.toWei(askDen.toString()),
-        web3.utils.toWei(bidNum.toString()),
-        web3.utils.toWei(bidDen.toString())).estimateGas((r) => console.log(r))
+        web3.utils.toWei(askNum.toFixed(18).toString()),
+        web3.utils.toWei(askDen.toFixed(18).toString()),
+        web3.utils.toWei(bidNum.toFixed(18).toString()),
+        web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(async function(e, d) {
+            console.log('e', e);
+            console.log('d', d);
+        })
 }
 
 // This function should return a positive or negative number reflecting the balance.
