@@ -228,16 +228,6 @@ contract BathPair {
             );
             emit LogGrossYield(bathAssetAddress, bathQuoteYield);
         }
-
-        // Return settled trades to the appropriate bathToken
-        require(
-            IERC20(underlyingAsset).balanceOf(bathQuoteAddress) == 0,
-            "yield not correctly rebalanced"
-        );
-        require(
-            IERC20(underlyingQuote).balanceOf(bathAssetAddress) == 0,
-            "yield not correctly rebalanced"
-        );
     }
 
     // function where strategists claim rewards proportional to their quantity of fills
@@ -286,7 +276,7 @@ contract BathPair {
     }
 
     function cancelPartialFills() internal {
-        // ** Optimistically assume that any partialFill or totalFill resulted in yield **
+        // ** Assume that any partialFill or totalFill resulted in yield **
         require(
             outstandingPairIDs.length < BathHouse(bathHouse).maxOutstandingPairCount(),
             "too many outstanding pairs"
@@ -418,7 +408,7 @@ contract BathPair {
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct!
                 // emit LogNote("raw maxSize", maxSize);
-                int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
+                // int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
                 // emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
@@ -445,7 +435,7 @@ contract BathPair {
                 uint256 maxSize =
                     (maxOrderSizeProportion * underlyingBalance) / 100; // Correct! 48000000000000000000
                 // emit LogNote("raw maxSize", maxSize);
-                int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
+                // int128 e = ABDKMath64x64.divu(SafeMathE.eN(), SafeMathE.eD()); //Correct as a int128!
                 // emit LogNoteI("e", e);
                 int128 shapeFactor =
                     ABDKMath64x64.exp(ABDKMath64x64.mul(shapeCoef, ratio));
@@ -467,8 +457,10 @@ contract BathPair {
     }
 
     // Used to map a strategist to their orders
-    function newTradeIDs() internal view returns (uint256[3] memory) {
+    function newTradeIDs(address strategist) internal returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
+        ID2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][0]] = strategist;
+        ID2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][1]] = strategist;
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
@@ -518,21 +510,7 @@ contract BathPair {
 
         // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
-        strategistRecord.push(
-            StrategistTrade(
-                underlyingAsset,
-                bathAssetAddress,
-                underlyingQuote,
-                bathQuoteAddress,
-                askNumerator,
-                askDenominator,
-                bidNumerator,
-                bidDenominator,
-                msg.sender,
-                now,
-                newTradeIDs()
-            )
-        );
+        newTradeIDs(msg.sender);
 
         // 4. Cancel Outstanding Orders
         cancelPartialFills();

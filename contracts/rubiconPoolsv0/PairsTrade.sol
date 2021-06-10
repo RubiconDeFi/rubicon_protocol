@@ -18,15 +18,6 @@ contract PairsTrade {
 
     address public RubiconMarketAddress;
 
-    mapping(address => uint256[]) addressToHoldings;
-
-    // security mapping to ensure only Pairs
-    mapping(address => bool) approvedPairs;
-
-    uint256[] public outstandingAskIDs;
-    uint256[] public outstandingBidIDs;
-    uint256[2][] public outstandingPairIDs;
-
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event LogAddress(string, ERC20);

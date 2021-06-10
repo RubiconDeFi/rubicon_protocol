@@ -174,18 +174,18 @@ contract BathToken is IBathToken {
     // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
     function rebalance(
         address sisterBath,
-        address underlying, /* sister asset */
+        address underlyingAsset, /* sister asset */
         uint256 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 20);
         uint256 stratReward =
-            (stratProportion * (IERC20(underlying).balanceOf(address(this)))) /
+            (stratProportion * (IERC20(underlyingAsset).balanceOf(address(this)))) /
                 100;
-        IERC20(underlying).transfer(
+        IERC20(underlyingAsset).transfer(
             sisterBath,
-            IERC20(underlying).balanceOf(address(this)) - stratReward
+            IERC20(underlyingAsset).balanceOf(address(this)) - stratReward
         );
-        IERC20(underlying).transfer(msg.sender, stratReward);
+        IERC20(underlyingAsset).transfer(msg.sender, stratReward);
     }
 
     // *** Internal Functions ***
