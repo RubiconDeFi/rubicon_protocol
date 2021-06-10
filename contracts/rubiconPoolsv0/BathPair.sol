@@ -29,11 +29,6 @@ contract BathPair {
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
 
-    // Risk Parameters
-    uint256 public maximumOrderSize; // max order size that can be places in a single order
-
-    StrategistTrade[] public strategistRecord;
-
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
@@ -44,25 +39,10 @@ contract BathPair {
     event LogOffer(string, order);
     event LogGrossYield(address, uint256);
 
-    // Maps a trade ID to each of their strategists
-    mapping(uint256 => address) public ID2strategist;
+    // Maps a trade ID to each of their strategists for rewards purposes
+    mapping(uint256 => address) public IDs2strategist;
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
-
-
-    struct StrategistTrade {
-        address underlyingAsset;
-        address bathAssetAddress;
-        address underlyingQuote;
-        address bathQuoteAddress;
-        uint256 askNumerator;
-        uint256 askDenominator;
-        uint256 bidNumerator;
-        uint256 bidDenominator;
-        address strategist;
-        uint256 timestamp;
-        uint256[3] tradeIDs;
-    }
 
     struct order {
         uint256 pay_amt;
@@ -71,7 +51,7 @@ contract BathPair {
         ERC20 buy_gem;
     }
 
-    // constructor called by the BathHouse to initialize a new Pair
+    // constructor called to initialize a new Pair
     function initialize(
         address _bathAssetAddress,
         address _bathQuoteAddress,
@@ -263,7 +243,7 @@ contract BathPair {
     // isAssetFill are *quotes* that result in asset yield
     function logFill(uint256 orderID, bool isAssetFill) internal {
         // Goal is to map a fill to a strategist
-        address strategist = ID2strategist[orderID];
+        address strategist = IDs2strategist[orderID];
         if (isAssetFill) {
             strategist2FillsAsset[strategist] += 1;
             totalAssetFills += 1;
@@ -459,8 +439,8 @@ contract BathPair {
     // Used to map a strategist to their orders
     function newTradeIDs(address strategist) internal returns (uint256[3] memory) {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
-        ID2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][0]] = strategist;
-        ID2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][1]] = strategist;
+        IDs2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][0]] = strategist;
+        IDs2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][1]] = strategist;
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
