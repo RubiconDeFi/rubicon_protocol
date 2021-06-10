@@ -121,7 +121,6 @@ const func = async (hre) => {
     //      console.log("initBathPair result: ", r)
     //    });
 
-
 }
 
 func.tags = ['Pools']

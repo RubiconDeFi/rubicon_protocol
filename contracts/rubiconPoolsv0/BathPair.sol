@@ -489,11 +489,11 @@ contract BathPair {
         // Enforce dynamic ordersizing and inventory management
         require(
             askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress),
-            "the ask is too large in size"
+            "ask too large"
         );
         require(
             bidNumerator <= getMaxOrderSize(underlyingQuote, bathQuoteAddress),
-            "the bid is too large in size"
+            "bid too large"
         );
 
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price

@@ -58,13 +58,13 @@ var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 var sender = process.env.OP_KOVAN_ADMIN;
 var key = process.env.OP_KOVAN_ADMIN_KEY;
 
-function sendTx(tx, msg) {
+async function sendTx(tx, msg) {
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
-            console.log("*transaction success*", msg);
+            console.log("*transaction success* => ", msg);
             // console.log(r);
         }).catch((c) =>  {
-            console.log("failure", c);
+            throw (c);
         });
     });
 }
@@ -110,7 +110,7 @@ function sendTx(tx, msg) {
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
 // // Deposit USDC into BathToken USDC
-// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
+// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("190")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -195,8 +195,8 @@ function sendTx(tx, msg) {
 // console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 //     if (r == process.env.OP_KOVAN_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
 // }));
-// // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + r)));
-// // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + r)));
+// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + r)));
+// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + r)));
 
 
 // //  BATH TOKENS
@@ -290,7 +290,7 @@ console.log('--------------------------------------\n')
 let oldMidpoint;
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
-    const targetSpread = 0.05; // the % of the spread we want to improve
+    const targetSpread = 0.01; // the % of the spread we want to improve
     const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
@@ -340,10 +340,10 @@ async function marketMake(a, b, im) {
 
     // console.log('new ask price', askDen / askNum);
     // console.log('new bid price', bidNum / bidDen);
-    // console.log("askNum: ", web3.utils.toWei(askNum.toString()));
+    console.log("askNum: ", web3.utils.toWei(askNum.toFixed(18).toString()));
     // console.log("askDen: ", web3.utils.toWei(askDen.toString()));
     // console.log("bidDen: ", web3.utils.toWei(bidDen.toString()));
-    // console.log("bidNum: ", web3.utils.toWei(bidNum.toString()));
+    console.log("bidNum: ", web3.utils.toWei(bidNum.toFixed(18).toString()));
     // execute strategy with tighter spread
     var txData = bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
@@ -356,23 +356,29 @@ async function marketMake(a, b, im) {
         gas: 9000000,
         data: txData.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: bathPairKovanAddr,
+        to: process.env.OP_KOVAN_BATHWAYNEUSDC,
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
-    // Send the transaction
-    // sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n')
     
-    // Estimate the gas
+    // web3.eth.estimateGas(tx).then(console.log);
+    // // Estimate the gas
     bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
         web3.utils.toWei(askNum.toFixed(18).toString()),
         web3.utils.toWei(askDen.toFixed(18).toString()),
         web3.utils.toWei(bidNum.toFixed(18).toString()),
-        web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(async function(e, d) {
-            if (d != 0 ) {
-                console.log('Pools Successful ~DRY RUN~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+        web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(tx,
+            async function(e, d) {
+            if (await d != null || d >= 0) {
+                // Send the transaction
+                // console.log(d);
+                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n', d);
+                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+            } else {
+                console.log("**ERROR Executing Strategy**: \n");
+                console.log(e);
             }
-        })
+        });
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -384,11 +390,12 @@ async function manageInventory(currentAsk, currentBid) {
 
     const bathAssetSupply = await bathWayneContractKovan.methods.totalSupply().call();
     // console.log(bathQuoteSupply);
+    // console.log('Current asset liquidity balance: ', assetBalance);
+    // console.log('Current quote liquidity balance: ', quoteBalance);
+    // console.log('bathQuote deposited', bathQuoteSupply);
+    // console.log('bathAsset deposited', bathQuoteSupply);
 
     if (assetBalance == 0 || quoteBalance == 0) {
-        // console.log('Current asset liquidity balance: ', assetBalance);
-        // console.log('Current quote liquidity balance: ', quoteBalance);
-
         throw ("ERROR: no liquidity in quote or asset bathToken");
     }
     if ((bathAssetSupply * currentReserveRatio) >= (assetBalance)) {
@@ -402,13 +409,12 @@ async function manageInventory(currentAsk, currentBid) {
         throw ("ERROR: insufficient quote liquidity to clear reserve ratio");
     }
 
-
     // Ratio targets the current orderbook midpoint as the ideal ratio (50/50)
     return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
+// This function sets off the chain of calls to successfully marketMake
 async function startBot() {
-    
     setTimeout(async function() {
         await stoikov().then(async function(data) {
             var currentAsk = data[0];
@@ -425,7 +431,6 @@ async function startBot() {
       // Every 5 sec
     }, 5000);
  
-    // This function sets off the chain of calls to successfully marketMake
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
