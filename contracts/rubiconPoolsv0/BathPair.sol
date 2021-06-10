@@ -4,7 +4,7 @@
 /// @notice This contract is also where strategists claim rewards for successful market making
 
 pragma solidity ^0.5.16;
-pragma experimental ;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
@@ -35,9 +35,6 @@ contract BathPair {
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event LogNoteI(string, int128);
-    event Cancel(uint256, ERC20, uint256);
-    event LogOffer(string, order);
-    event LogGrossYield(address, uint256);
 
     // Maps a trade ID to each of their strategists for rewards purposes
     mapping(uint256 => address) public IDs2strategist;
@@ -206,23 +203,21 @@ contract BathPair {
             ERC20(underlyingQuote).balanceOf(bathAssetAddress);
         uint256 bathQuoteYield =
             ERC20(underlyingAsset).balanceOf(bathQuoteAddress);
-
+        uint8 stratReward = BathHouse(bathHouse).getPropToStrats(address(this));
         if (bathAssetYield > 0) {
             BathToken(bathAssetAddress).rebalance(
                 bathQuoteAddress,
                 underlyingQuote,
-                5
+                stratReward
             );
-            emit LogGrossYield(bathQuoteAddress, bathAssetYield);
         }
 
         if (bathQuoteYield > 0) {
             BathToken(bathQuoteAddress).rebalance(
                 bathAssetAddress,
                 underlyingAsset,
-                5
+                stratReward
             );
-            emit LogGrossYield(bathAssetAddress, bathQuoteYield);
         }
     }
 
@@ -263,11 +258,11 @@ contract BathPair {
         if (isAssetFill) {
             strategist2FillsAsset[strategist] += 1;
             totalAssetFills += 1;
-            emit LogNote("logFill asset", totalAssetFills);
+            // emit LogNote("logFill asset", totalAssetFills);
         } else {
             strategist2FillsQuote[strategist] += 1;
             totalQuoteFills += 1;
-            emit LogNote("logFill quote", totalQuoteFills);
+            // emit LogNote("logFill quote", totalQuoteFills);
         }
     }
 
@@ -295,11 +290,6 @@ contract BathPair {
             ) {
                 // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
                 BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
-                emit Cancel(
-                    outstandingPairIDs[x][1],
-                    offer1.pay_gem,
-                    offer1.pay_amt
-                );
                 delete outstandingPairIDs[x];
                 // true if quote fills -> asset yield
                 logFill(outstandingPairIDs[x][0], false);
@@ -315,11 +305,6 @@ contract BathPair {
                     offer2.buy_gem == ERC20(0))
             ) {
                 BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
-                emit Cancel(
-                    outstandingPairIDs[x][0],
-                    offer2.pay_gem,
-                    offer2.pay_amt
-                );
                 delete outstandingPairIDs[x];
                 logFill(outstandingPairIDs[x][1], true);
                 return;
@@ -341,18 +326,8 @@ contract BathPair {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
                     );
-                    emit Cancel(
-                        outstandingPairIDs[x][0],
-                        offer2.pay_gem,
-                        offer2.pay_amt
-                    );
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][1]
-                    );
-                    emit Cancel(
-                        outstandingPairIDs[x][1],
-                        offer2.pay_gem,
-                        offer2.pay_amt
                     );
                     delete outstandingPairIDs[x];
                 } else {

@@ -21,6 +21,7 @@ contract BathHouse {
     mapping(address => bool) approvedPairs;
     mapping(address => bool) bathQuoteExists;
     mapping(address => bool) bathAssetExists;
+    mapping(address => uint8) propToStrategists;
     mapping(address => address) quoteToBathQuote;
     mapping(address => address) assetToBathAsset;
 
@@ -64,6 +65,11 @@ contract BathHouse {
         timeDelay = value;
     }
 
+    function setPropToStrats(uint8 value, address pair) public onlyAdmin {
+        require(value < 50);
+        propToStrategists[pair] = value;
+    }
+
     function setMaxOutstandingPairCount(uint256 value) public onlyAdmin {
         maxOutstandingPairCount = value;
     }
@@ -80,7 +86,8 @@ contract BathHouse {
         // uint256 _reserveRatio,
         // uint256 _timeDelay,
         // uint256 _maxOutstandingPairCount
-        address pair
+        address pair,
+        uint8 _propToStrategists
     ) external onlyAdmin returns (address newPair) {
         //calls initialize on two Bath Tokens and spins them up
         require(asset != quote);
@@ -90,6 +97,7 @@ contract BathHouse {
         // Ensure the pair doesn't exist and approved
         require(!isApprovedPair(getPair[asset][quote]));
         allBathPairs.push(address(pair));
+        propToStrategists[pair] = _propToStrategists;
 
         getPair[asset][quote] = address(pair);
 
@@ -190,5 +198,9 @@ contract BathHouse {
         returns (address)
     {
         return quoteToBathQuote[quote];
+    }
+
+    function getPropToStrats(address pair) external view returns(uint8){
+        return propToStrategists[pair];
     }
 }

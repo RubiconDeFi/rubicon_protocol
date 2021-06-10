@@ -175,7 +175,7 @@ contract BathToken is IBathToken {
     function rebalance(
         address sisterBath,
         address underlyingAsset, /* sister asset */
-        uint256 stratProportion
+        uint8 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 20);
         uint256 stratReward =

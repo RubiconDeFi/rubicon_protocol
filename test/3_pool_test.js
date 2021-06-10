@@ -57,7 +57,7 @@ contract("Rubicon Pools Test", async function(accounts) {
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
             await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
 
-            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
+            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address, 5)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
         });
@@ -170,3 +170,5 @@ contract("Rubicon Pools Test", async function(accounts) {
         });
     });
 });
+2700000000000000
+200000000000000

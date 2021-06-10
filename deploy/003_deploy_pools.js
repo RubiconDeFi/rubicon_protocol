@@ -108,8 +108,8 @@ const func = async (hre) => {
     // // // 6. Approve the WAYNE/USDC bath pair
     // const bh = await hre.ethers.getContractFactory("BathHouse");
     // const BHI = await bh.attach(process.env.OP_KOVAN_BATHHOUSE);
-    // // await BHI.estimateGas.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC).then(async function(g) {
-    //   await BHI.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, {gasLimit:  5000000}).then(async function(r) {
+    // // await BHI.estimateGas.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5).then(async function(g) {
+    //   await BHI.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5, {gasLimit:  5000000}).then(async function(r) {
     //     console.log("initBathPair result: ", r)
     //   });
 

@@ -1,6 +1,6 @@
 // @unsupported: ovm
 pragma solidity ^0.5.16;
-pragma experimental ;
+pragma experimental ABIEncoderV2;
 
 contract SenateAlpha {
     /// @notice The name of this contract
