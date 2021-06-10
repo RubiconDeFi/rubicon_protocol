@@ -92,7 +92,7 @@ contract BathToken is IBathToken {
         uint256 MAX_INT = 2**256 - 1;
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
         emit LogInit(now);
-        
+
         initialized = true;
     }
 
@@ -179,8 +179,8 @@ contract BathToken is IBathToken {
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 20);
         uint256 stratReward =
-            (stratProportion * (IERC20(underlyingAsset).balanceOf(address(this)))) /
-                100;
+            (stratProportion *
+                (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
         IERC20(underlyingAsset).transfer(
             sisterBath,
             IERC20(underlyingAsset).balanceOf(address(this)) - stratReward

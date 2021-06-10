@@ -35,10 +35,15 @@ contract BathHouse {
     // Constraint variable for the max amount of outstanding market making pairs at a time
     uint256 public maxOutstandingPairCount;
 
-    function initialize(address market, uint _reserveRatio, uint _timeDelay, uint mopc) public {
+    function initialize(
+        address market,
+        uint256 _reserveRatio,
+        uint256 _timeDelay,
+        uint256 mopc
+    ) public {
         require(!initialized);
         admin = msg.sender;
-        
+
         timeDelay = _timeDelay;
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);
@@ -63,7 +68,7 @@ contract BathHouse {
         maxOutstandingPairCount = value;
     }
 
-    function getMarket() public view returns(address) {
+    function getMarket() public view returns (address) {
         return RubiconMarketAddress;
     }
 
@@ -117,7 +122,11 @@ contract BathHouse {
         approvedStrategies[strategy] = true;
     }
 
-    function isApprovedBathToken(address bathToken) external view returns (bool) {
+    function isApprovedBathToken(address bathToken)
+        external
+        view
+        returns (bool)
+    {
         if (approvedBathTokens[bathToken] == true) {
             return true;
         } else {

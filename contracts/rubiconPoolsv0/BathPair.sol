@@ -4,7 +4,7 @@
 /// @notice This contract is also where strategists claim rewards for successful market making
 
 pragma solidity ^0.5.16;
-pragma experimental ABIEncoderV2;
+pragma experimental ;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
@@ -63,16 +63,24 @@ contract BathPair {
         bathAssetAddress = _bathAssetAddress;
         bathQuoteAddress = _bathQuoteAddress;
 
-        require(BathToken(bathAssetAddress).underlying() != address(0x0000000000000000000000000000000000000000));
-        require(BathToken(bathQuoteAddress).underlying() != address(0x0000000000000000000000000000000000000000));
+        require(
+            BathToken(bathAssetAddress).underlying() !=
+                address(0x0000000000000000000000000000000000000000)
+        );
+        require(
+            BathToken(bathQuoteAddress).underlying() !=
+                address(0x0000000000000000000000000000000000000000)
+        );
         underlyingAsset = BathToken(bathAssetAddress).underlying();
         underlyingQuote = BathToken(bathQuoteAddress).underlying();
 
-        require(BathHouse(bathHouse).getMarket() != address(0x0000000000000000000000000000000000000000));
+        require(
+            BathHouse(bathHouse).getMarket() !=
+                address(0x0000000000000000000000000000000000000000)
+        );
         RubiconMarketAddress = BathHouse(bathHouse).getMarket();
         initialized = true;
     }
-
 
     modifier onlyBathHouse {
         require(msg.sender == bathHouse);
@@ -89,20 +97,28 @@ contract BathPair {
 
     modifier enforceReserveRatio {
         require(
-            (BathToken(bathAssetAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
+            (BathToken(bathAssetAddress).totalSupply() *
+                BathHouse(bathHouse).reserveRatio()) /
+                100 <=
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
+            (BathToken(bathQuoteAddress).totalSupply() *
+                BathHouse(bathHouse).reserveRatio()) /
+                100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
         _;
         require(
-            (BathToken(bathAssetAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
+            (BathToken(bathAssetAddress).totalSupply() *
+                BathHouse(bathHouse).reserveRatio()) /
+                100 <=
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() * BathHouse(bathHouse).reserveRatio()) / 100 <=
+            (BathToken(bathQuoteAddress).totalSupply() *
+                BathHouse(bathHouse).reserveRatio()) /
+                100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
     }
@@ -258,7 +274,8 @@ contract BathPair {
     function cancelPartialFills() internal {
         // ** Assume that any partialFill or totalFill resulted in yield **
         require(
-            outstandingPairIDs.length < BathHouse(bathHouse).maxOutstandingPairCount(),
+            outstandingPairIDs.length <
+                BathHouse(bathHouse).maxOutstandingPairCount(),
             "too many outstanding pairs"
         );
 
@@ -317,7 +334,10 @@ contract BathPair {
                     offer2.buy_gem != ERC20(0))
             ) {
                 // delete the offer if it is too old
-                if (outstandingPairIDs[x][2] < (now - BathHouse(bathHouse).timeDelay())) {
+                if (
+                    outstandingPairIDs[x][2] <
+                    (now - BathHouse(bathHouse).timeDelay())
+                ) {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
                     );
@@ -437,10 +457,17 @@ contract BathPair {
     }
 
     // Used to map a strategist to their orders
-    function newTradeIDs(address strategist) internal returns (uint256[3] memory) {
+    function newTradeIDs(address strategist)
+        internal
+        returns (uint256[3] memory)
+    {
         require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
-        IDs2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][0]] = strategist;
-        IDs2strategist[outstandingPairIDs[outstandingPairIDs.length - 1][1]] = strategist;
+        IDs2strategist[
+            outstandingPairIDs[outstandingPairIDs.length - 1][0]
+        ] = strategist;
+        IDs2strategist[
+            outstandingPairIDs[outstandingPairIDs.length - 1][1]
+        ] = strategist;
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
