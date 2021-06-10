@@ -110,7 +110,7 @@ async function sendTx(tx, msg) {
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
 // // Deposit USDC into BathToken USDC
-// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("190")).encodeABI();
+// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -161,70 +161,72 @@ async function sendTx(tx, msg) {
 // sendTx(tx);
 
 // // ------------------- Validate Migrations ------------------
-// //  BATH HOUSE
-// // Strategy is Approved
-// console.log(bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_PAIRSTRADE).call().then((r) => {
-//     if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
-// }));
-// console.log(bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_BATHWAYNEUSDC).call().then((r) => {
-// if (r == true) {console.log("BH isApprovedPair CORRECT")} else {console.log("BH isApprovedPair ** ERROR **")}
-// }));
+//  BATH HOUSE
+// Strategy is Approved
+console.log(bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_PAIRSTRADE).call().then((r) => {
+    if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
+}));
+console.log(bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_BATHWAYNEUSDC).call().then((r) => {
+if (r == true) {console.log("BH isApprovedPair CORRECT")} else {console.log("BH isApprovedPair ** ERROR **")}
+}));
 
-// console.log(bathHouseContractKovan.methods.getMarket().call().then((r) => {
-//     if (r == process.env.OP_KOVAN_MARKET) {console.log("BH getMarket CORRECT")} else {console.log("getMarket ** ERROR **")}
-// }));
-// console.log(bathHouseContractKovan.methods.getBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC).call().then((r) => {
-//     // console.log(r);
-//     if (r == process.env.OP_KOVAN_BATHWAYNEUSDC) {console.log("BH getBathPair CORRECT")} else {console.log("BH getBathPair ** ERROR **")}
-// }));
+console.log(bathHouseContractKovan.methods.getMarket().call().then((r) => {
+    if (r == process.env.OP_KOVAN_MARKET) {console.log("BH getMarket CORRECT")} else {console.log("getMarket ** ERROR **")}
+}));
+console.log(bathHouseContractKovan.methods.getBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC).call().then((r) => {
+    // console.log(r);
+    if (r == process.env.OP_KOVAN_BATHWAYNEUSDC) {console.log("BH getBathPair CORRECT")} else {console.log("BH getBathPair ** ERROR **")}
+}));
 
-// // BATH PAIR
-// // Bath pair ask and bid 
-// console.log(bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
-//     if (r == process.env.OP_KOVAN_WAYNE) {console.log("BP underlyingAsset CORRECT")} else {console.log("underlyingAsset ** ERROR **")}
-// }));
-// console.log(bathPairContractKovan.methods.initialized().call().then((r) =>{
-//     if (r == true) {console.log("BP initialized CORRECT")} else {console.log("BP initialized ** ERROR **")}
-//     }));
-// console.log(bathPairContractKovan.methods.bathHouse().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BP bathHouse CORRECT")} else {console.log("BP bathHouse ** ERROR **")}
-// }));
-// console.log(bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_BATHWAYNE) {console.log("BP bathWAYNE CORRECT")} else {console.log("BP bathWAYNE ** ERROR **")}
-// }));
-// console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
-// }));
-// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + r)));
-// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + r)));
+// BATH PAIR
+// Bath pair ask and bid 
+console.log(bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
+    if (r == process.env.OP_KOVAN_WAYNE) {console.log("BP underlyingAsset CORRECT")} else {console.log("underlyingAsset ** ERROR **")}
+}));
+console.log(bathPairContractKovan.methods.initialized().call().then((r) =>{
+    if (r == true) {console.log("BP initialized CORRECT")} else {console.log("BP initialized ** ERROR **")}
+    }));
+console.log(bathPairContractKovan.methods.bathHouse().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BP bathHouse CORRECT")} else {console.log("BP bathHouse ** ERROR **")}
+}));
+console.log(bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_BATHWAYNE) {console.log("BP bathWAYNE CORRECT")} else {console.log("BP bathWAYNE ** ERROR **")}
+}));
+console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
+}));
+
+// These are reverting...
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + r)));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + r)));
 
 
-// //  BATH TOKENS
-// console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
-//     if (r == "bathUSDC") {console.log("BTUSDC symbol CORRECT")} else {console.log("BTUSDC symbol ** ERROR **")}
-// }));
-// console.log(bathUsdcContractKovan.methods.bathHouse().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BTUSDC bathHouse CORRECT")} else {console.log("BTUSDC bathHouse ** ERROR **")}
-// }));
-// console.log(bathUsdcContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_MARKET) {console.log("BTUSDC market CORRECT")} else {console.log("BTUSDC market ** ERROR **")}
-// }));
-// console.log(bathUsdcContractKovan.methods.underlyingToken().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_USDC) {console.log("BTUSDC underlyingToken CORRECT")} else {console.log("BTUSDC underlyingToken ** ERROR **")}
-// }));
+//  BATH TOKENS
+console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
+    if (r == "bathUSDC") {console.log("BTUSDC symbol CORRECT")} else {console.log("BTUSDC symbol ** ERROR **")}
+}));
+console.log(bathUsdcContractKovan.methods.bathHouse().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BTUSDC bathHouse CORRECT")} else {console.log("BTUSDC bathHouse ** ERROR **")}
+}));
+console.log(bathUsdcContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_MARKET) {console.log("BTUSDC market CORRECT")} else {console.log("BTUSDC market ** ERROR **")}
+}));
+console.log(bathUsdcContractKovan.methods.underlyingToken().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_USDC) {console.log("BTUSDC underlyingToken CORRECT")} else {console.log("BTUSDC underlyingToken ** ERROR **")}
+}));
 
-// console.log(bathWayneContractKovan.methods.symbol().call().then((r) =>{
-//     if (r == "bathWAYNE") {console.log("BTWAYNE symbol CORRECT")} else {console.log("BTWAYNE symbol ** ERROR **")}
-// }));
-// console.log(bathWayneContractKovan.methods.bathHouse().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BTWAYNE bathHouse CORRECT")} else {console.log("BTWAYNE bathHouse ** ERROR **")}
-// }));
-// console.log(bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_MARKET) {console.log("BTWAYNE market CORRECT")} else {console.log("BTWAYNE market ** ERROR **")}
-// }));
-// console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
-//     if (r == process.env.OP_KOVAN_WAYNE) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **")}
-// }));
+console.log(bathWayneContractKovan.methods.symbol().call().then((r) =>{
+    if (r == "bathWAYNE") {console.log("BTWAYNE symbol CORRECT")} else {console.log("BTWAYNE symbol ** ERROR **")}
+}));
+console.log(bathWayneContractKovan.methods.bathHouse().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_BATHHOUSE) {console.log("BTWAYNE bathHouse CORRECT")} else {console.log("BTWAYNE bathHouse ** ERROR **")}
+}));
+console.log(bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_MARKET) {console.log("BTWAYNE market CORRECT")} else {console.log("BTWAYNE market ** ERROR **")}
+}));
+console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_WAYNE) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **")}
+}));
 // ------------------------------------
 
 // ************ The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan *************
@@ -284,13 +286,13 @@ async function logInfo(mA, mB, a, b, im) {
     }
     console.log("Return on Assets for bathUSDC since Inception: ", naiveAPR);
     }));
-console.log('--------------------------------------\n')
+    console.log('--------------------------------------\n')
 }
 
 let oldMidpoint;
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
-    const targetSpread = 0.01; // the % of the spread we want to improve
+    const targetSpread = 0.03; // the % of the spread we want to improve
     const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************

@@ -8,28 +8,28 @@ const func = async (hre) => {
 
   // The below may need to be done incrementally in single runs
 // -----------------------------------------------
-//   //1. Deploy and init Bath House
-//   const deployResultBH = await deploy('BathHouse', {
-//     from: deployer,
-//     log: true
-//   });
-//   if (deployResultBH.newlyDeployed) {
-//     console.log(
-//       `contract BathHouse deployed at ${deployResultBH.address}`
-//     );
+  // //1. Deploy and init Bath House
+  // const deployResultBH = await deploy('BathHouse', {
+  //   from: deployer,
+  //   log: true
+  // });
+  // if (deployResultBH.newlyDeployed) {
+  //   console.log(
+  //     `contract BathHouse deployed at ${deployResultBH.address}`
+  //   );
 
-//     // Init BathHouse
-//         const bh = await hre.ethers.getContractFactory("BathHouse");
-//         const BHI = await bh.attach(deployResultBH.address);
-//         await BHI.estimateGas.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10).then(async function(g) {
-//           // setTimeout(() => {}, 8000);
-//           await BHI.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10, {gasLimit: g._hex}).then((r) => console.log("BH Init \n" + r));
-//           console.log('Bath House initialized');
-//         });
-//     }
+  //   // Init BathHouse
+  //       const bh = await hre.ethers.getContractFactory("BathHouse");
+  //       const BHI = await bh.attach(deployResultBH.address);
+  //       await BHI.estimateGas.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10).then(async function(g) {
+  //         // setTimeout(() => {}, 8000);
+  //         await BHI.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10, {gasLimit: g._hex}).then((r) => console.log("BH Init \n" + r));
+  //         console.log('Bath House initialized');
+  //       });
+  //   }
 
 //     // 2. ------------------------------
-//   // Deploy BathTokens
+// //   // Deploy BathTokens
 //   // Deploy BathToken for WAYNE
 //   const bathTokenFactory = await hre.ethers.getContractFactory("BathToken");
 //   const bathTokenWAYNE = await bathTokenFactory.deploy().then(async function(r) {
@@ -40,7 +40,7 @@ const func = async (hre) => {
 //   });
 // });
       
-// // Deploy BathToken for USDC
+// // // Deploy BathToken for USDC
 //      const bathTokenFactoryUSDC = await hre.ethers.getContractFactory('BathToken');
 //      const bathTokenUSDC = await bathTokenFactoryUSDC.deploy().then(async function(r) {
 //       console.log("bathUSDC deployed at " + await r.address);
@@ -50,7 +50,7 @@ const func = async (hre) => {
 //     });
 //   });
 // --------------------------------------------------------------------------
-    // 3. deploy BathPair and init
+  //   // 3. deploy BathPair and init
     
   // // Deploy BathPair for WAYNE / DAI
   // const deployResultBP = await deploy('BathPair', {

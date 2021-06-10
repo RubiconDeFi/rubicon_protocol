@@ -346,6 +346,7 @@ contract BathPair {
         return offerInfo;
     }
 
+    // this throws on a zero value
     function getMaxOrderSize(address asset, address bathTokenAddress)
         public
         returns (uint256)
