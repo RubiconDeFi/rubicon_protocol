@@ -112,6 +112,19 @@ contract BathToken is IBathToken {
         _;
     }
 
+    function setMarket(address newRubiconMarket) external {
+        require(msg.sender == bathHouse);
+        RubiconMarketAddress = newRubiconMarket;
+    }
+
+    function setBathHouse(address newBathHouse) external {
+        require(msg.sender == bathHouse);
+        bathHouse = newBathHouse;
+    }
+
+
+    // Rubicon Market Functions:
+
     function cancel(uint256 id) external onlyPair {
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }

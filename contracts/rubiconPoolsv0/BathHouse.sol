@@ -61,17 +61,25 @@ contract BathHouse {
         _;
     }
 
-    function setCancelTimeDelay(uint256 value) public onlyAdmin {
+    function setCancelTimeDelay(uint256 value) external onlyAdmin {
         timeDelay = value;
     }
 
-    function setPropToStrats(uint8 value, address pair) public onlyAdmin {
+    function setPropToStrats(uint8 value, address pair) external onlyAdmin {
         require(value < 50);
         propToStrategists[pair] = value;
     }
 
-    function setMaxOutstandingPairCount(uint256 value) public onlyAdmin {
+    function setMaxOutstandingPairCount(uint256 value) external onlyAdmin {
         maxOutstandingPairCount = value;
+    }
+
+    function setBathTokenMarket(address bathToken, address newMarket) external onlyAdmin {
+        BathToken(bathToken).setMarket(newMarket);
+    }
+
+    function setBathTokenBathHouse(address bathToken, address newAdmin) external onlyAdmin {
+        BathToken(bathToken).setMarket(newMarket);
     }
 
     function getMarket() public view returns (address) {
