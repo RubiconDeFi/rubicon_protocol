@@ -79,7 +79,7 @@ contract BathHouse {
     }
 
     function setBathTokenBathHouse(address bathToken, address newAdmin) external onlyAdmin {
-        BathToken(bathToken).setMarket(newMarket);
+        BathToken(bathToken).setMarket(newAdmin);
     }
 
     function getMarket() public view returns (address) {

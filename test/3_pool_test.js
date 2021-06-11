@@ -17,7 +17,7 @@ function logIndented(...args) {
 }
 
 // ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
-// ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000
+// ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000 --allowUnlimitedContractSize
 
 contract("Rubicon Pools Test", async function(accounts) {
     let newPair;
@@ -158,14 +158,20 @@ contract("Rubicon Pools Test", async function(accounts) {
             await rubiconMarketInstance.buy(4, web3.utils.toWei((0.4).toString()), { from: accounts[5] });
         });
         it("Partial fill is correctly cancelled and replaced", async function () {
+            await bathPairInstance.bathScrub();
+            
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
-        // for (let i = 1; i < 8; i++) {
-        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-        //         await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-        //     });
-        // }
+        for (let i = 1; i < 8; i++) {
+            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+                await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+                if (i % 4) {
+                    await bathPairInstance.bathScrub();
+                }
+            });
+        }
         it("Funds are correctly returned to bathTokens", async function () {
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
             assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
@@ -173,7 +179,7 @@ contract("Rubicon Pools Test", async function(accounts) {
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
             // TODO: validate this is correct
-            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "270000000000000");
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "160000000000000");
         });
     });
 });

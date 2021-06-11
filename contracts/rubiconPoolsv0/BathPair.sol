@@ -268,12 +268,6 @@ contract BathPair {
 
     function cancelPartialFills() internal {
         // ** Assume that any partialFill or totalFill resulted in yield **
-        require(
-            outstandingPairIDs.length <
-                BathHouse(bathHouse).maxOutstandingPairCount(),
-            "too many outstanding pairs"
-        );
-
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
             order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
             order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
@@ -318,7 +312,7 @@ contract BathPair {
                     offer2.buy_amt != 0 &&
                     offer2.buy_gem != ERC20(0))
             ) {
-                // delete the offer if it is too old
+                // delete the offer if it is too old - this forces the expungement of static orders
                 if (
                     outstandingPairIDs[x][2] <
                     (now - BathHouse(bathHouse).timeDelay())
@@ -471,6 +465,13 @@ contract BathPair {
             "bid too large"
         );
 
+        // Enforce that the bath is scrubbed for outstanding pairs
+        require(
+            outstandingPairIDs.length <
+                BathHouse(bathHouse).maxOutstandingPairCount(),
+            "too many outstanding pairs"
+        );
+
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(
             askNumerator,
@@ -494,7 +495,10 @@ contract BathPair {
         // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         newTradeIDs(msg.sender);
+    }
 
+    // This function cleans outstanding orders and rebalances yield between bathTokens
+    function bathScrub() public {
         // 4. Cancel Outstanding Orders
         cancelPartialFills();
 
