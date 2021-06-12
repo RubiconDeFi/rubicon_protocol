@@ -144,9 +144,9 @@ contract BathToken is IBathToken {
                 pay_amt,
                 pay_gem,
                 buy_amt,
-                buy_gem,
-                0,
-                false
+                buy_gem
+                // 0,
+                // false
             );
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);

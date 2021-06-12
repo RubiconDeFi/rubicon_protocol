@@ -8,28 +8,28 @@ const func = async (hre) => {
 
   // The below may need to be done incrementally in single runs
 // -----------------------------------------------
-  // //1. Deploy and init Bath House
-  // const deployResultBH = await deploy('BathHouse', {
-  //   from: deployer,
-  //   log: true
-  // });
-  // if (deployResultBH.newlyDeployed) {
-  //   console.log(
-  //     `contract BathHouse deployed at ${deployResultBH.address}`
-  //   );
+//   //1. Deploy and init Bath House
+//   const deployResultBH = await deploy('BathHouse', {
+//     from: deployer,
+//     log: true
+//   });
+//   if (deployResultBH.newlyDeployed) {
+//     console.log(
+//       `contract BathHouse deployed at ${deployResultBH.address}`
+//     );
 
-  //   // Init BathHouse
-  //       const bh = await hre.ethers.getContractFactory("BathHouse");
-  //       const BHI = await bh.attach(deployResultBH.address);
-  //       await BHI.estimateGas.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10).then(async function(g) {
-  //         // setTimeout(() => {}, 8000);
-  //         await BHI.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10, {gasLimit: g._hex}).then((r) => console.log("BH Init \n" + r));
-  //         console.log('Bath House initialized');
-  //       });
-  //   }
+//     // Init BathHouse
+//         const bh = await hre.ethers.getContractFactory("BathHouse");
+//         const BHI = await bh.attach(deployResultBH.address);
+//         await BHI.estimateGas.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10).then(async function(g) {
+//           // setTimeout(() => {}, 8000);
+//           await BHI.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10, {gasLimit: g._hex}).then((r) => console.log("BH Init \n" + r));
+//           console.log('Bath House initialized');
+//         });
+// }
 
 //     // 2. ------------------------------
-// //   // Deploy BathTokens
+//   // Deploy BathTokens
 //   // Deploy BathToken for WAYNE
 //   const bathTokenFactory = await hre.ethers.getContractFactory("BathToken");
 //   const bathTokenWAYNE = await bathTokenFactory.deploy().then(async function(r) {
@@ -95,8 +95,8 @@ const func = async (hre) => {
   //   console.log(
   //     `contract Pairs Trade deployed at ${deployResultPT.address}`
   //   );
-
   //   }
+
     // //5. Approve the Pairs Trade strategy
     // const bh = await hre.ethers.getContractFactory("BathHouse");
     // const BHI = await bh.attach(process.env.OP_KOVAN_BATHHOUSE);
@@ -105,13 +105,13 @@ const func = async (hre) => {
     //   console.log('Pairs Trade Approved');
     // });
 
-    // // // 6. Approve the WAYNE/USDC bath pair
-    // const bh = await hre.ethers.getContractFactory("BathHouse");
-    // const BHI = await bh.attach(process.env.OP_KOVAN_BATHHOUSE);
-    // // await BHI.estimateGas.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5).then(async function(g) {
-    //   await BHI.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5, {gasLimit:  5000000}).then(async function(r) {
-    //     console.log("initBathPair result: ", r)
-    //   });
+    // // 6. Approve the WAYNE/USDC bath pair
+    const bh = await hre.ethers.getContractFactory("BathHouse");
+    const BHI = await bh.attach(process.env.OP_KOVAN_BATHHOUSE);
+    // await BHI.estimateGas.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5).then(async function(g) {
+      await BHI.initBathPair(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHWAYNEUSDC, 5, {gasLimit:  5000000}).then(async function(r) {
+        console.log("initBathPair result: ", r)
+      });
 
     //  // // 6. Un-Approve a bath pair
     //  const bh = await hre.ethers.getContractFactory("BathHouse");

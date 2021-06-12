@@ -340,6 +340,10 @@ contract BathPair {
         return offerInfo;
     }
 
+    function getOutstandingPairCount() external view returns(uint){
+        return outstandingPairIDs.length;
+    }
+
     // this throws on a zero value
     function getMaxOrderSize(address asset, address bathTokenAddress)
         public
@@ -348,6 +352,7 @@ contract BathPair {
         require(asset == underlyingAsset || asset == underlyingQuote);
         uint256 maxOrderSizeProportion = 50; //in percentage points of underlying
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
+        require(underlyingBalance > 0, "no bathToken liquidity to calculate max orderSize permissable");
         // emit LogNote("underlyingBalance", underlyingBalance);
         // emit LogNote(
         //     "underlying other",
@@ -438,6 +443,10 @@ contract BathPair {
         IDs2strategist[
             outstandingPairIDs[outstandingPairIDs.length - 1][1]
         ] = strategist;
+        return outstandingPairIDs[outstandingPairIDs.length - 1];
+    }
+
+    function getLastTradeIDs() external view returns(uint[3] memory) {
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 

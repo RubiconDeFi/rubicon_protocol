@@ -82,6 +82,8 @@ async function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "Approve bathPair to recieve WAYNE and DAI first");
 
+// setTimeout(() => {console.log('waiting for nonce update')}, 2000)
+
 // var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_BATHUSDC, web3.utils.toWei("300000")).encodeABI();
 // var tx = {
 //     gas: 12500000,
@@ -109,7 +111,7 @@ async function sendTx(tx, msg) {
 // // console.log(bathUsdcContractKovan.methods.symbol().call().then((r) => console.log(r)));
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
-// // Deposit USDC into BathToken USDC
+// // // Deposit USDC into BathToken USDC
 // var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
 // var tx = {
 //     gas: 12500000,
@@ -290,9 +292,31 @@ async function logInfo(mA, mB, a, b, im) {
 }
 
 let oldMidpoint;
+async function checkForScrub(){
+    // const outstandingPairCount = await bathPairContractKovan.outstandingPairIDs().call().then((r) => {console.log(r)});
+    // console.log("AMOUNT OF OUT PAIRS", await outstandingPairCount);
+    // counter = counter + 1;
+    // if (counter % 3){
+        var tx = {
+            gas: 9000000,
+            data: await bathPairContractKovan.methods.bathScrub().encodeABI(),
+            from: process.env.OP_KOVAN_ADMIN.toString(),
+            to: process.env.OP_KOVAN_BATHWAYNEUSDC,
+            gasPrice: web3.utils.toWei("0", "Gwei")
+        };
+        await bathPairContractKovan.methods.bathScrub().estimateGas(tx, (async function(r, d) {
+            if (d > 0) { 
+            await sendTx(tx, "\n<* I have successfully scrubbed the bath, Master *>\n");
+            } else{
+                throw("gas estimation in bathScrub failed");
+            }
+        }));
+    
+}
+
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
-    const targetSpread = 0.03; // the % of the spread we want to improve
+    const targetSpread = 0.04; // the % of the spread we want to improve
     const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
@@ -305,6 +329,8 @@ async function marketMake(a, b, im) {
     }
     var newAskPrice = midPoint * (1-targetSpread);
     var newBidPrice = midPoint * (1+targetSpread);
+    // console.log('Expected new Ask Price ', newAskPrice);
+    // console.log('Expected new Bid Price ', newBidPrice);
     
     // Oversupply of bathQuote -> dynamic ask size
     if (im > 1) {
@@ -342,10 +368,10 @@ async function marketMake(a, b, im) {
 
     // console.log('new ask price', askDen / askNum);
     // console.log('new bid price', bidNum / bidDen);
-    console.log("askNum: ", web3.utils.toWei(askNum.toFixed(18).toString()));
+    // console.log("askNum: ", web3.utils.toWei(askNum.toFixed(18).toString()));
     // console.log("askDen: ", web3.utils.toWei(askDen.toString()));
     // console.log("bidDen: ", web3.utils.toWei(bidDen.toString()));
-    console.log("bidNum: ", web3.utils.toWei(bidNum.toFixed(18).toString()));
+    // console.log("bidNum: ", web3.utils.toWei(bidNum.toFixed(18).toString()));
     // execute strategy with tighter spread
     var txData = bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
@@ -374,8 +400,8 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n', d);
-                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
+                // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
             } else {
                 console.log("**ERROR Executing Strategy**: \n");
                 console.log(e);
@@ -423,7 +449,8 @@ async function startBot() {
             var currentBid = data[1];
     
             const IMfactor = manageInventory(currentAsk, currentBid);
-            marketMake(currentAsk, currentBid, IMfactor);
+            await checkForScrub();
+            await marketMake(currentAsk, currentBid, IMfactor);
         });
         console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
@@ -431,7 +458,7 @@ async function startBot() {
       startBot();
 
       // Every 5 sec
-    }, 5000);
+    }, 6000);
  
 }
 

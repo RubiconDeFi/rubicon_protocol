@@ -167,7 +167,7 @@ contract("Rubicon Pools Test", async function(accounts) {
                 await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
                 // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
                 await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-                if (i % 4) {
+                if (i % 3) {
                     await bathPairInstance.bathScrub();
                 }
             });
