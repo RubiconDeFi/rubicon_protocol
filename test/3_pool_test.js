@@ -39,7 +39,7 @@ contract("Rubicon Pools Test", async function(accounts) {
 
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 259200, 10);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 5, 10);
 
         });
         it("Bath Token for asset is deployed and initialized", async function() {
@@ -162,14 +162,16 @@ contract("Rubicon Pools Test", async function(accounts) {
             
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
-        for (let i = 1; i < 8; i++) {
+        for (let i = 1; i < 20; i++) {
             it(`Spamming of executeStrategy iteration: ${i}`, async function () {
                 await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
                 // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
                 await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
                 if (i % 3) {
                     await bathPairInstance.bathScrub();
                 }
+                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
             });
         }
         it("Funds are correctly returned to bathTokens", async function () {

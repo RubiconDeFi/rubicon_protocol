@@ -266,6 +266,11 @@ contract BathPair {
         }
     }
 
+    function removeElement(uint index) internal {
+        outstandingPairIDs[index] = outstandingPairIDs[outstandingPairIDs.length - 1];
+        outstandingPairIDs.pop();
+    }
+
     function cancelPartialFills() internal {
         // ** Assume that any partialFill or totalFill resulted in yield **
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
@@ -284,10 +289,10 @@ contract BathPair {
             ) {
                 // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
                 BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
-                delete outstandingPairIDs[x];
+                emit LogNote("cancelled: ", outstandingPairIDs[x][1]);
                 // true if quote fills -> asset yield
                 logFill(outstandingPairIDs[x][0], false);
-                return;
+                removeElement(x);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -299,9 +304,10 @@ contract BathPair {
                     offer2.buy_gem == ERC20(0))
             ) {
                 BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
-                delete outstandingPairIDs[x];
+                emit LogNote("cancelled: ", outstandingPairIDs[x][0]);
+
                 logFill(outstandingPairIDs[x][1], true);
-                return;
+                removeElement(x);
             } else if (
                 (offer1.pay_amt != 0 &&
                     offer1.pay_gem != ERC20(0) &&
@@ -323,7 +329,9 @@ contract BathPair {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][1]
                     );
-                    delete outstandingPairIDs[x];
+                    emit LogNote("cancelled both: ", outstandingPairIDs[x][0]);
+                    emit LogNote("cancelled both: ", outstandingPairIDs[x][1]);
+                    removeElement(x);
                 } else {
                     logFill(outstandingPairIDs[x][1], false);
                     logFill(outstandingPairIDs[x][0], true);

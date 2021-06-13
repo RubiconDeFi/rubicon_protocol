@@ -62,6 +62,7 @@ async function sendTx(tx, msg) {
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
             console.log("*transaction success* => ", msg);
+            return;
             // console.log(r);
         }).catch((c) =>  {
             throw (c);
@@ -69,8 +70,7 @@ async function sendTx(tx, msg) {
     });
 }
 
-
-// // **Approve bathPair to recieve WAYNE and DAI first**
+// // // **Approve bathPair to recieve WAYNE and DAI first**
 // var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_BATHWAYNE, web3.utils.toWei("200000")).encodeABI();
 // var tx = {
 //     gas: 12500000,
@@ -80,7 +80,7 @@ async function sendTx(tx, msg) {
 //     gasPrice: web3.utils.toWei("0", "Gwei")
 // }
 // // Send the transaction
-// sendTx(tx, "Approve bathPair to recieve WAYNE and DAI first");
+// sendTx(tx, "Approve bathPair to recieve WAYNE");
 
 // setTimeout(() => {console.log('waiting for nonce update')}, 2000)
 
@@ -95,19 +95,18 @@ async function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "dai approve");
 // ---------------------------------------------------------
-// // Deposit WAYNE into BathToken WAYNE
-// var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
-// var tx = {
-//     gas: 12500000,
-//     data: txData.toString(),
-//     from: sender,
-//     to: process.env.OP_KOVAN_BATHWAYNE,
-//     gasPrice: web3.utils.toWei("0", "Gwei")
-// }
-// // Send the transaction
-// sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
+// Deposit WAYNE into BathToken WAYNE
+var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
+var tx = {
+    gas: 12500000,
+    data: txData.toString(),
+    from: sender,
+    to: process.env.OP_KOVAN_BATHWAYNE,
+    gasPrice: web3.utils.toWei("0", "Gwei")
+}
+// Send the transaction
+sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 
-// // 384078440000000000000
 // // console.log(bathUsdcContractKovan.methods.symbol().call().then((r) => console.log(r)));
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
@@ -457,13 +456,13 @@ async function startBot() {
       // Again
       startBot();
 
-      // Every 5 sec
+      // Every 6 sec
     }, 6000);
  
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
-startBot();
+// startBot();
 
 
