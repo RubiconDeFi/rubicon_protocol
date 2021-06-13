@@ -332,14 +332,20 @@ async function marketMake(a, b, im) {
     } else {
         oldMidpoint = midPoint;
     }
-    var newAskPrice = midPoint * (1-targetSpread);
-    var newBidPrice = midPoint * (1+targetSpread);
-    if (newAskPrice < b) {
-        newAskPrice = a * 0.99;
-    }
-    if (newBidPrice > a) {
-        newBidPrice = b * 1.01;
-    }
+    var newBidPrice = midPoint * (1-targetSpread);
+    var newAskPrice = midPoint * (1+targetSpread);
+    // if (newAskPrice < b) {
+    //     newAskPrice = a * 0.9998;
+    //     if (newAskPrice < b) {
+    //         newAskPrice = a;
+    //     }
+    // }
+    // if (newBidPrice > a) {
+    //     newBidPrice = b * 1.0015;
+    //     if (newBidPrice > a) {
+    //         newBidPrice = b;
+    //     }
+    // }
     // console.log('Expected new Ask Price ', newAskPrice);
     // console.log('Expected new Bid Price ', newBidPrice);
     
@@ -411,8 +417,8 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
-                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
+                // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
             } else {
                 console.log("**ERROR Executing Strategy**: \n");
                 console.log(e);

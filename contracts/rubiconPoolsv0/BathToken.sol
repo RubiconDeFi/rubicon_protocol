@@ -144,7 +144,7 @@ contract BathToken is IBathToken {
                 pay_amt,
                 pay_gem,
                 buy_amt,
-                buy_gem
+                buy_gem,
                 0,
                 false
             );
