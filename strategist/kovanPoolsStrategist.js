@@ -62,7 +62,7 @@ async function sendTx(tx, msg) {
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
             console.log("*transaction success* => ", msg);
-            return;
+            // return;
             // console.log(r);
         }).catch((c) =>  {
             throw (c);
@@ -95,17 +95,17 @@ async function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx, "dai approve");
 // ---------------------------------------------------------
-// Deposit WAYNE into BathToken WAYNE
-var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
-var tx = {
-    gas: 12500000,
-    data: txData.toString(),
-    from: sender,
-    to: process.env.OP_KOVAN_BATHWAYNE,
-    gasPrice: web3.utils.toWei("0", "Gwei")
-}
-// Send the transaction
-sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
+// // Deposit WAYNE into BathToken WAYNE
+// var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("50")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: process.env.OP_KOVAN_BATHWAYNE,
+//     gasPrice: web3.utils.toWei("0", "Gwei")
+// }
+// // Send the transaction
+// sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 
 // // console.log(bathUsdcContractKovan.methods.symbol().call().then((r) => console.log(r)));
 // // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
@@ -123,7 +123,7 @@ sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 // sendTx(tx, "Deposit USDC into BathToken USDC");
 // // ---------------------------------------------------------
 // // Withdraw WAYNE from BathToken WAYNE
-// var txData = bathWayneContractKovan.methods.withdraw(web3.utils.toWei("200")).encodeABI();
+// var txData = bathWayneContractKovan.methods.withdraw(web3.utils.toWei("50")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -139,7 +139,7 @@ sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
 // // Withdraw USDC from BathToken USDC
-// var txData = bathUsdcContractKovan.methods.withdraw(web3.utils.toWei("300")).encodeABI();
+// var txData = bathUsdcContractKovan.methods.withdraw(web3.utils.toWei("200")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -149,6 +149,7 @@ sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
 // }
 // // Send the transaction
 // sendTx(tx, "Withdraw USDC from BathToken USDC");
+
 // // Withdraw assets from BathPair
 // var txData = bathPairContractKovan.methods.withdraw("0xC61812684385910CF8E93Fa0B04c572E6051F679", web3.utils.toWei("200"), "0x7f21271358765A4b04dB20Ba0BBFE309EC91259a", web3.utils.toWei("400")).encodeABI();
 // var tx = {
@@ -197,10 +198,9 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
     if (r == process.env.OP_KOVAN_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
 }));
 
-// These are reverting...
-console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + r)));
-console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + r)));
-
+// Will revert if no bathToken liquidity
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + web3.utils.fromWei(r))));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + web3.utils.fromWei(r))));
 
 //  BATH TOKENS
 console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
@@ -228,6 +228,9 @@ console.log(bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r
 console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
     if (r == process.env.OP_KOVAN_WAYNE) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **")}
 }));
+RubiconMarketContractKovan.methods.getMinSell(process.env.OP_KOVAN_WAYNE).call().then((r) => {
+    console.log("min sell wayne: ", r)
+});
 // ------------------------------------
 
 // ************ The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan *************
@@ -296,6 +299,9 @@ async function checkForScrub(){
     // console.log("AMOUNT OF OUT PAIRS", await outstandingPairCount);
     // counter = counter + 1;
     // if (counter % 3){
+        await bathPairContractKovan.methods.getOutstandingPairCount().call().then((r) => {
+            console.log("outstanding Pair count: ", r)
+        });
         var tx = {
             gas: 9000000,
             data: await bathPairContractKovan.methods.bathScrub().encodeABI(),
@@ -315,7 +321,7 @@ async function checkForScrub(){
 
 async function marketMake(a, b, im) {
     // ***Market Maker Inputs***
-    const targetSpread = 0.04; // the % of the spread we want to improve
+    const targetSpread = 0.02; // the % of the spread we want to improve
     const maxOrderSize =  1;//size in *quote currency* of the orders
     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
     // *************************
@@ -324,10 +330,16 @@ async function marketMake(a, b, im) {
         console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
         return;
     } else {
-        oldMidpoint = await midPoint;
+        oldMidpoint = midPoint;
     }
     var newAskPrice = midPoint * (1-targetSpread);
     var newBidPrice = midPoint * (1+targetSpread);
+    if (newAskPrice < b) {
+        newAskPrice = a * 0.99;
+    }
+    if (newBidPrice > a) {
+        newBidPrice = b * 1.01;
+    }
     // console.log('Expected new Ask Price ', newAskPrice);
     // console.log('Expected new Bid Price ', newBidPrice);
     
@@ -399,8 +411,8 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
-                // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
+                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
             } else {
                 console.log("**ERROR Executing Strategy**: \n");
                 console.log(e);
@@ -463,6 +475,6 @@ async function startBot() {
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
-// startBot();
+startBot();
 
 
