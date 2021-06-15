@@ -9,8 +9,6 @@ var SPXE = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol")
 var WBTC = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
 var COIN = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
 
-var RBCN = artifacts.require("./contracts/RBCN.sol");
-
 const BigNumber = require('bignumber.js');
 
 module.exports = function(deployer, network, accounts) {

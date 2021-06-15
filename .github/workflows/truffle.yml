@@ -35,9 +35,6 @@ jobs:
         # For the error "Something went wrong while attempting to connect to the
         # network", implicate this line that starts up ganache.
       
-      - name: Run Core Protocol Tests
-        run: npm run test:protocol
-      
       - name: Run Rubicon Pools Tests
         run: npm run test:pools
 

@@ -1,15 +1,11 @@
 const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
 const BathToken = artifacts.require("BathToken");
-const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 const PairsTrade = artifacts.require("PairsTrade");
 
-// const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
-const _deploy_asset_contracts = require('../migrations/2_deploy_asset_contracts.js');
-// const { artifacts } = require('hardhat');
 const helper = require('./testHelpers/timeHelper.js');
 
 function logIndented(...args) {
@@ -126,11 +122,6 @@ contract("Rubicon Pools Test", async function(accounts) {
             
             await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
             assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
-        });
-        it("Admin can initialize and whitelist WETH and DAI for trading", async function() {
-            // await rubiconMarketInstance.initialize(false, accounts[0]);
-            await rubiconMarketInstance.addToWhitelist(WETHInstance.address);
-            await rubiconMarketInstance.addToWhitelist(DAIInstance.address);
         });
         it("Place a starting pair to clear checks", async function () {
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});

@@ -35,7 +35,7 @@
     "web3-provider-engine": "^16.0.1"
   },
   "scripts": {
-    "compile:ovm": "cd ovm && truffle compile --all",
+    "compile:ovm": "npx hardhat compile",
     "migrate:ovm": "printf 'Ensure that ganache is configured as: ganache-cli --port 7545 --networkId 5777 --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize \n' && cd ovm && truffle compile --all && truffle migrate --reset",
     "test:pools": "truffle test ./test/3_pool_test.js --network pools",
     "test:poolsE": "truffle test ./test/3_pool_test.js --network pools --show-events",

@@ -8,27 +8,27 @@ const func = async (hre) => {
   const { deploy } = deployments
   const { deployer } = await getNamedAccounts()
 
-  // WETH
-  const WETHdeployResult = await deploy('WETH9', {
-    from: deployer,
-    log: true
-     });
-  if (WETHdeployResult.newlyDeployed) {
-    console.log(
-      `WETH deployed at ${WETHdeployResult.address}`
-    );
-}
-// USDC
-const USDCdeployResult = await deploy('DaiWithFaucet', {
-    from: deployer,
-    args: [69],
-    log: true
-     });
-  if (USDCdeployResult.newlyDeployed) {
-    console.log(
-      `USDC deployed at ${USDCdeployResult.address}`
-    );
-}
+//   // WETH
+//   const WETHdeployResult = await deploy('WETH9', {
+//     from: deployer,
+//     log: true
+//      });
+//   if (WETHdeployResult.newlyDeployed) {
+//     console.log(
+//       `WETH deployed at ${WETHdeployResult.address}`
+//     );
+// }
+// // USDC
+// const USDCdeployResult = await deploy('DaiWithFaucet', {
+//     from: deployer,
+//     args: [69],
+//     log: true
+//      });
+//   if (USDCdeployResult.newlyDeployed) {
+//     console.log(
+//       `USDC deployed at ${USDCdeployResult.address}`
+//     );
+// }
   //   assetsToDeploy = [
   //   "WAYNE",
   //   "STARK",

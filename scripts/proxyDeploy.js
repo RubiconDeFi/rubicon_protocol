@@ -1,5 +1,3 @@
-
-
 // scripts/deploy.js
 async function main() {
     console.log("Attempting proxy deploy...");
