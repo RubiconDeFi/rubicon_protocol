@@ -175,13 +175,14 @@ contract("Rubicon Pools Test", async function(accounts) {
             });
         }
         it("Funds are correctly returned to bathTokens", async function () {
+            await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
             assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
         });
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
             // TODO: validate this is correct
-            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "160000000000000");
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "5200000000000000");
         });
     });
 });

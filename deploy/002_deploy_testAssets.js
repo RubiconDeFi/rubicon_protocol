@@ -8,13 +8,7 @@ const func = async (hre) => {
   const { deploy } = deployments
   const { deployer } = await getNamedAccounts()
 
-
-  // // testing proxy and bathHouse
-  // const BathHouse = await hre.ethers.getContractFactory("BathHouse");
-  // const bathHouse = await hre.upgrades.deployProxy(BathHouse, [process.env.OP_KOVAN_MARKET, 80, 259200, 10, "Rubicon Bath House"], {gasLimit: 9000000})
-  // await bathHouse.deployed();
-  // console.log("Bath House deployed to: ", bathHouse.address);
-// WETH
+  // WETH
   const WETHdeployResult = await deploy('WETH9', {
     from: deployer,
     log: true
