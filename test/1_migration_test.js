@@ -30,6 +30,7 @@ const EighteenZeros = "000000000000000000"
 const Founder1Tokens = "500" + EighteenZeros;
 const Founder2Tokens = "500" + EighteenZeros;
 
+// Migration Tests of on-chain Governance
 contract("Rubicon Migrations and Governance Test", async function(accounts) {
 
     describe("Deployment", async function() {
