@@ -41,10 +41,11 @@ contract BathHouse {
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 mopc
+        // string memory _name
     ) public {
         require(!initialized);
         admin = msg.sender;
-
+        // name = _name;    
         timeDelay = _timeDelay;
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);

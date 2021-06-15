@@ -70,7 +70,7 @@ async function sendTx(tx, msg) {
     });
 }
 
-// // // **Approve bathPair to recieve WAYNE and DAI first**
+// // **Approve bathPair to recieve WAYNE and DAI first**
 // var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_BATHWAYNE, web3.utils.toWei("200000")).encodeABI();
 // var tx = {
 //     gas: 12500000,
@@ -481,6 +481,6 @@ async function startBot() {
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
-startBot();
+// startBot();
 
 

@@ -8,12 +8,19 @@ const func = async (hre) => {
 
   // The below may need to be done incrementally in single runs
 // -----------------------------------------------
+// Proxy info: https://github.com/wighawag/hardhat-deploy#deploying-and-upgrading-proxies
   //1. Deploy and init Bath House
   const deployResultBH = await deploy('BathHouse', {
     from: deployer,
-    log: true
+    log: true,
+    // proxy: {
+    //     methodName: 'initialize',
+    // },
+    // args: [process.env.OP_KOVAN_MARKET, 80, 259200, 10],
+    gasLimit: 8000000 
   }).then(async function(d) {
     const newBHAddr = await d.address;
+    console.log(`bathHouse is at ${newBHAddr}`);
     if (await d.newlyDeployed) {
     console.log(
       `contract BathHouse deployed at ${newBHAddr}`
@@ -26,7 +33,7 @@ const func = async (hre) => {
           // setTimeout(() => {}, 8000);
           await BHI.initialize(process.env.OP_KOVAN_MARKET, 80, 259200, 10, {gasLimit: g._hex}).then((r) => console.log("BH Init Call sent!\n"));
         });
-      return newBHAddr;
+      return await newBHAddr;
 } else {
   return process.env.OP_KOVAN_BATHHOUSE;
 } // 2 Launch Bath Tokens
@@ -103,10 +110,10 @@ const func = async (hre) => {
       //5. Approve the Pairs Trade strategy
     const bh = await hre.ethers.getContractFactory("BathHouse");
     const BHI = await bh.attach(await data[2]);
-    await BHI.estimateGas.approveStrategy(await data[4]).then(async function(g) {
-      await BHI.approveStrategy(await data[4], {gasLimit: g._hex}).then((r) => console.log("Pairs Trade approve call made \n"));
-      console.log('Pairs Trade Approved');
-    });
+    // await BHI.estimateGas.approveStrategy(await data[4]).then(async function(g) {
+      await BHI.approveStrategy(await data[4], {gasLimit: 9000000}).then((r) => console.log("Pairs Trade approve call made \n"));
+      // console.log('Pairs Trade Approved');
+    // );
     return data;
 }).then(async function(data) {
     // // 6. Approve the WAYNE/USDC bath pair
