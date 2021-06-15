@@ -4,19 +4,28 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import 'hardhat-deploy'
 import '@eth-optimism/hardhat-ovm'
+import '@openzeppelin/hardhat-upgrades'
 
 module.exports = {
   ovm: {
     solcVersion: "0.5.16"
   },
   solidity: {
+    compilers: [
+      {    
     version:"0.5.16",
     settings: {
       optimizer: {
         enabled: true,
         runs: 200
+        },
+      }
       },
-    }
+      {
+        version:"0.7.6"
+      }
+    ]
+
   },
   paths: {
     tests: "./ovm/ovmTests"

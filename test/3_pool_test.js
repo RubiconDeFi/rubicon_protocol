@@ -17,6 +17,7 @@ function logIndented(...args) {
 }
 
 // ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
+// ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000 --allowUnlimitedContractSize
 
 contract("Rubicon Pools Test", async function(accounts) {
     let newPair;
@@ -38,7 +39,7 @@ contract("Rubicon Pools Test", async function(accounts) {
 
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 259200, 10);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 5, 10);
 
         });
         it("Bath Token for asset is deployed and initialized", async function() {
@@ -57,7 +58,7 @@ contract("Rubicon Pools Test", async function(accounts) {
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
             await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
 
-            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address)); // 90% reserve ratio and 3 days cancel delay
+            (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address, 5)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
             logIndented("New BathPair: ", newPair);
         });
@@ -107,10 +108,10 @@ contract("Rubicon Pools Test", async function(accounts) {
     // Test Market making functionality:
     describe("Liquidity Providing Tests", async function() {
         // Bid and ask made by Pools throughout the test
-        const askNumerator = web3.utils.toWei((0.1).toString()); 
-        const askDenominator = web3.utils.toWei((5).toString());
-        const bidNumerator = web3.utils.toWei((4).toString());
-        const bidDenominator = web3.utils.toWei((0.1).toString());
+        const askNumerator = web3.utils.toWei((0.01).toString()); 
+        const askDenominator = web3.utils.toWei((0.5).toString());
+        const bidNumerator = web3.utils.toWei((0.4).toString());
+        const bidDenominator = web3.utils.toWei((0.01).toString());
 
         it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
             await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((10).toString())})
@@ -151,22 +152,37 @@ contract("Rubicon Pools Test", async function(accounts) {
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
         it("Taker can fill part of trade", async function () {
-            await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((.1*1.002).toString())});
-            await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((.1*1.002).toString()), {from: accounts[5]});
+            await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((100).toString())});
+            await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((100).toString()), {from: accounts[5]});
 
-            await rubiconMarketInstance.buy(4, web3.utils.toWei((4).toString()), { from: accounts[5] });
+            await rubiconMarketInstance.buy(4, web3.utils.toWei((0.4).toString()), { from: accounts[5] });
         });
         it("Partial fill is correctly cancelled and replaced", async function () {
+            await bathPairInstance.bathScrub();
+            
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
+        for (let i = 1; i < 10; i++) {
+            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+                await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+                if (i % 3) {
+                    await bathPairInstance.bathScrub();
+                }
+                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+            });
+        }
         it("Funds are correctly returned to bathTokens", async function () {
+            await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
             assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
         });
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
-            // Should be 5% * 4 * 2/2 = 0.002 
-            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "200000000000000");
+            // TODO: validate this is correct
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "5200000000000000");
         });
     });
 });

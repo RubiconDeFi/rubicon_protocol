@@ -8,7 +8,7 @@ const func = async (hre) => {
   const { deploy } = deployments
   const { deployer } = await getNamedAccounts()
 
-// WETH
+  // WETH
   const WETHdeployResult = await deploy('WETH9', {
     from: deployer,
     log: true
@@ -29,26 +29,26 @@ const USDCdeployResult = await deploy('DaiWithFaucet', {
       `USDC deployed at ${USDCdeployResult.address}`
     );
 }
-    assetsToDeploy = [
-    "WAYNE",
-    "STARK",
-    "GME",
-    "OPT",
-    "SPXE",
-    "WBTC",
-    "COIN"
-  ];
+  //   assetsToDeploy = [
+  //   "WAYNE",
+  //   "STARK",
+  //   "GME",
+  //   "OPT",
+  //   "SPXE",
+  //   "WBTC",
+  //   "COIN"
+  // ];
 
-    const deployResult = await deploy('EquityToken', {
-        from: deployer,
-        args: [process.env.OP_KOVAN_ADMIN, BigNumber.from("1000000000000000000000")],
-        log: true
-     });
-    if (deployResult.newlyDeployed) {
-     console.log(
-       `contract WAYNE deployed at ${deployResult.address}`
-    );
-    }
+  //   const deployResult = await deploy('EquityToken', {
+  //       from: deployer,
+  //       args: [process.env.OP_KOVAN_ADMIN, BigNumber.from("1000000000000000000000")],
+  //       log: true
+  //    });
+  //   if (deployResult.newlyDeployed) {
+  //    console.log(
+  //      `contract WAYNE deployed at ${deployResult.address}`
+  //   );
+  //   }
 }
   
 
