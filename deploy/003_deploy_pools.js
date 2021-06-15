@@ -15,6 +15,8 @@ const func = async (hre) => {
     log: true,
     // proxy: {
     //     methodName: 'initialize',
+    //     // owner: process.env.OP_KOVAN_MULTISIG
+    //     proxyContract: 'TransparentUpgradeableProxy'
     // },
     // args: [process.env.OP_KOVAN_MARKET, 80, 259200, 10],
     gasLimit: 8000000 
