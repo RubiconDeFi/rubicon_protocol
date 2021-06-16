@@ -7,7 +7,7 @@ pragma solidity =0.7.6;
 import "./BathPair.sol";
 
 contract BathHouse {
-    string public name = "Rubicon Bath House";
+    string public name;
 
     address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;
@@ -43,6 +43,7 @@ contract BathHouse {
         uint256 mopc
     ) public {
         require(!initialized);
+        name = "Rubicon Bath House";
         admin = msg.sender;
         timeDelay = _timeDelay;
         require(_reserveRatio <= 100);
