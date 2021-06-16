@@ -3,9 +3,9 @@
 /// @notice Yield from successful market making strategies are passed to LPs
 /// @notice This contract is effectively the entrypoint for a strategist's pair trade
 
-pragma solidity ^0.5.16;
+pragma solidity =0.7.6;
 
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./BathToken.sol";
 import "../RubiconMarket.sol";
 import "./BathHouse.sol";
@@ -137,7 +137,7 @@ contract PairsTrade {
         emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
 
         address pair = BathHouse(bathHouse).getBathPair(asset, quote);
-        BathPair(pair).addOutstandingPair([newAskID, newBidID, now]);
+        BathPair(pair).addOutstandingPair([newAskID, newBidID, block.timestamp]);
     }
 
     function execute(

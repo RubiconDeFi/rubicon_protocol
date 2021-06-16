@@ -2,7 +2,7 @@
 /// @notice This contract acts as the admin for the Rubicon Pools system
 /// @notice The BathHouse approves strategist contracts and initializes bathPairs
 
-pragma solidity =0.5.16;
+pragma solidity =0.7.6;
 
 import "./BathPair.sol";
 

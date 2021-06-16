@@ -15,7 +15,7 @@ function logIndented(...args) {
 // ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
 // ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000 --allowUnlimitedContractSize
 
-contract("Rubicon Pools Test", async function(accounts) {
+contract("Rubicon Exchange and Pools Test", async function(accounts) {
     let newPair;
     let bathPairInstance;
     let bathAssetInstance;

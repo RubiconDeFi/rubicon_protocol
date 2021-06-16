@@ -3,17 +3,15 @@
 /// @notice Any user can deposit assets into this pool and earn yield from successful strategist market making with their liquidity
 /// @notice This contract looks to both BathPairs and the BathHouse as its admin
 
-pragma solidity =0.5.16;
+pragma solidity =0.7.6;
 
-import "../interfaces/IBathToken.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-// import "../peripheral_contracts/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../RubiconMarket.sol";
 import "./PairsTrade.sol";
 import "./BathHouse.sol";
 
-contract BathToken is IBathToken {
+contract BathToken {
     // using SafeERC20 for IERC20;
     // using Address for address;
     using SafeMath for uint256;
@@ -74,7 +72,7 @@ contract BathToken is IBathToken {
 
         uint256 chainId;
         assembly {
-            chainId := chainid
+            chainId := chainid()
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -91,7 +89,7 @@ contract BathToken is IBathToken {
         // Add infinite approval of Rubicon Market for this asset
         uint256 MAX_INT = 2**256 - 1;
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
-        emit LogInit(now);
+        emit LogInit(block.timestamp);
 
         initialized = true;
     }

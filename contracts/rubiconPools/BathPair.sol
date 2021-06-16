@@ -3,14 +3,14 @@
 /// @notice The BathPair is the admin for the pair's liquidity and has many security checks in place
 /// @notice This contract is also where strategists claim rewards for successful market making
 
-pragma solidity ^0.5.16;
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
-import "../peripheral_contracts/SafeMathE.sol";
 import "../interfaces/IPairsTrade.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
@@ -321,7 +321,7 @@ contract BathPair {
                 // delete the offer if it is too old - this forces the expungement of static orders
                 if (
                     outstandingPairIDs[x][2] <
-                    (now - BathHouse(bathHouse).timeDelay())
+                    (block.timestamp - BathHouse(bathHouse).timeDelay())
                 ) {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
@@ -444,7 +444,7 @@ contract BathPair {
         internal
         returns (uint256[3] memory)
     {
-        require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == now);
+        require(outstandingPairIDs[outstandingPairIDs.length - 1][2] == block.timestamp);
         IDs2strategist[
             outstandingPairIDs[outstandingPairIDs.length - 1][0]
         ] = strategist;

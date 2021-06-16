@@ -1,7 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.6;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // https://github.com/ethereum/eips/issues/1404
 // contract ERC1404 is ERC20 {
@@ -9,10 +8,10 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 //     function messageForTransferRestriction (uint8 restrictionCode) public view returns (string memory);
 // }
 
-contract EquityToken is ERC20Detailed, ERC20 {
+contract EquityToken is ERC20 {
     constructor(address admin, uint256 initialSupply)
         public
-        ERC20Detailed("Regulation A+ Equity", "EQT", 18)
+        ERC20("Regulation A+ Equity", "EQT")
     {
         _mint(admin, initialSupply);
     }
