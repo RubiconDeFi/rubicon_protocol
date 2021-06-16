@@ -120,7 +120,6 @@ contract BathToken {
         bathHouse = newBathHouse;
     }
 
-
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
@@ -137,15 +136,14 @@ contract BathToken {
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
-        uint256 id =
-            RubiconMarket(RubiconMarketAddress).offer(
-                pay_amt,
-                pay_gem,
-                buy_amt,
-                buy_gem,
-                0,
-                false
-            );
+        uint256 id = RubiconMarket(RubiconMarketAddress).offer(
+            pay_amt,
+            pay_gem,
+            buy_amt,
+            buy_gem,
+            0,
+            false
+        );
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);
     }
@@ -173,10 +171,10 @@ contract BathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) public {
-        uint256 r =
-            (IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)).div(
-                totalSupply
-            );
+        uint256 r = (
+            IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)
+        )
+        .div(totalSupply);
         _burn(msg.sender, _shares);
 
         underlyingToken.transfer(msg.sender, r);
@@ -189,9 +187,8 @@ contract BathToken {
         uint8 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 20);
-        uint256 stratReward =
-            (stratProportion *
-                (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
+        uint256 stratReward = (stratProportion *
+            (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
         IERC20(underlyingAsset).transfer(
             sisterBath,
             IERC20(underlyingAsset).balanceOf(address(this)) - stratReward
@@ -266,23 +263,22 @@ contract BathToken {
         bytes32 s
     ) external {
         require(deadline >= block.timestamp, "UniswapV2: EXPIRED");
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            spender,
-                            value,
-                            nonces[owner]++,
-                            deadline
-                        )
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                keccak256(
+                    abi.encode(
+                        PERMIT_TYPEHASH,
+                        owner,
+                        spender,
+                        value,
+                        nonces[owner]++,
+                        deadline
                     )
                 )
-            );
+            )
+        );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(
             recoveredAddress != address(0) && recoveredAddress == owner,

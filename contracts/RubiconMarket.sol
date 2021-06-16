@@ -299,9 +299,9 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @notice The fee for taker trades is paid in this function.
     function buy(uint256 id, uint256 quantity)
         public
+        virtual
         can_buy(id)
         synchronized
-        virtual
         returns (bool)
     {
         OfferInfo memory offer = offers[id];
@@ -381,9 +381,9 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @notice This function refunds the offer to the maker.
     function cancel(uint256 id)
         public
+        virtual
         can_cancel(id)
         synchronized
-        virtual
         returns (bool success)
     {
         OfferInfo memory offer = offers[id];
@@ -425,13 +425,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    )
-        public
-        can_offer
-        synchronized
-        virtual
-        returns (uint256 id)
-    {
+    ) public virtual can_offer synchronized returns (uint256 id) {
         require(uint128(pay_amt) == pay_amt);
         require(uint128(buy_amt) == buy_amt);
         require(pay_amt > 0);
@@ -499,7 +493,7 @@ contract ExpiringMarket is DSAuth, SimpleMarket {
     }
 
     /// @dev After close, anyone can cancel an offer.
-    modifier can_cancel(uint256 id) override virtual {
+    modifier can_cancel(uint256 id) virtual override {
         require(isActive(id));
         require((msg.sender == getOwner(id)) || isClosed());
         _;
@@ -646,8 +640,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 buy_gem //taker (ask) buy which token
     ) public override returns (uint256) {
         require(!locked, "Reentrancy attempt");
-        function(uint256, ERC20, uint256, ERC20) returns (uint256) fn =
-            matchingEnabled ? _offeru : super.offer;
+
+
+            function(uint256, ERC20, uint256, ERC20) returns (uint256) fn
+         = matchingEnabled ? _offeru : super.offer;
         return fn(pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
@@ -680,7 +676,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     }
 
     //Transfers funds from caller to offer maker, and from market to caller.
-    function buy(uint256 id, uint256 amount) public can_buy(id) override returns (bool) {
+    function buy(uint256 id, uint256 amount)
+        public
+        override
+        can_buy(id)
+        returns (bool)
+    {
         require(!locked, "Reentrancy attempt");
 
         //RBCN distribution on the trade
@@ -690,14 +691,20 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
                 msg.sender
             );
         }
-        function(uint256, uint256) returns (bool) fn =
-            matchingEnabled ? _buys : super.buy;
+        function(uint256, uint256) returns (bool) fn = matchingEnabled
+            ? _buys
+            : super.buy;
 
         return fn(id, amount);
     }
 
     // Cancel an offer. Refunds offer maker.
-    function cancel(uint256 id) public can_cancel(id) override returns (bool success) {
+    function cancel(uint256 id)
+        public
+        override
+        can_cancel(id)
+        returns (bool success)
+    {
         require(!locked, "Reentrancy attempt");
         if (matchingEnabled) {
             if (isOfferSorted(id)) {
@@ -870,11 +877,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
                 take(bytes32(offerId), uint128(offers[offerId].pay_amt)); //We take the whole offer
             } else {
                 // if lower
-                uint256 baux =
-                    rmul(
-                        pay_amt * 10**9,
-                        rdiv(offers[offerId].pay_amt, offers[offerId].buy_amt)
-                    ) / 10**9;
+                uint256 baux = rmul(
+                    pay_amt * 10**9,
+                    rdiv(offers[offerId].pay_amt, offers[offerId].buy_amt)
+                ) / 10**9;
                 fill_amt = add(fill_amt, baux); //Add amount bought to acumulator
                 take(bytes32(offerId), uint128(baux)); //We take the portion of the offer that we need
                 pay_amt = 0; //All amount is sold

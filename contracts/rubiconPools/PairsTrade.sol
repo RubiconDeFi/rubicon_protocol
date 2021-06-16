@@ -60,15 +60,14 @@ contract PairsTrade {
         uint256 bidDenomenator
     ) internal {
         // 1. Calculate new bid and ask
-        (order memory ask, order memory bid) =
-            getNewOrders(
-                underlyingAsset,
-                underlyingQuote,
-                askNumerator,
-                askDenomenator,
-                bidNumerator,
-                bidDenomenator
-            );
+        (order memory ask, order memory bid) = getNewOrders(
+            underlyingAsset,
+            underlyingQuote,
+            askNumerator,
+            askDenomenator,
+            bidNumerator,
+            bidDenomenator
+        );
 
         // 2. place new bid and ask
         placeTrades(
@@ -92,20 +91,18 @@ contract PairsTrade {
         ERC20 ERC20underlyingAsset = ERC20(underlyingAsset);
         ERC20 ERC20underlyingQuote = ERC20(underlyingQuote);
 
-        order memory newAsk =
-            order(
-                askNumerator,
-                ERC20underlyingAsset,
-                askDenominator,
-                ERC20underlyingQuote
-            );
-        order memory newBid =
-            order(
-                (bidNumerator),
-                ERC20underlyingQuote,
-                bidDenominator,
-                ERC20underlyingAsset
-            );
+        order memory newAsk = order(
+            askNumerator,
+            ERC20underlyingAsset,
+            askDenominator,
+            ERC20underlyingQuote
+        );
+        order memory newBid = order(
+            (bidNumerator),
+            ERC20underlyingQuote,
+            bidDenominator,
+            ERC20underlyingAsset
+        );
         return (newAsk, newBid);
     }
 
@@ -118,26 +115,26 @@ contract PairsTrade {
         address asset,
         address quote
     ) internal returns (bool) {
-        uint256 newAskID =
-            BathToken(bathAssetAddress).placeOffer(
-                ask.pay_amt,
-                ask.pay_gem,
-                ask.buy_amt,
-                ask.buy_gem
-            );
+        uint256 newAskID = BathToken(bathAssetAddress).placeOffer(
+            ask.pay_amt,
+            ask.pay_gem,
+            ask.buy_amt,
+            ask.buy_gem
+        );
         emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
 
-        uint256 newBidID =
-            BathToken(bathQuoteAddress).placeOffer(
-                bid.pay_amt,
-                bid.pay_gem,
-                bid.buy_amt,
-                bid.buy_gem
-            );
+        uint256 newBidID = BathToken(bathQuoteAddress).placeOffer(
+            bid.pay_amt,
+            bid.pay_gem,
+            bid.buy_amt,
+            bid.buy_gem
+        );
         emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
 
         address pair = BathHouse(bathHouse).getBathPair(asset, quote);
-        BathPair(pair).addOutstandingPair([newAskID, newBidID, block.timestamp]);
+        BathPair(pair).addOutstandingPair(
+            [newAskID, newBidID, block.timestamp]
+        );
     }
 
     function execute(

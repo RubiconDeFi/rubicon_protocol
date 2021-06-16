@@ -200,23 +200,22 @@ contract DaiWithFaucet is LibNote {
         bytes32 r,
         bytes32 s
     ) external {
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            holder,
-                            spender,
-                            nonce,
-                            expiry,
-                            allowed
-                        )
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                keccak256(
+                    abi.encode(
+                        PERMIT_TYPEHASH,
+                        holder,
+                        spender,
+                        nonce,
+                        expiry,
+                        allowed
                     )
                 )
-            );
+            )
+        );
 
         require(holder != address(0), "Dai/invalid-address-0");
         require(holder == ecrecover(digest, v, r, s), "Dai/invalid-permit");
