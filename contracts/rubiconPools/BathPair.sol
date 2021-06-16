@@ -355,7 +355,7 @@ contract BathPair {
         return outstandingPairIDs.length;
     }
 
-    // this throws on a zero value
+    // this throws on a zero value ofliquidity
     function getMaxOrderSize(address asset, address bathTokenAddress)
         public
         returns (uint256)
@@ -369,7 +369,6 @@ contract BathPair {
         );
         // Divide the below by 1000
         int128 shapeCoef = ABDKMath64x64.div(-5, 1000); // 5 / 1000
-        emit LogNoteI("shapeCoef", shapeCoef);
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
@@ -378,21 +377,15 @@ contract BathPair {
                 underlyingBalance,
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
             );
-            emit LogNoteI("ratio", ratio); // this number divided by 2**64 is correct!
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
-                emit LogNote(
-                    "normal maxSize Asset",
-                    (maxOrderSizeProportion * underlyingBalance) / 100
-                );
                 return (maxOrderSizeProportion * underlyingBalance) / 100;
             } else {
                 // return dynamic order size
                 uint256 maxSize = (maxOrderSizeProportion * underlyingBalance) /
                     100; 
-                emit LogNote("raw maxSize", maxSize);
                 int128 shapeFactor = ABDKMath64x64.exp(
-                    ABDKMath64x64.mul(shapeCoef, ratio)
+                    ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.mul(ratio, getMidpointPrice())))
                 );
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
                 return dynamicSize;
@@ -408,8 +401,8 @@ contract BathPair {
                 // return dynamic order size
                 uint256 maxSize = (maxOrderSizeProportion * underlyingBalance) /
                     100; 
-                int128 shapeFactor = ABDKMath64x64.exp(
-                    ABDKMath64x64.mul(shapeCoef, ratio)
+                int128 shapeFactor = ABDKMath64x64.exp( ////
+                    ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.div(ratio, getMidpointPrice())))
                 );
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
                 return dynamicSize;
