@@ -55,6 +55,29 @@ contract BathHouse {
         initialized = true;
     }
 
+    function initBathPair(
+        address asset,
+        address quote,
+        address pair,
+        uint8 _propToStrategists
+    ) external onlyAdmin returns (address newPair) {
+        //calls initialize on two Bath Tokens and spins them up
+        require(asset != quote);
+        require(asset != address(0));
+        require(quote != address(0));
+
+        // Ensure the pair doesn't exist and approved
+        require(!isApprovedPair(getPair[asset][quote]));
+        allBathPairs.push(address(pair));
+        propToStrategists[pair] = _propToStrategists;
+
+        getPair[asset][quote] = address(pair);
+
+        approvePair(address(pair));
+        addQuote(quote, BathPair(pair).getThisBathQuote());
+        return address(pair);
+    }
+
     modifier onlyAdmin {
         require(msg.sender == admin);
         _;
