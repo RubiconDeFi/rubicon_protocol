@@ -26,8 +26,12 @@ contract BathPair {
 
     bool public initialized;
 
+    uint16 public maxOrderSizeBPS;
+    int128 internal shapeCoefNum;
+
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
+
 
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
@@ -52,7 +56,9 @@ contract BathPair {
     function initialize(
         address _bathAssetAddress,
         address _bathQuoteAddress,
-        address _bathHouse
+        address _bathHouse,
+        uint16 _maxOrderSizeBPS,
+        int128 _shapeCoefNum
     ) public {
         require(!initialized);
         bathHouse = _bathHouse;
@@ -76,6 +82,12 @@ contract BathPair {
                 address(0x0000000000000000000000000000000000000000)
         );
         RubiconMarketAddress = BathHouse(bathHouse).getMarket();
+
+        // maxOrderSizeBPS = 500;
+        // shapeCoefNum = -5;
+        
+        maxOrderSizeBPS = _maxOrderSizeBPS;
+        shapeCoefNum = _shapeCoefNum;
         initialized = true;
     }
 
@@ -118,6 +130,14 @@ contract BathPair {
                 100 <=
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
+    }
+
+    function setMaxOrderSizeBPS(uint16 val) external onlyBathHouse {
+        maxOrderSizeBPS = val;
+    }
+
+    function setShapeCoefNum(int128 val) external onlyBathHouse {
+        shapeCoefNum = val;
     }
 
     // TODO: enforce oracle sanity check to avoid order book manipulation before permissionless strategists
@@ -361,14 +381,14 @@ contract BathPair {
         returns (uint256)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
-        uint256 maxOrderSizeProportion = 50; //in percentage points of underlying
+        int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000); // 5 / 1000
+        
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
         require(
             underlyingBalance > 0,
             "no bathToken liquidity to calculate max orderSize permissable"
         );
         // Divide the below by 1000
-        int128 shapeCoef = ABDKMath64x64.div(-5, 1000); // 5 / 1000
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
@@ -379,11 +399,11 @@ contract BathPair {
             );
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
-                return (maxOrderSizeProportion * underlyingBalance) / 100;
+                return (maxOrderSizeBPS * underlyingBalance) / 10000;
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeProportion * underlyingBalance) /
-                    100; 
+                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) /
+                    10000; 
                 int128 shapeFactor = ABDKMath64x64.exp(
                     ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.mul(ratio, getMidpointPrice())))
                 );
@@ -396,12 +416,12 @@ contract BathPair {
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
             );
             if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2**64)) {
-                return (maxOrderSizeProportion * underlyingBalance) / 100;
+                return (maxOrderSizeBPS * underlyingBalance) / 10000;
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeProportion * underlyingBalance) /
-                    100; 
-                int128 shapeFactor = ABDKMath64x64.exp( ////
+                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) /
+                    10000; 
+                int128 shapeFactor = ABDKMath64x64.exp( 
                     ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.div(ratio, getMidpointPrice())))
                 );
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);

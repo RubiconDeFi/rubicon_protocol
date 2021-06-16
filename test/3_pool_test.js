@@ -52,7 +52,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             })
         });
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
-            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
+            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address, 500, -5);
 
             (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address, 5)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);

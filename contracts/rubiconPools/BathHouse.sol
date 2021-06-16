@@ -119,6 +119,20 @@ contract BathHouse {
         BathToken(bathToken).setMarket(newAdmin);
     }
 
+    function setBathPairMOSBPS(address bathPair, uint16 mosbps)
+        external
+        onlyAdmin
+    {
+        BathPair(bathPair).setMaxOrderSizeBPS(mosbps);
+    }
+
+    function setBathPairSCN(address bathPair, int128 val)
+        external
+        onlyAdmin
+    {
+        BathPair(bathPair).setShapeCoefNum(val);
+    }
+
     function setMarket(address newMarket) external onlyAdmin {
         RubiconMarketAddress = newMarket;
     }
