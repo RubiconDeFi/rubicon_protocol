@@ -1,7 +1,12 @@
 /// @title RubiconMarket.sol
-/// @notice Please see the repository for this code at https://github.com/RubiconDeFi/rubicon_protocol
+/// @notice Please see the repository for this code at https://github.com/RubiconDeFi/rubicon_protocol;
 
-pragma solidity 0.5.16;
+/// SPDX-License-Identifier: Apache-2.0
+/// This contract is a derivative work of the open-source work of Oasis DEX: https://github.com/OasisDEX/oasis
+
+pragma solidity =0.7.6;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @notice DSAuth events for authentication schema
 contract DSAuthEvents {
@@ -83,53 +88,26 @@ contract DSMath {
     function rdiv(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(mul(x, RAY), y / 2) / y;
     }
-
-    // This famous algorithm is called "exponentiation by squaring"
-    // and calculates x^n with x as fixed-point and n as regular unsigned.
-    //
-    // It's O(log n), instead of O(n) for naive repeated multiplication.
-    //
-    // These facts are why it works:
-    //
-    //  If n is even, then x^n = (x^2)^(n/2).
-    //  If n is odd,  then x^n = x * x^(n-1),
-    //   and applying the equation for even x gives
-    //    x^n = x * (x^2)^((n-1) / 2).
-    //
-    //  Also, EVM division is flooring and
-    //    floor[(n-1) / 2] = floor[n / 2].
-    //
-    function rpow(uint256 x, uint256 n) internal pure returns (uint256 z) {
-        z = n % 2 != 0 ? x : RAY;
-
-        for (n /= 2; n != 0; n /= 2) {
-            x = rmul(x, x);
-
-            if (n % 2 != 0) {
-                z = rmul(z, x);
-            }
-        }
-    }
 }
 
-/// @notice ERC-20 interface as derived from EIP-20
-contract ERC20 {
-    function totalSupply() public view returns (uint256);
+// /// @notice ERC-20 interface as derived from EIP-20
+// contract ERC20 {
+//     function totalSupply() public view returns (uint256);
 
-    function balanceOf(address guy) public view returns (uint256);
+//     function balanceOf(address guy) public view returns (uint256);
 
-    function allowance(address src, address guy) public view returns (uint256);
+//     function allowance(address src, address guy) public view returns (uint256);
 
-    function approve(address guy, uint256 wad) public returns (bool);
+//     function approve(address guy, uint256 wad) public returns (bool);
 
-    function transfer(address dst, uint256 wad) public returns (bool);
+//     function transfer(address dst, uint256 wad) public returns (bool);
 
-    function transferFrom(
-        address src,
-        address dst,
-        uint256 wad
-    ) public returns (bool);
-}
+//     function transferFrom(
+//         address src,
+//         address dst,
+//         uint256 wad
+//     ) public returns (bool);
+// }
 
 /// @notice Events contract for logging trade activity on Rubicon Market
 /// @dev Provides the key event logs that are used in all core functionality of exchanging on the Rubicon Market
@@ -214,15 +192,12 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @dev The mapping that makes up the core orderbook of the exchange
     mapping(uint256 => OfferInfo) public offers;
 
-    mapping(address => bool) internal whitelist;
-
     bool locked;
 
-    /// @notice This parameter provides the ability for a protocol fee on taker trades
     /// @dev This parameter is in basis points
     uint256 internal feeBPS;
 
-    /// @notice This parameter provides the address to which fees are sent
+    /// @dev This parameter provides the address to which fees are sent
     address internal feeTo;
 
     struct OfferInfo {
@@ -235,19 +210,19 @@ contract SimpleMarket is EventfulMarket, DSMath {
     }
 
     /// @notice Modifier that insures an order exists and is properly in the orderbook
-    modifier can_buy(uint256 id) {
+    modifier can_buy(uint256 id) virtual {
         require(isActive(id));
         _;
     }
 
     /// @notice Modifier that checks the user to make sure they own the offer and its valid before they attempt to cancel it
-    modifier can_cancel(uint256 id) {
+    modifier can_cancel(uint256 id) virtual {
         require(isActive(id));
         require(getOwner(id) == msg.sender);
         _;
     }
 
-    modifier can_offer {
+    modifier can_offer virtual {
         _;
     }
 
@@ -256,12 +231,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
         locked = true;
         _;
         locked = false;
-    }
-
-    modifier onlyWhitelisted(ERC20 pay_gem, ERC20 buy_gem) {
-        require(isWhitelisted(address(pay_gem)));
-        require(isWhitelisted(address(buy_gem)));
-        _;
     }
 
     function isActive(uint256 id) public view returns (bool active) {
@@ -306,6 +275,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @notice The fee for taker trades is paid in this function.
     function buy(uint256 id, uint256 quantity)
         public
+        virtual
         can_buy(id)
         synchronized
         returns (bool)
@@ -326,8 +296,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
             return false;
         }
 
-        ///@dev Below is the basis point math logic for calculating the fee on a given trade
-        ///@notice The fee is paid in the asset that the caller (taker) is market buying or selling with
         uint256 fee = mul(spend, feeBPS) / 10000;
         require(
             offer.buy_gem.transferFrom(msg.sender, feeTo, fee),
@@ -355,7 +323,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
             msg.sender,
             uint128(quantity),
             uint128(spend),
-            uint64(now)
+            uint64(block.timestamp)
         );
         emit FeeTake(
             bytes32(id),
@@ -368,7 +336,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
             uint128(spend),
             fee,
             feeTo,
-            uint64(now)
+            uint64(block.timestamp)
         );
         emit LogTrade(
             quantity,
@@ -389,11 +357,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
     /// @notice This function refunds the offer to the maker.
     function cancel(uint256 id)
         public
+        virtual
         can_cancel(id)
         synchronized
         returns (bool success)
     {
-        /// @dev This is a read-only offer. Modify an offer by directly accessing offers[id]
         OfferInfo memory offer = offers[id];
         delete offers[id];
 
@@ -408,13 +376,13 @@ contract SimpleMarket is EventfulMarket, DSMath {
             offer.buy_gem,
             uint128(offer.pay_amt),
             uint128(offer.buy_amt),
-            uint64(now)
+            uint64(block.timestamp)
         );
 
         success = true;
     }
 
-    function kill(bytes32 id) external {
+    function kill(bytes32 id) external virtual {
         require(cancel(uint256(id)));
     }
 
@@ -423,7 +391,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 buy_gem,
         uint128 pay_amt,
         uint128 buy_amt
-    ) external returns (bytes32 id) {
+    ) external virtual returns (bytes32 id) {
         return bytes32(offer(pay_amt, pay_gem, buy_amt, buy_gem));
     }
 
@@ -433,13 +401,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    )
-        public
-        can_offer
-        synchronized
-        onlyWhitelisted(pay_gem, buy_gem)
-        returns (uint256 id)
-    {
+    ) public virtual can_offer synchronized returns (uint256 id) {
         require(uint128(pay_amt) == pay_amt);
         require(uint128(buy_amt) == buy_amt);
         require(pay_amt > 0);
@@ -454,7 +416,7 @@ contract SimpleMarket is EventfulMarket, DSMath {
         info.buy_amt = buy_amt;
         info.buy_gem = buy_gem;
         info.owner = msg.sender;
-        info.timestamp = uint64(now);
+        info.timestamp = uint64(block.timestamp);
         id = _next_id();
         offers[id] = info;
 
@@ -469,11 +431,11 @@ contract SimpleMarket is EventfulMarket, DSMath {
             buy_gem,
             uint128(pay_amt),
             uint128(buy_amt),
-            uint64(now)
+            uint64(block.timestamp)
         );
     }
 
-    function take(bytes32 id, uint128 maxTakeAmount) external {
+    function take(bytes32 id, uint128 maxTakeAmount) external virtual {
         require(buy(uint256(id), maxTakeAmount));
     }
 
@@ -486,10 +448,6 @@ contract SimpleMarket is EventfulMarket, DSMath {
     function getFeeBPS() internal view returns (uint256) {
         return feeBPS;
     }
-
-    function isWhitelisted(address target) internal view returns (bool) {
-        return whitelist[target];
-    }
 }
 
 /// @notice Expiring market is a Simple Market with a market lifetime.
@@ -498,20 +456,20 @@ contract ExpiringMarket is DSAuth, SimpleMarket {
     bool public stopped;
 
     /// @dev After close_time has been reached, no new offers are allowed.
-    modifier can_offer {
+    modifier can_offer override {
         require(!isClosed());
         _;
     }
 
     /// @dev After close, no new buys are allowed.
-    modifier can_buy(uint256 id) {
+    modifier can_buy(uint256 id) override {
         require(isActive(id));
         require(!isClosed());
         _;
     }
 
     /// @dev After close, anyone can cancel an offer.
-    modifier can_cancel(uint256 id) {
+    modifier can_cancel(uint256 id) virtual override {
         require(isActive(id));
         require((msg.sender == getOwner(id)) || isClosed());
         _;
@@ -522,7 +480,7 @@ contract ExpiringMarket is DSAuth, SimpleMarket {
     }
 
     function getTime() public view returns (uint64) {
-        return uint64(now);
+        return uint64(block.timestamp);
     }
 
     function stop() external auth {
@@ -548,7 +506,7 @@ contract DSNote {
         assembly {
             foo := calldataload(4)
             bar := calldataload(36)
-            wad := callvalue
+            wad := callvalue()
         }
 
         emit LogNote(msg.sig, msg.sender, foo, bar, wad, msg.data);
@@ -609,7 +567,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     }
 
     // After close, anyone can cancel an offer
-    modifier can_cancel(uint256 id) {
+    modifier can_cancel(uint256 id) override {
         require(isActive(id), "Offer was deleted or taken, or never existed.");
         require(
             isClosed() || msg.sender == getOwner(id) || id == dustId,
@@ -625,15 +583,15 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 buy_gem,
         uint128 pay_amt,
         uint128 buy_amt
-    ) public returns (bytes32) {
+    ) public override returns (bytes32) {
         return bytes32(offer(pay_amt, pay_gem, buy_amt, buy_gem));
     }
 
-    function take(bytes32 id, uint128 maxTakeAmount) public {
+    function take(bytes32 id, uint128 maxTakeAmount) public override {
         require(buy(uint256(id), maxTakeAmount));
     }
 
-    function kill(bytes32 id) external {
+    function kill(bytes32 id) external override {
         require(cancel(uint256(id)));
     }
 
@@ -656,10 +614,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 pay_gem, //maker (ask) sell which token
         uint256 buy_amt, //taker (ask) buy how much
         ERC20 buy_gem //taker (ask) buy which token
-    ) public returns (uint256) {
+    ) public override returns (uint256) {
         require(!locked, "Reentrancy attempt");
-        function(uint256, ERC20, uint256, ERC20) returns (uint256) fn =
-            matchingEnabled ? _offeru : super.offer;
+
+
+            function(uint256, ERC20, uint256, ERC20) returns (uint256) fn
+         = matchingEnabled ? _offeru : super.offer;
         return fn(pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
@@ -692,7 +652,12 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     }
 
     //Transfers funds from caller to offer maker, and from market to caller.
-    function buy(uint256 id, uint256 amount) public can_buy(id) returns (bool) {
+    function buy(uint256 id, uint256 amount)
+        public
+        override
+        can_buy(id)
+        returns (bool)
+    {
         require(!locked, "Reentrancy attempt");
 
         //RBCN distribution on the trade
@@ -702,14 +667,20 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
                 msg.sender
             );
         }
-        function(uint256, uint256) returns (bool) fn =
-            matchingEnabled ? _buys : super.buy;
+        function(uint256, uint256) returns (bool) fn = matchingEnabled
+            ? _buys
+            : super.buy;
 
         return fn(id, amount);
     }
 
     // Cancel an offer. Refunds offer maker.
-    function cancel(uint256 id) public can_cancel(id) returns (bool success) {
+    function cancel(uint256 id)
+        public
+        override
+        can_cancel(id)
+        returns (bool success)
+    {
         require(!locked, "Reentrancy attempt");
         if (matchingEnabled) {
             if (isOfferSorted(id)) {
@@ -882,11 +853,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
                 take(bytes32(offerId), uint128(offers[offerId].pay_amt)); //We take the whole offer
             } else {
                 // if lower
-                uint256 baux =
-                    rmul(
-                        pay_amt * 10**9,
-                        rdiv(offers[offerId].pay_amt, offers[offerId].buy_amt)
-                    ) / 10**9;
+                uint256 baux = rmul(
+                    pay_amt * 10**9,
+                    rdiv(offers[offerId].pay_amt, offers[offerId].buy_amt)
+                ) / 10**9;
                 fill_amt = add(fill_amt, baux); //Add amount bought to acumulator
                 take(bytes32(offerId), uint128(baux)); //We take the portion of the offer that we need
                 pay_amt = 0; //All amount is sold
@@ -1261,15 +1231,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     function setFeeBPS(uint256 _newFeeBPS) external auth returns (bool) {
         feeBPS = _newFeeBPS;
         return true;
-    }
-
-    // Adding to token whitelist entrypoint
-    function addToWhitelist(address addition) external auth {
-        whitelist[addition] = true;
-    }
-
-    function removeFromWhitelist(address remove) external auth {
-        whitelist[remove] = false;
     }
 
     function setAqueductDistributionLive(bool live)

@@ -81,7 +81,7 @@ const func = async (hre) => {
     const bp = await hre.ethers.getContractFactory("BathPair");
     const BPI = await bp.attach(deployResultBP.address);
     await BPI.initialize(await wA, await uA,
-        await bh, {gasLimit: 5000000}).then(async function(g) {
+        await bh, 500, -5, {gasLimit: 5000000}).then(async function(g) {
           console.log("bathPair Initialized!");
           // await BPI.initialize(process.env.OP_KOVAN_BATHWAYNE, process.env.OP_KOVAN_BATHUSDC,
           //   process.env.OP_KOVAN_BATHHOUSE, {gasLimit: g._hex}).then((r) => console.log("init of BP", r));

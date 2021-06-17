@@ -2,112 +2,112 @@
   "manifestVersion": "3.2",
   "proxies": [],
   "impls": {
-    "f72cab722b4efa385199a5cf0a247ca7bc9baac80245b8f7cfbf4efcfe0afdc1": {
-      "address": "0x4C7D28eA4960938c2Cb8A69087fE063904Cbc042",
-      "txHash": "0x4107a6ceda17986f2de523590f931b37f788b9a029aaa2151a121141f7d1a964",
+    "d8c16a1c2346ef6f888858d95dbf05033e28f7bda62801aaace51436864b2be0": {
+      "address": "0x91ABab9f4172E167f6157718f3C30B3753B1B550",
+      "txHash": "0x015d3adcd00f4ffc6274d733eda540ae0bfe34d1e8497047b682bfaccd21d6d2",
       "layout": {
         "storage": [
           {
             "contract": "BathHouse",
             "label": "name",
             "type": "t_string_storage",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:10"
+            "src": "contracts/rubiconPools/BathHouse.sol:10"
           },
           {
             "contract": "BathHouse",
             "label": "allBathPairs",
             "type": "t_array(t_address)dyn_storage",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:12"
+            "src": "contracts/rubiconPools/BathHouse.sol:12"
           },
           {
             "contract": "BathHouse",
             "label": "getPair",
             "type": "t_mapping(t_address,t_mapping(t_address,t_address))",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:13"
+            "src": "contracts/rubiconPools/BathHouse.sol:13"
           },
           {
             "contract": "BathHouse",
             "label": "admin",
             "type": "t_address",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:15"
+            "src": "contracts/rubiconPools/BathHouse.sol:15"
           },
           {
             "contract": "BathHouse",
             "label": "RubiconMarketAddress",
             "type": "t_address",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:16"
+            "src": "contracts/rubiconPools/BathHouse.sol:16"
           },
           {
             "contract": "BathHouse",
             "label": "approvedStrategies",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:19"
+            "src": "contracts/rubiconPools/BathHouse.sol:19"
           },
           {
             "contract": "BathHouse",
             "label": "approvedBathTokens",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:20"
+            "src": "contracts/rubiconPools/BathHouse.sol:20"
           },
           {
             "contract": "BathHouse",
             "label": "approvedPairs",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:21"
+            "src": "contracts/rubiconPools/BathHouse.sol:21"
           },
           {
             "contract": "BathHouse",
             "label": "bathQuoteExists",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:22"
+            "src": "contracts/rubiconPools/BathHouse.sol:22"
           },
           {
             "contract": "BathHouse",
             "label": "bathAssetExists",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:23"
+            "src": "contracts/rubiconPools/BathHouse.sol:23"
           },
           {
             "contract": "BathHouse",
             "label": "propToStrategists",
             "type": "t_mapping(t_address,t_uint8)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:24"
+            "src": "contracts/rubiconPools/BathHouse.sol:24"
           },
           {
             "contract": "BathHouse",
             "label": "quoteToBathQuote",
             "type": "t_mapping(t_address,t_address)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:25"
+            "src": "contracts/rubiconPools/BathHouse.sol:25"
           },
           {
             "contract": "BathHouse",
             "label": "assetToBathAsset",
             "type": "t_mapping(t_address,t_address)",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:26"
+            "src": "contracts/rubiconPools/BathHouse.sol:26"
           },
           {
             "contract": "BathHouse",
             "label": "initialized",
             "type": "t_bool",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:28"
+            "src": "contracts/rubiconPools/BathHouse.sol:28"
           },
           {
             "contract": "BathHouse",
             "label": "reserveRatio",
             "type": "t_uint256",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:31"
+            "src": "contracts/rubiconPools/BathHouse.sol:31"
           },
           {
             "contract": "BathHouse",
             "label": "timeDelay",
             "type": "t_uint256",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:34"
+            "src": "contracts/rubiconPools/BathHouse.sol:34"
           },
           {
             "contract": "BathHouse",
             "label": "maxOutstandingPairCount",
             "type": "t_uint256",
-            "src": "contracts/rubiconPoolsv0/BathHouse.sol:37"
+            "src": "contracts/rubiconPools/BathHouse.sol:37"
           }
         ],
         "types": {

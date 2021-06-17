@@ -1,13 +1,15 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract acts as the admin for the Rubicon Pools system
 /// @notice The BathHouse approves strategist contracts and initializes bathPairs
 
-pragma solidity =0.5.16;
+pragma solidity =0.7.6;
 
 import "./BathPair.sol";
 
 contract BathHouse {
-    string public name = "Rubicon Bath House";
+    string public name;
 
     address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;
@@ -41,11 +43,10 @@ contract BathHouse {
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 mopc
-        // string memory _name
     ) public {
         require(!initialized);
+        name = "Rubicon Bath House";
         admin = msg.sender;
-        // name = _name;    
         timeDelay = _timeDelay;
         require(_reserveRatio <= 100);
         require(_reserveRatio > 0);
@@ -57,44 +58,9 @@ contract BathHouse {
         initialized = true;
     }
 
-    modifier onlyAdmin {
-        require(msg.sender == admin);
-        _;
-    }
-
-    function setCancelTimeDelay(uint256 value) external onlyAdmin {
-        timeDelay = value;
-    }
-
-    function setPropToStrats(uint8 value, address pair) external onlyAdmin {
-        require(value < 50);
-        propToStrategists[pair] = value;
-    }
-
-    function setMaxOutstandingPairCount(uint256 value) external onlyAdmin {
-        maxOutstandingPairCount = value;
-    }
-
-    function setBathTokenMarket(address bathToken, address newMarket) external onlyAdmin {
-        BathToken(bathToken).setMarket(newMarket);
-    }
-
-    function setBathTokenBathHouse(address bathToken, address newAdmin) external onlyAdmin {
-        BathToken(bathToken).setMarket(newAdmin);
-    }
-
-    function getMarket() public view returns (address) {
-        return RubiconMarketAddress;
-    }
-
     function initBathPair(
         address asset,
-        // string calldata assetName,
         address quote,
-        // string calldata quoteName,
-        // uint256 _reserveRatio,
-        // uint256 _timeDelay,
-        // uint256 _maxOutstandingPairCount
         address pair,
         uint8 _propToStrategists
     ) external onlyAdmin returns (address newPair) {
@@ -113,6 +79,91 @@ contract BathHouse {
         approvePair(address(pair));
         addQuote(quote, BathPair(pair).getThisBathQuote());
         return address(pair);
+    }
+
+    modifier onlyAdmin {
+        require(msg.sender == admin);
+        _;
+    }
+
+    // Setter Functions for paramters - onlyAdmin
+    function setCancelTimeDelay(uint256 value) external onlyAdmin {
+        timeDelay = value;
+    }
+
+    function setReserveRatio(uint256 rr) external onlyAdmin {
+        require(rr <= 100);
+        require(rr > 0);
+        reserveRatio = rr;
+    }
+
+    function setPropToStrats(uint8 value, address pair) external onlyAdmin {
+        require(value < 50);
+        require(value >= 0);
+        propToStrategists[pair] = value;
+    }
+
+    function setMaxOutstandingPairCount(uint256 value) external onlyAdmin {
+        maxOutstandingPairCount = value;
+    }
+
+    function setBathTokenMarket(address bathToken, address newMarket)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setMarket(newMarket);
+    }
+
+    function setBathTokenBathHouse(address bathToken, address newAdmin)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setMarket(newAdmin);
+    }
+
+    function setBathTokenFeeBPS(address bathToken, uint newBPS)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setFeeBPS(newBPS);
+    }
+
+    function setFeeTo(address bathToken, address feeTo)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setFeeTo(feeTo);
+    }
+
+    function setBathPairMOSBPS(address bathPair, uint16 mosbps)
+        external
+        onlyAdmin
+    {
+        BathPair(bathPair).setMaxOrderSizeBPS(mosbps);
+    }
+
+    function setBathPairSCN(address bathPair, int128 val)
+        external
+        onlyAdmin
+    {
+        BathPair(bathPair).setShapeCoefNum(val);
+    }
+
+    function setMarket(address newMarket) external onlyAdmin {
+        RubiconMarketAddress = newMarket;
+    }
+
+    // Getter Functions for parameters - onlyAdmin
+    function getMarket() public view returns (address) {
+        return RubiconMarketAddress;
+    }
+
+    function getReserveRatio() public view returns (uint256) {
+        return reserveRatio;
+    }
+
+    function getCancelTimeDelay() public view returns (uint256) {
+        return timeDelay;
     }
 
     function getBathPair(address asset, address quote)
@@ -209,7 +260,7 @@ contract BathHouse {
         return quoteToBathQuote[quote];
     }
 
-    function getPropToStrats(address pair) external view returns(uint8){
+    function getPropToStrats(address pair) external view returns (uint8) {
         return propToStrategists[pair];
     }
 }

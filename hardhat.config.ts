@@ -8,7 +8,7 @@ import '@openzeppelin/hardhat-upgrades'
 
 module.exports = {
   ovm: {
-    solcVersion: "0.5.16"
+    solcVersion: "0.7.6"
   },
   solidity: {
     compilers: [
@@ -22,7 +22,13 @@ module.exports = {
       }
       },
       {
-        version:"0.7.6"
+        version:"0.7.6",
+        settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1
+        },
+      }
       }
     ]
 

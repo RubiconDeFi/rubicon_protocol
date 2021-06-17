@@ -16,9 +16,9 @@ const func = async (hre) => {
     );
     // setTimeout(() => {}, 2000);
     // Initialize Rubicon Market
-    // const rmi = await hre.ethers.getContractFactory("RubiconMarket");
-    // const RMI = await rmi.attach(deployResult.address);
-    // await RMI.initialize(false, process.env.OP_KOVAN_ADMIN, {gasLimit: 8099999}).then((r ) => console.log(r));
+    const rmi = await hre.ethers.getContractFactory("RubiconMarket");
+    const RMI = await rmi.attach(deployResult.address);
+    await RMI.initialize(false, process.env.OP_KOVAN_ADMIN).then((r ) => console.log("Initialized Rubicon Market"));
   }
 
   // Initialize Rubicon Market

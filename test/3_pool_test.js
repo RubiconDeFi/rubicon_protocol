@@ -1,15 +1,11 @@
 const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
 const BathToken = artifacts.require("BathToken");
-const RBCN = artifacts.require("RBCN");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 const PairsTrade = artifacts.require("PairsTrade");
 
-// const { isAssertionExpression, isImportEqualsDeclaration } = require('typescript');
-const _deploy_asset_contracts = require('../migrations/2_deploy_asset_contracts.js');
-// const { artifacts } = require('hardhat');
 const helper = require('./testHelpers/timeHelper.js');
 
 function logIndented(...args) {
@@ -19,7 +15,7 @@ function logIndented(...args) {
 // ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
 // ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000 --allowUnlimitedContractSize
 
-contract("Rubicon Pools Test", async function(accounts) {
+contract("Rubicon Exchange and Pools Test", async function(accounts) {
     let newPair;
     let bathPairInstance;
     let bathAssetInstance;
@@ -56,7 +52,7 @@ contract("Rubicon Pools Test", async function(accounts) {
             })
         });
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
-            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address);
+            await bathPairInstance.initialize(bathAssetInstance.address, bathQuoteInstance.address, bathHouseInstance.address, 500, -5);
 
             (await bathHouseInstance.initBathPair(WETHInstance.address, DAIInstance.address, bathPairInstance.address, 5)); // 90% reserve ratio and 3 days cancel delay
             newPair = await bathHouseInstance.getBathPair(WETHInstance.address, DAIInstance.address);
@@ -126,11 +122,6 @@ contract("Rubicon Pools Test", async function(accounts) {
             
             await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
             assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
-        });
-        it("Admin can initialize and whitelist WETH and DAI for trading", async function() {
-            // await rubiconMarketInstance.initialize(false, accounts[0]);
-            await rubiconMarketInstance.addToWhitelist(WETHInstance.address);
-            await rubiconMarketInstance.addToWhitelist(DAIInstance.address);
         });
         it("Place a starting pair to clear checks", async function () {
             await WETHInstance.deposit({from: accounts[3],value: web3.utils.toWei((0.5).toString())});

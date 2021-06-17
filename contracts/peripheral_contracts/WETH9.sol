@@ -1,6 +1,4 @@
-/**
- *Submitted for verification at Etherscan.io on 2017-12-12
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 // Copyright (C) 2015, 2016, 2017 Dapphub
 
@@ -17,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.5.16;
+pragma solidity 0.7.6;
 
 contract WETH9 {
     string public name = "Wrapped Ether";
@@ -32,7 +30,7 @@ contract WETH9 {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    function() external payable {
+    fallback() external payable {
         deposit();
     }
 

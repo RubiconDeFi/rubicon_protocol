@@ -1,38 +1,46 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract represents a single-asset liquidity pool for Rubicon Pools
 /// @notice Any user can deposit assets into this pool and earn yield from successful strategist market making with their liquidity
 /// @notice This contract looks to both BathPairs and the BathHouse as its admin
 
-pragma solidity =0.5.16;
+pragma solidity =0.7.6;
 
-import "../interfaces/IBathToken.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-// import "../peripheral_contracts/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../RubiconMarket.sol";
 import "./PairsTrade.sol";
 import "./BathHouse.sol";
 
-contract BathToken is IBathToken {
+contract BathToken {
     // using SafeERC20 for IERC20;
-    // using Address for address;
     using SafeMath for uint256;
+    // using Address for address;
 
     string public symbol;
+    string public constant name = "BathToken v1";
+    uint8 public constant decimals = 18;
+    
     IERC20 public underlyingToken;
     address public RubiconMarketAddress;
 
     // admin
     address public bathHouse;
+    
+    address public feeTo;
+    uint public feeBPS;
+    uint public feeDenominator = 10000;
 
-    string public constant name = "BathToken v1";
-    uint8 public constant decimals = 18;
     uint256 public totalSupply;
+    uint256 MAX_INT = 2**256 - 1;
+
     mapping(address => uint256) public balanceOf;
 
     // This maps a user's address to cumulative pool yield at the time of deposit
     mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => uint256) public nonces;
 
     // This tracks cumulative yield over time [amount, timestmap]
     // amount should be token being passed from another bathToken to this one (pair) - market price at the time
@@ -42,7 +50,6 @@ contract BathToken is IBathToken {
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    mapping(address => uint256) public nonces;
     bool public initialized;
 
     event Approval(
@@ -74,7 +81,7 @@ contract BathToken is IBathToken {
 
         uint256 chainId;
         assembly {
-            chainId := chainid
+            chainId := chainid()
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -89,9 +96,13 @@ contract BathToken is IBathToken {
         );
 
         // Add infinite approval of Rubicon Market for this asset
-        uint256 MAX_INT = 2**256 - 1;
+        
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
-        emit LogInit(now);
+        emit LogInit(block.timestamp);
+
+        require(RubiconMarket(RubiconMarketAddress).initialized() && BathHouse(bathHouse).initialized());
+        feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
+        feeBPS = 0; //Fee set to zero
 
         initialized = true;
     }
@@ -113,15 +124,24 @@ contract BathToken is IBathToken {
     }
 
     function setMarket(address newRubiconMarket) external {
-        require(msg.sender == bathHouse);
+        require(msg.sender == bathHouse && initialized);
         RubiconMarketAddress = newRubiconMarket;
     }
 
     function setBathHouse(address newBathHouse) external {
-        require(msg.sender == bathHouse);
+        require(msg.sender == bathHouse && initialized);
         bathHouse = newBathHouse;
     }
 
+    function setFeeBPS(uint _feeBPS) external {
+        require(msg.sender == bathHouse && initialized);
+        feeBPS = _feeBPS;
+    }
+
+    function setFeeTo(address _feeTo) external {
+        require(msg.sender == bathHouse && initialized);
+        feeTo = _feeTo;
+    }
 
     // Rubicon Market Functions:
 
@@ -139,15 +159,14 @@ contract BathToken is IBathToken {
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
-        uint256 id =
-            RubiconMarket(RubiconMarketAddress).offer(
-                pay_amt,
-                pay_gem,
-                buy_amt,
-                buy_gem,
-                0,
-                false
-            );
+        uint256 id = RubiconMarket(RubiconMarketAddress).offer(
+            pay_amt,
+            pay_gem,
+            buy_amt,
+            buy_gem,
+            0,
+            false
+        );
         emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
         return (id);
     }
@@ -175,13 +194,16 @@ contract BathToken is IBathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) public {
-        uint256 r =
-            (IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)).div(
-                totalSupply
-            );
+        uint256 r = (
+            IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)
+        )
+        .div(totalSupply);
         _burn(msg.sender, _shares);
 
-        underlyingToken.transfer(msg.sender, r);
+        uint256 _fee = r.mul(feeBPS).div(feeDenominator);
+        IERC20(underlyingToken).transfer(feeTo, _fee);
+
+        underlyingToken.transfer(msg.sender, r.sub(_fee));
     }
 
     // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
@@ -191,9 +213,8 @@ contract BathToken is IBathToken {
         uint8 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 20);
-        uint256 stratReward =
-            (stratProportion *
-                (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
+        uint256 stratReward = (stratProportion *
+            (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
         IERC20(underlyingAsset).transfer(
             sisterBath,
             IERC20(underlyingAsset).balanceOf(address(this)) - stratReward
@@ -268,23 +289,22 @@ contract BathToken is IBathToken {
         bytes32 s
     ) external {
         require(deadline >= block.timestamp, "UniswapV2: EXPIRED");
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            owner,
-                            spender,
-                            value,
-                            nonces[owner]++,
-                            deadline
-                        )
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                keccak256(
+                    abi.encode(
+                        PERMIT_TYPEHASH,
+                        owner,
+                        spender,
+                        value,
+                        nonces[owner]++,
+                        deadline
                     )
                 )
-            );
+            )
+        );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(
             recoveredAddress != address(0) && recoveredAddress == owner,

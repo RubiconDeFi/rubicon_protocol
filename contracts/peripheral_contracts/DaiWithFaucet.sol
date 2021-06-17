@@ -1,9 +1,7 @@
-/**
- *Submitted for verification at Etherscan.io on 2019-11-14
- */
+// SPDX-License-Identifier: UNLICENSED
 
 // hevm: flattened sources of /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/dai.sol
-pragma solidity ^0.5.12;
+pragma solidity =0.7.6;
 
 ////// /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/lib.sol
 // This program is free software: you can redistribute it and/or modify
@@ -29,27 +27,6 @@ contract LibNote {
         bytes32 indexed arg2,
         bytes data
     ) anonymous;
-
-    modifier note {
-        _;
-        assembly {
-            // log an 'anonymous' event with a constant 6 words of calldata
-            // and four indexed topics: selector, caller, arg1 and arg2
-            let mark := msize // end of memory ensures zero
-            mstore(0x40, add(mark, 288)) // update free memory pointer
-            mstore(mark, 0x20) // bytes type data offset
-            mstore(add(mark, 0x20), 224) // bytes size (padded)
-            calldatacopy(add(mark, 0x40), 0, 224) // bytes payload
-            log4(
-                mark,
-                288, // calldata
-                shl(224, shr(224, calldataload(0))), // msg.sig
-                caller, // msg.sender
-                calldataload(4), // arg1
-                calldataload(36) // arg2
-            )
-        }
-    }
 }
 
 ////// /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/dai.sol
@@ -76,11 +53,11 @@ contract DaiWithFaucet is LibNote {
     // --- Auth ---
     mapping(address => uint256) public wards;
 
-    function rely(address guy) external note auth {
+    function rely(address guy) external auth {
         wards[guy] = 1;
     }
 
-    function deny(address guy) external note auth {
+    function deny(address guy) external auth {
         wards[guy] = 0;
     }
 
@@ -221,27 +198,26 @@ contract DaiWithFaucet is LibNote {
         bytes32 r,
         bytes32 s
     ) external {
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH,
-                            holder,
-                            spender,
-                            nonce,
-                            expiry,
-                            allowed
-                        )
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                keccak256(
+                    abi.encode(
+                        PERMIT_TYPEHASH,
+                        holder,
+                        spender,
+                        nonce,
+                        expiry,
+                        allowed
                     )
                 )
-            );
+            )
+        );
 
         require(holder != address(0), "Dai/invalid-address-0");
         require(holder == ecrecover(digest, v, r, s), "Dai/invalid-permit");
-        require(expiry == 0 || now <= expiry, "Dai/permit-expired");
+        require(expiry == 0 || block.timestamp <= expiry, "Dai/permit-expired");
         require(nonce == nonces[holder]++, "Dai/invalid-nonce");
         uint256 wad = allowed ? uint256(-1) : 0;
         allowance[holder][spender] = wad;

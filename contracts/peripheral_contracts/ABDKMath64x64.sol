@@ -3,7 +3,7 @@
  * ABDK Math 64.64 Smart Contract Library.  Copyright © 2019 by ABDK Consulting.
  * Author: Mikhail Vladimirov <mikhail.vladimirov@gmail.com>
  */
-pragma solidity >=0.5.0; //<0.6.0-0||>=0.6.0 <0.7.0-0||>=0.7.0 <0.8.0-0;
+pragma solidity =0.7.6; //<0.6.0-0||>=0.6.0 <0.7.0-0||>=0.7.0 <0.8.0-0;
 
 /**
  * Smart contract library of mathematical functions operating with signed
@@ -189,8 +189,8 @@ library ABDKMath64x64 {
 
         require(x >= 0);
 
-        uint256 lo =
-            (uint256(x) * (y & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)) >> 64;
+        uint256 lo = (uint256(x) * (y & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)) >>
+            64;
         uint256 hi = uint256(x) * (y >> 128);
 
         require(hi <= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);

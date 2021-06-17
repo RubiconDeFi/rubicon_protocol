@@ -198,9 +198,10 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
     if (r == process.env.OP_KOVAN_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
 }));
 
+
 // Will revert if no bathToken liquidity
-console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("Max order size for WAYNE: " + web3.utils.fromWei(r))));
-console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("Max order size for USDC: " + web3.utils.fromWei(r))));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("POOLS Max order size for WAYNE: " + web3.utils.fromWei(r))));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
 
 //  BATH TOKENS
 console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
@@ -417,8 +418,8 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
-                // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
+                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
             } else {
                 console.log("**ERROR Executing Strategy**: \n");
                 console.log(e);
@@ -435,8 +436,8 @@ async function manageInventory(currentAsk, currentBid) {
 
     const bathAssetSupply = await bathWayneContractKovan.methods.totalSupply().call();
     // console.log(bathQuoteSupply);
-    // console.log('Current asset liquidity balance: ', assetBalance);
-    // console.log('Current quote liquidity balance: ', quoteBalance);
+    console.log('Current asset liquidity balance: ', web3.utils.fromWei(assetBalance));
+    console.log('Current quote liquidity balance: ', web3.utils.fromWei(quoteBalance));
     // console.log('bathQuote deposited', bathQuoteSupply);
     // console.log('bathAsset deposited', bathQuoteSupply);
 
@@ -480,7 +481,6 @@ async function startBot() {
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
-console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
-// startBot();
+startBot();
 
 
