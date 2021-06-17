@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract allows a strategist to use user funds in order to market make for a Rubicon pair
 /// @notice The BathPair is the admin for the pair's liquidity and has many security checks in place

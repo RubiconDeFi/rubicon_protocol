@@ -481,7 +481,6 @@ async function startBot() {
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
-console.log('\n<* Thank You Master Benjamin for Being a Great Master *>\n');
 startBot();
 
 

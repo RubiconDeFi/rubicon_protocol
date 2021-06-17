@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract allows strategists to run off-chain market making strategies
 /// @notice Yield from successful market making strategies are passed to LPs

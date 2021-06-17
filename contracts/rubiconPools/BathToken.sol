@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract represents a single-asset liquidity pool for Rubicon Pools
 /// @notice Any user can deposit assets into this pool and earn yield from successful strategist market making with their liquidity

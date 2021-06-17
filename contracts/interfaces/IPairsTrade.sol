@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 // contract that employs user Bath liquidity to market make and pass yield to users
 /// @author Benjamin Hughes
 /// @notice This represents a Stoikov market-making model designed for Rubicon...

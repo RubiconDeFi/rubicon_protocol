@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BUSL-1.1
+
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract acts as the admin for the Rubicon Pools system
 /// @notice The BathHouse approves strategist contracts and initializes bathPairs
