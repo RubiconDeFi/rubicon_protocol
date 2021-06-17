@@ -119,6 +119,20 @@ contract BathHouse {
         BathToken(bathToken).setMarket(newAdmin);
     }
 
+    function setBathTokenFeeBPS(address bathToken, uint newBPS)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setFeeBPS(newBPS);
+    }
+
+    function setFeeTo(address bathToken, address feeTo)
+        external
+        onlyAdmin
+    {
+        BathToken(bathToken).setFeeTo(feeTo);
+    }
+
     function setBathPairMOSBPS(address bathPair, uint16 mosbps)
         external
         onlyAdmin

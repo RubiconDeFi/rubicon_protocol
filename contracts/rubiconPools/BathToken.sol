@@ -13,24 +13,32 @@ import "./BathHouse.sol";
 
 contract BathToken {
     // using SafeERC20 for IERC20;
-    // using Address for address;
     using SafeMath for uint256;
+    // using Address for address;
 
     string public symbol;
+    string public constant name = "BathToken v1";
+    uint8 public constant decimals = 18;
+    
     IERC20 public underlyingToken;
     address public RubiconMarketAddress;
 
     // admin
     address public bathHouse;
+    
+    address public feeTo;
+    uint public feeBPS;
+    uint public feeDenominator = 10000;
 
-    string public constant name = "BathToken v1";
-    uint8 public constant decimals = 18;
     uint256 public totalSupply;
+    uint256 MAX_INT = 2**256 - 1;
+
     mapping(address => uint256) public balanceOf;
 
     // This maps a user's address to cumulative pool yield at the time of deposit
     mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => uint256) public nonces;
 
     // This tracks cumulative yield over time [amount, timestmap]
     // amount should be token being passed from another bathToken to this one (pair) - market price at the time
@@ -40,7 +48,6 @@ contract BathToken {
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    mapping(address => uint256) public nonces;
     bool public initialized;
 
     event Approval(
@@ -87,9 +94,13 @@ contract BathToken {
         );
 
         // Add infinite approval of Rubicon Market for this asset
-        uint256 MAX_INT = 2**256 - 1;
+        
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
         emit LogInit(block.timestamp);
+
+        require(RubiconMarket(RubiconMarketAddress).initialized() && BathHouse(bathHouse).initialized());
+        feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
+        feeBPS = 0; //Fee set to zero
 
         initialized = true;
     }
@@ -111,13 +122,23 @@ contract BathToken {
     }
 
     function setMarket(address newRubiconMarket) external {
-        require(msg.sender == bathHouse);
+        require(msg.sender == bathHouse && initialized);
         RubiconMarketAddress = newRubiconMarket;
     }
 
     function setBathHouse(address newBathHouse) external {
-        require(msg.sender == bathHouse);
+        require(msg.sender == bathHouse && initialized);
         bathHouse = newBathHouse;
+    }
+
+    function setFeeBPS(uint _feeBPS) external {
+        require(msg.sender == bathHouse && initialized);
+        feeBPS = _feeBPS;
+    }
+
+    function setFeeTo(address _feeTo) external {
+        require(msg.sender == bathHouse && initialized);
+        feeTo = _feeTo;
     }
 
     // Rubicon Market Functions:
@@ -177,7 +198,10 @@ contract BathToken {
         .div(totalSupply);
         _burn(msg.sender, _shares);
 
-        underlyingToken.transfer(msg.sender, r);
+        uint256 _fee = r.mul(feeBPS).div(feeDenominator);
+        IERC20(underlyingToken).transfer(feeTo, _fee);
+
+        underlyingToken.transfer(msg.sender, r.sub(_fee));
     }
 
     // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
