@@ -1,5 +1,4 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RubiconDeFi/rubicon_protocol/Truffle%20Tests)
-![GitHub](https://img.shields.io/github/license/RubiconDeFi/rubicon_protocol)
 ![Discord](https://img.shields.io/discord/752590582274326680?link=https://discord.com/invite/E7pS24J&link=https://discord.com/invite/E7pS24J)
 
 ## Docs
