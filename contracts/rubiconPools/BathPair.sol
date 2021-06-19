@@ -139,7 +139,6 @@ contract BathPair {
         shapeCoefNum = val;
     }
 
-    // TODO: enforce oracle sanity check to avoid order book manipulation before permissionless strategists
     function getMidpointPrice() internal returns (int128) {
         uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
@@ -149,6 +148,7 @@ contract BathPair {
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
+        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to get a Midpoint");        
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
@@ -157,13 +157,10 @@ contract BathPair {
                 (bestBid.pay_amt / bestBid.buy_amt)),
             2
         );
-        // ((bestAsk.buy_amt / bestAsk.pay_amt) +
-        //     (bestBid.pay_amt / bestBid.buy_amt)) / 2;
-        emit LogNoteI("midpoint calculated:", midpoint);
         return midpoint;
     }
 
-    // Takes the proposed bid and ask as a parameter - ensures that there is a spread and that ask price > best bid and
+    // Takes the proposed bid and ask as a parameter - that the offers placed won't match and are maker orders
     // bid price > best ask
     function enforceSpread(
         uint256 askN,
@@ -184,6 +181,8 @@ contract BathPair {
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
+
+        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to enforce a spread");        
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
