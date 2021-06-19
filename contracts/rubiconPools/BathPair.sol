@@ -300,70 +300,86 @@ contract BathPair {
         // ** Assume that any partialFill or totalFill resulted in yield **
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
             // If neither is zero...
-            if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
-            order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-            order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
-
             if (
-                (offer1.pay_amt == 0 &&
-                    offer1.pay_gem == ERC20(0) &&
-                    offer1.buy_amt == 0 &&
-                    offer1.buy_gem == ERC20(0)) &&
-                (offer2.pay_amt != 0 &&
-                    offer2.pay_gem != ERC20(0) &&
-                    offer2.buy_amt != 0 &&
-                    offer2.buy_gem != ERC20(0))
+                outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0
             ) {
-                // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
-                BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
-                emit LogNote("cancelled: ", outstandingPairIDs[x][1]);
-                // true if quote fills -> asset yield
-                logFill(outstandingPairIDs[x][0], true);
-                removeElement(x);
-            } else if (
-                (offer1.pay_amt != 0 &&
-                    offer1.pay_gem != ERC20(0) &&
-                    offer1.buy_amt != 0 &&
-                    offer1.pay_gem != ERC20(0)) &&
-                (offer2.pay_amt == 0 &&
-                    offer2.pay_gem == ERC20(0) &&
-                    offer2.buy_amt == 0 &&
-                    offer2.buy_gem == ERC20(0))
-            ) {
-                BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
-                emit LogNote("cancelled: ", outstandingPairIDs[x][0]);
+                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
 
-                logFill(outstandingPairIDs[x][1], false);
-                removeElement(x);
-            } else if (
-                (offer1.pay_amt != 0 &&
-                    offer1.pay_gem != ERC20(0) &&
-                    offer1.buy_amt != 0 &&
-                    offer1.pay_gem != ERC20(0)) &&
-                (offer2.pay_amt != 0 &&
-                    offer2.pay_gem != ERC20(0) &&
-                    offer2.buy_amt != 0 &&
-                    offer2.buy_gem != ERC20(0))
-            ) {
-                // delete the offer if it is too old - this forces the expungement of static orders
                 if (
-                    outstandingPairIDs[x][2] <
-                    (block.timestamp - BathHouse(bathHouse).timeDelay())
+                    (offer1.pay_amt == 0 &&
+                        offer1.pay_gem == ERC20(0) &&
+                        offer1.buy_amt == 0 &&
+                        offer1.buy_gem == ERC20(0)) &&
+                    (offer2.pay_amt != 0 &&
+                        offer2.pay_gem != ERC20(0) &&
+                        offer2.buy_amt != 0 &&
+                        offer2.buy_gem != ERC20(0))
+                ) {
+                    // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
+                    BathToken(bathQuoteAddress).cancel(
+                        outstandingPairIDs[x][1]
+                    );
+                    emit LogNote("cancelled: ", outstandingPairIDs[x][1]);
+                    // true if quote fills -> asset yield
+                    logFill(outstandingPairIDs[x][0], true);
+                    removeElement(x);
+                    continue;
+                } else if (
+                    (offer1.pay_amt != 0 &&
+                        offer1.pay_gem != ERC20(0) &&
+                        offer1.buy_amt != 0 &&
+                        offer1.pay_gem != ERC20(0)) &&
+                    (offer2.pay_amt == 0 &&
+                        offer2.pay_gem == ERC20(0) &&
+                        offer2.buy_amt == 0 &&
+                        offer2.buy_gem == ERC20(0))
                 ) {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
                     );
-                    BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][1]
-                    );
-                    emit LogNote("cancelled both: ", outstandingPairIDs[x][0]);
-                    emit LogNote("cancelled both: ", outstandingPairIDs[x][1]);
-                    removeElement(x);
-                } else {
+                    emit LogNote("cancelled: ", outstandingPairIDs[x][0]);
+
                     logFill(outstandingPairIDs[x][1], false);
-                    logFill(outstandingPairIDs[x][0], true);
+                    removeElement(x);
+                    continue;
+                } else if (
+                    (offer1.pay_amt != 0 &&
+                        offer1.pay_gem != ERC20(0) &&
+                        offer1.buy_amt != 0 &&
+                        offer1.pay_gem != ERC20(0)) &&
+                    (offer2.pay_amt != 0 &&
+                        offer2.pay_gem != ERC20(0) &&
+                        offer2.buy_amt != 0 &&
+                        offer2.buy_gem != ERC20(0))
+                ) {
+                    // delete the offer if it is too old - this forces the expungement of static orders
+                    if (
+                        outstandingPairIDs[x][2] <
+                        (block.timestamp - BathHouse(bathHouse).timeDelay())
+                    ) {
+                        BathToken(bathAssetAddress).cancel(
+                            outstandingPairIDs[x][0]
+                        );
+                        BathToken(bathQuoteAddress).cancel(
+                            outstandingPairIDs[x][1]
+                        );
+                        emit LogNote(
+                            "cancelled both: ",
+                            outstandingPairIDs[x][0]
+                        );
+                        emit LogNote(
+                            "cancelled both: ",
+                            outstandingPairIDs[x][1]
+                        );
+                        removeElement(x);
+                    continue;
+                    } else {
+                        logFill(outstandingPairIDs[x][1], false);
+                        logFill(outstandingPairIDs[x][0], true);
+                    }
                 }
-            }} 
+            }
             // just ask
             else if (outstandingPairIDs[x][0] != 0) {
                 order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
@@ -373,10 +389,12 @@ contract BathPair {
                     offer1.pay_gem == ERC20(0) &&
                     offer1.buy_amt == 0 &&
                     offer1.pay_gem == ERC20(0)
-            ) {
-                logFill(outstandingPairIDs[x][0], true);
-                removeElement(x); 
-            }
+                ) {
+                    logFill(outstandingPairIDs[x][0], true);
+                    removeElement(x);
+                    continue;
+
+                }
                 // time check
                 if (
                     outstandingPairIDs[x][2] <
@@ -386,8 +404,9 @@ contract BathPair {
                         outstandingPairIDs[x][0]
                     );
                     removeElement(x);
-                }
+                    continue;
 
+                }
             } else {
                 order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
                 // fill check
@@ -396,19 +415,21 @@ contract BathPair {
                     offer2.pay_gem == ERC20(0) &&
                     offer2.buy_amt == 0 &&
                     offer2.pay_gem == ERC20(0)
-            ) {
-                logFill(outstandingPairIDs[x][1], false);
-                removeElement(x); 
-            }
+                ) {
+                    logFill(outstandingPairIDs[x][1], false);
+                    removeElement(x);
+                    continue;
+                }
                 // time check
                 if (
                     outstandingPairIDs[x][2] <
                     (block.timestamp - BathHouse(bathHouse).timeDelay())
                 ) {
-                    BathToken(bathAssetAddress).cancel(
+                    BathToken(bathQuoteAddress).cancel(
                         outstandingPairIDs[x][1]
                     );
                     removeElement(x);
+                    continue;
                 }
             }
         }
@@ -436,14 +457,13 @@ contract BathPair {
         returns (uint256)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
-        int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000); // 5 / 1000
+        int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000);
 
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
         require(
             underlyingBalance > 0,
             "no bathToken liquidity to calculate max orderSize permissable"
         );
-        // Divide the below by 1000
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
@@ -491,15 +511,6 @@ contract BathPair {
                 return dynamicSize;
             }
         }
-
-        // PseudoCode:
-        // if ratio = (assetBalance / propotional quote balance) > 1:
-        //      -Use dynamic order size for quote due to underweighting: n=-0.005 => MaxSize * e^(n*ratio)
-        // maxQuoteSize * (eN / eD ) ** (n *ratio)
-        // else:
-        //      -Use dynamic order size for asset due to underweighting: ''
-        // maxAssetSize * (eN / eD ) ** (n *ratio)
-        // return orderSize;
     }
 
     // Used to map a strategist to their orders
@@ -523,6 +534,8 @@ contract BathPair {
     function getLastTradeIDs() external view returns (uint256[3] memory) {
         return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
+
+    // ** Below are the functions that can be called by Strategists ** 
 
     function executeStrategy(
         address targetStrategy,
@@ -581,10 +594,33 @@ contract BathPair {
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
     function bathScrub() public {
-        // 4. Cancel Outstanding Orders
+        // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool
         rebalancePair();
+    }
+
+    // This function allows a strategist to remove Pools liquidity from the order book
+    function removeLiquidity(uint id) external {
+        require(IDs2strategist[id] == msg.sender, "only strategist can cancel their orders");
+        order memory ord = getOfferInfo(id);
+        if (ord.pay_gem == ERC20(underlyingAsset)) {
+                BathToken(bathAssetAddress).cancel(id);
+            for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+                if (outstandingPairIDs[x][0] == id) {
+                    removeElement(x);
+                    break;
+                }
+            }
+        } else if (ord.pay_gem == ERC20(underlyingQuote)) {
+                BathToken(bathQuoteAddress).cancel(id);
+            for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+                if (outstandingPairIDs[x][1] == id) {
+                    removeElement(x);
+                    break;
+                }
+            }
+        }
     }
 }

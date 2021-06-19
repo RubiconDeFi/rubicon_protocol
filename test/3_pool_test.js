@@ -6,8 +6,6 @@ const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
 const PairsTrade = artifacts.require("PairsTrade");
 
-const helper = require('./testHelpers/timeHelper.js');
-
 function logIndented(...args) {
     console.log("       ", ...args); 
 }
@@ -154,28 +152,33 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
         it("Zero order can be placed - bid or ask", async function () {
-            
             await bathPairInstance.executeStrategy(strategyInstance.address, 0, 0, bidNumerator, bidDenominator);
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, 0, 0 );
             await bathPairInstance.bathScrub();
         });
-        // for (let i = 1; i < 5; i++) {
-        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-        //         await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-        //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-        //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-        //         if (i % 3) {
-        //             await bathPairInstance.bathScrub();
-        //         }
-        //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-        //     });
-        // }
-        // it("Funds are correctly returned to bathTokens", async function () {
-        //     await bathPairInstance.bathScrub();
-        //     assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
-        //     assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
-        // });
+        it("Strategist can cancel an order they made", async function () {
+            
+            await bathPairInstance.removeLiquidity(8);
+            // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
+        });
+        for (let i = 1; i < 10; i++) {
+            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+
+                await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+                if (i % 3) {
+                    await bathPairInstance.bathScrub();
+                }
+                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+            });
+        }
+        it("Funds are correctly returned to bathTokens", async function () {
+            await bathPairInstance.bathScrub();
+            assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
+            assert.equal((await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),"0");
+        });
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
             // TODO: validate this is correct
