@@ -40,6 +40,7 @@ contract BathPair {
     event LogTrade(uint256, ERC20, uint256, ERC20);
     event LogNote(string, uint256);
     event LogNoteI(string, int128);
+    event LogOffer(string, order);
 
     // Maps a trade ID to each of their strategists for rewards purposes
     mapping(uint256 => address) public IDs2strategist;
@@ -83,9 +84,6 @@ contract BathPair {
                 address(0x0000000000000000000000000000000000000000)
         );
         RubiconMarketAddress = BathHouse(bathHouse).getMarket();
-
-        // maxOrderSizeBPS = 500;
-        // shapeCoefNum = -5;
 
         maxOrderSizeBPS = _maxOrderSizeBPS;
         shapeCoefNum = _shapeCoefNum;
@@ -301,6 +299,8 @@ contract BathPair {
     function cancelPartialFills() internal {
         // ** Assume that any partialFill or totalFill resulted in yield **
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+            // If neither is zero...
+            if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
             order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
             order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
 
@@ -318,7 +318,7 @@ contract BathPair {
                 BathToken(bathQuoteAddress).cancel(outstandingPairIDs[x][1]);
                 emit LogNote("cancelled: ", outstandingPairIDs[x][1]);
                 // true if quote fills -> asset yield
-                logFill(outstandingPairIDs[x][0], false);
+                logFill(outstandingPairIDs[x][0], true);
                 removeElement(x);
             } else if (
                 (offer1.pay_amt != 0 &&
@@ -333,7 +333,7 @@ contract BathPair {
                 BathToken(bathAssetAddress).cancel(outstandingPairIDs[x][0]);
                 emit LogNote("cancelled: ", outstandingPairIDs[x][0]);
 
-                logFill(outstandingPairIDs[x][1], true);
+                logFill(outstandingPairIDs[x][1], false);
                 removeElement(x);
             } else if (
                 (offer1.pay_amt != 0 &&
@@ -362,6 +362,53 @@ contract BathPair {
                 } else {
                     logFill(outstandingPairIDs[x][1], false);
                     logFill(outstandingPairIDs[x][0], true);
+                }
+            }} 
+            // just ask
+            else if (outstandingPairIDs[x][0] != 0) {
+                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+                // fill check
+                if (
+                    offer1.pay_amt == 0 &&
+                    offer1.pay_gem == ERC20(0) &&
+                    offer1.buy_amt == 0 &&
+                    offer1.pay_gem == ERC20(0)
+            ) {
+                logFill(outstandingPairIDs[x][0], true);
+                removeElement(x); 
+            }
+                // time check
+                if (
+                    outstandingPairIDs[x][2] <
+                    (block.timestamp - BathHouse(bathHouse).timeDelay())
+                ) {
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][0]
+                    );
+                    removeElement(x);
+                }
+
+            } else {
+                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+                // fill check
+                if (
+                    offer2.pay_amt == 0 &&
+                    offer2.pay_gem == ERC20(0) &&
+                    offer2.buy_amt == 0 &&
+                    offer2.pay_gem == ERC20(0)
+            ) {
+                logFill(outstandingPairIDs[x][1], false);
+                removeElement(x); 
+            }
+                // time check
+                if (
+                    outstandingPairIDs[x][2] <
+                    (block.timestamp - BathHouse(bathHouse).timeDelay())
+                ) {
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][1]
+                    );
+                    removeElement(x);
                 }
             }
         }
