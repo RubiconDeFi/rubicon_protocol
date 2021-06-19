@@ -117,26 +117,53 @@ contract PairsTrade {
         address asset,
         address quote
     ) internal returns (bool) {
-        uint256 newAskID = BathToken(bathAssetAddress).placeOffer(
-            ask.pay_amt,
-            ask.pay_gem,
-            ask.buy_amt,
-            ask.buy_gem
-        );
-        emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
-
-        uint256 newBidID = BathToken(bathQuoteAddress).placeOffer(
-            bid.pay_amt,
-            bid.pay_gem,
-            bid.buy_amt,
-            bid.buy_gem
-        );
-        emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
-
         address pair = BathHouse(bathHouse).getBathPair(asset, quote);
-        BathPair(pair).addOutstandingPair(
-            [newAskID, newBidID, block.timestamp]
-        );
+
+        if (
+            ask.pay_amt > 0 &&
+            ask.buy_amt > 0 &&
+            bid.buy_amt > 0 &&
+            bid.pay_amt > 0
+        ) {
+            uint256 newAskID = BathToken(bathAssetAddress).placeOffer(
+                ask.pay_amt,
+                ask.pay_gem,
+                ask.buy_amt,
+                ask.buy_gem
+            );
+            emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
+
+            uint256 newBidID = BathToken(bathQuoteAddress).placeOffer(
+                bid.pay_amt,
+                bid.pay_gem,
+                bid.buy_amt,
+                bid.buy_gem
+            );
+            emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
+
+            BathPair(pair).addOutstandingPair(
+                [newAskID, newBidID, block.timestamp]
+            );
+        } else if (bid.buy_amt > 0 && bid.pay_amt > 0) {
+            uint256 newBidID = BathToken(bathQuoteAddress).placeOffer(
+                bid.pay_amt,
+                bid.pay_gem,
+                bid.buy_amt,
+                bid.buy_gem
+            );
+            emit LogTrade(bid.pay_amt, bid.pay_gem, bid.buy_amt, bid.buy_gem);
+
+            BathPair(pair).addOutstandingPair([0, newBidID, block.timestamp]);
+        } else {
+            uint256 newAskID = BathToken(bathAssetAddress).placeOffer(
+                ask.pay_amt,
+                ask.pay_gem,
+                ask.buy_amt,
+                ask.buy_gem
+            );
+            emit LogTrade(ask.pay_amt, ask.pay_gem, ask.buy_amt, ask.buy_gem);
+            BathPair(pair).addOutstandingPair([newAskID, 0, block.timestamp]);
+        }
     }
 
     function execute(

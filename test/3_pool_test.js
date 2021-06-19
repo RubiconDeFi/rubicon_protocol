@@ -153,18 +153,24 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
-        for (let i = 1; i < 10; i++) {
-            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-                await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-                if (i % 3) {
-                    await bathPairInstance.bathScrub();
-                }
-                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-            });
-        }
+        it("Zero order can be placed - bid or ask", async function () {
+            // await bathPairInstance.bathScrub();
+            
+            await bathPairInstance.executeStrategy(strategyInstance.address, 0, 0, bidNumerator, bidDenominator);
+            await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, 0, 0 );
+        });
+        // for (let i = 1; i < 10; i++) {
+        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+        //         await rubiconMarketInstance.buy(4 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+        //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+        //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+        //         if (i % 3) {
+        //             await bathPairInstance.bathScrub();
+        //         }
+        //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+        //     });
+        // }
         it("Funds are correctly returned to bathTokens", async function () {
             await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");

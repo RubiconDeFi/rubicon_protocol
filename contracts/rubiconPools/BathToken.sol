@@ -21,16 +21,16 @@ contract BathToken {
     string public symbol;
     string public constant name = "BathToken v1";
     uint8 public constant decimals = 18;
-    
+
     IERC20 public underlyingToken;
     address public RubiconMarketAddress;
 
     // admin
     address public bathHouse;
-    
+
     address public feeTo;
-    uint public feeBPS;
-    uint public feeDenominator = 10000;
+    uint256 public feeBPS;
+    uint256 public feeDenominator = 10000;
 
     uint256 public totalSupply;
     uint256 MAX_INT = 2**256 - 1;
@@ -96,11 +96,14 @@ contract BathToken {
         );
 
         // Add infinite approval of Rubicon Market for this asset
-        
+
         IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
         emit LogInit(block.timestamp);
 
-        require(RubiconMarket(RubiconMarketAddress).initialized() && BathHouse(bathHouse).initialized());
+        require(
+            RubiconMarket(RubiconMarketAddress).initialized() &&
+                BathHouse(bathHouse).initialized()
+        );
         feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
         feeBPS = 0; //Fee set to zero
 
@@ -133,7 +136,7 @@ contract BathToken {
         bathHouse = newBathHouse;
     }
 
-    function setFeeBPS(uint _feeBPS) external {
+    function setFeeBPS(uint256 _feeBPS) external {
         require(msg.sender == bathHouse && initialized);
         feeBPS = _feeBPS;
     }

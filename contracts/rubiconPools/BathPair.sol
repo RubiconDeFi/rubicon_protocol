@@ -34,7 +34,6 @@ contract BathPair {
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
 
-
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
@@ -87,7 +86,7 @@ contract BathPair {
 
         // maxOrderSizeBPS = 500;
         // shapeCoefNum = -5;
-        
+
         maxOrderSizeBPS = _maxOrderSizeBPS;
         shapeCoefNum = _shapeCoefNum;
         initialized = true;
@@ -174,11 +173,11 @@ contract BathPair {
         uint256 bidN,
         uint256 bidD
     ) internal view {
-        // A spread must exist: (askN / askD) < (bidN / bidD)
         require(
-            (askN * bidD) < (bidN * askD),
-            "there is not a spread on strategist's pair trade"
+            (askN > 0 && askD > 0) || (bidN > 0 && bidD > 0),
+            "one order must be non-zero"
         );
+
         uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
@@ -190,20 +189,27 @@ contract BathPair {
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
-
-        // Goal is for (askNumerator / askDenominator) < (bestBid.buy_amt / bestBid.pay_amt)
-        // Therefore: askNumerator * bestBid.pay_amt < bestBid.buy_amt * askDenominator
-        require(
-            (askN * bestBid.pay_amt) < (bestBid.buy_amt * askD),
-            "ask price is not greater than the best bid"
-        );
-
-        // Goal is for (bestAsk.pay_amt / bestAsk.buy_amt) < (bidNumerator / bidDenominator)
-        // Therefore: bestAskNumerator * bidDenominator < bidNumerator * bestAskDenominator
-        require(
-            (bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN),
-            "bid price is not less than the best ask"
-        );
+        if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
+            require(
+                (askN * bestBid.pay_amt) < (bestBid.buy_amt * askD) &&
+                    (bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN),
+                "ask price is not greater than the best bid"
+            );
+        } else if (bidN > 0 && bidD > 0) {
+            // Goal is for (bestAsk.pay_amt / bestAsk.buy_amt) < (bidNumerator / bidDenominator)
+            // Therefore: bestAskNumerator * bidDenominator < bidNumerator * bestAskDenominator
+            require(
+                (bestAsk.pay_amt * bidD) < (bestAsk.buy_amt * bidN),
+                "bid price is not less than the best ask"
+            );
+        } else if (askN > 0 && askD > 0) {
+            // Goal is for (askNumerator / askDenominator) < (bestBid.buy_amt / bestBid.pay_amt)
+            // Therefore: askNumerator * bestBid.pay_amt < bestBid.buy_amt * askDenominator
+            require(
+                (askN * bestBid.pay_amt) < (bestBid.buy_amt * askD),
+                "ask price is not greater than the best bid"
+            );
+        }
     }
 
     function getThisBathQuote() external view returns (address) {
@@ -384,7 +390,7 @@ contract BathPair {
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
         int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000); // 5 / 1000
-        
+
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
         require(
             underlyingBalance > 0,
@@ -404,10 +410,14 @@ contract BathPair {
                 return (maxOrderSizeBPS * underlyingBalance) / 10000;
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) /
-                    10000; 
+                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) / 10000;
                 int128 shapeFactor = ABDKMath64x64.exp(
-                    ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.mul(ratio, getMidpointPrice())))
+                    ABDKMath64x64.mul(
+                        shapeCoef,
+                        ABDKMath64x64.inv(
+                            ABDKMath64x64.mul(ratio, getMidpointPrice())
+                        )
+                    )
                 );
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
                 return dynamicSize;
@@ -421,10 +431,14 @@ contract BathPair {
                 return (maxOrderSizeBPS * underlyingBalance) / 10000;
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) /
-                    10000; 
-                int128 shapeFactor = ABDKMath64x64.exp( 
-                    ABDKMath64x64.mul(shapeCoef, ABDKMath64x64.inv(ABDKMath64x64.div(ratio, getMidpointPrice())))
+                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) / 10000;
+                int128 shapeFactor = ABDKMath64x64.exp(
+                    ABDKMath64x64.mul(
+                        shapeCoef,
+                        ABDKMath64x64.inv(
+                            ABDKMath64x64.div(ratio, getMidpointPrice())
+                        )
+                    )
                 );
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
                 return dynamicSize;
@@ -470,11 +484,10 @@ contract BathPair {
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
     ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+        // Require at least one order is non-zero
         require(
-            askNumerator > 0 &&
-                askDenominator > 0 &&
-                bidNumerator > 0 &&
-                bidDenominator > 0
+            (askNumerator > 0 && askDenominator > 0) ||
+                (bidNumerator > 0 && bidDenominator > 0)
         );
 
         // Enforce dynamic ordersizing and inventory management

@@ -28,15 +28,26 @@ abstract contract Proxy {
 
             // Call the implementation.
             // out and outsize are 0 because we don't know the size yet.
-            let result := delegatecall(gas(), implementation, 0, calldatasize(), 0, 0)
+            let result := delegatecall(
+                gas(),
+                implementation,
+                0,
+                calldatasize(),
+                0,
+                0
+            )
 
             // Copy the returned data.
             returndatacopy(0, 0, returndatasize())
 
             switch result
             // delegatecall returns 0 on error.
-            case 0 { revert(0, returndatasize()) }
-            default { return(0, returndatasize()) }
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 
@@ -60,7 +71,7 @@ abstract contract Proxy {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if no other
      * function in the contract matches the call data.
      */
-    fallback () external payable virtual {
+    fallback() external payable virtual {
         _fallback();
     }
 
@@ -68,7 +79,7 @@ abstract contract Proxy {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if call data
      * is empty.
      */
-    receive () external payable virtual {
+    receive() external payable virtual {
         _fallback();
     }
 
@@ -78,6 +89,5 @@ abstract contract Proxy {
      *
      * If overriden should call `super._beforeFallback()`.
      */
-    function _beforeFallback() internal virtual {
-    }
+    function _beforeFallback() internal virtual {}
 }

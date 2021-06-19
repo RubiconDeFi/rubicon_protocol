@@ -121,17 +121,14 @@ contract BathHouse {
         BathToken(bathToken).setMarket(newAdmin);
     }
 
-    function setBathTokenFeeBPS(address bathToken, uint newBPS)
+    function setBathTokenFeeBPS(address bathToken, uint256 newBPS)
         external
         onlyAdmin
     {
         BathToken(bathToken).setFeeBPS(newBPS);
     }
 
-    function setFeeTo(address bathToken, address feeTo)
-        external
-        onlyAdmin
-    {
+    function setFeeTo(address bathToken, address feeTo) external onlyAdmin {
         BathToken(bathToken).setFeeTo(feeTo);
     }
 
@@ -142,10 +139,7 @@ contract BathHouse {
         BathPair(bathPair).setMaxOrderSizeBPS(mosbps);
     }
 
-    function setBathPairSCN(address bathPair, int128 val)
-        external
-        onlyAdmin
-    {
+    function setBathPairSCN(address bathPair, int128 val) external onlyAdmin {
         BathPair(bathPair).setShapeCoefNum(val);
     }
 

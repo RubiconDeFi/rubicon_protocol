@@ -139,7 +139,7 @@ async function sendTx(tx, msg) {
 // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
 
 // // Withdraw USDC from BathToken USDC
-// var txData = bathUsdcContractKovan.methods.withdraw(web3.utils.toWei("200")).encodeABI();
+// var txData = bathUsdcContractKovan.methods.withdraw(web3.utils.toWei("100")).encodeABI();
 // var tx = {
 //     gas: 12500000,
 //     data: txData.toString(),
@@ -199,7 +199,7 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 }));
 
 
-// Will revert if no bathToken liquidity
+// // Will revert if no bathToken liquidity
 console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("POOLS Max order size for WAYNE: " + web3.utils.fromWei(r))));
 console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
 
@@ -335,20 +335,6 @@ async function marketMake(a, b, im) {
     }
     var newBidPrice = midPoint * (1-targetSpread);
     var newAskPrice = midPoint * (1+targetSpread);
-    // if (newAskPrice < b) {
-    //     newAskPrice = a * 0.9998;
-    //     if (newAskPrice < b) {
-    //         newAskPrice = a;
-    //     }
-    // }
-    // if (newBidPrice > a) {
-    //     newBidPrice = b * 1.0015;
-    //     if (newBidPrice > a) {
-    //         newBidPrice = b;
-    //     }
-    // }
-    // console.log('Expected new Ask Price ', newAskPrice);
-    // console.log('Expected new Bid Price ', newBidPrice);
     
     // Oversupply of bathQuote -> dynamic ask size
     if (im > 1) {
@@ -356,17 +342,10 @@ async function marketMake(a, b, im) {
         var dynDen = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
         var askNum = dynNum;
         var askDen = dynDen;
-        // console.log('Dynamically sized ask:');
-        // console.log(askNum);
-        // console.log(askDen);
     
         var bidNum = maxOrderSize;
         var bidDen = maxOrderSize / newBidPrice;
-        // console.log('New bid at max size:');
-        // console.log(bidNum);
-        // console.log(bidDen);
     } else {
-    // Oversupply of bathAsset -> dynamic bid size
         var dynNum = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
         var dynDen = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newBidPrice;
         var bidNum = dynNum;
@@ -374,12 +353,27 @@ async function marketMake(a, b, im) {
 
         var askNum = maxOrderSize / newAskPrice;
         var askDen = maxOrderSize;
-        // console.log('New Ask at max size:');
-        // console.log(askNum);
-        // console.log(askDen);
-        // console.log('Dynamically sized bid:');
-        // console.log(dynNum);
-        // console.log(dynDen);
+    }
+
+    newAskPrice1 = newAskPrice * 1.01
+    newBidPrice1 = newBidPrice * 0.99
+
+    if (im > 1) {
+        var dynNum1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newAskPrice1;
+        var dynDen1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
+        var askNum1 = dynNum;
+        var askDen1 = dynDen;
+    
+        var bidNum1 = maxOrderSize;
+        var bidDen1 = maxOrderSize / newBidPrice1;
+    } else {
+        var dynNum1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
+        var dynDen1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newBidPrice1;
+        var bidNum1 = dynNum;
+        var bidDen1 = dynDen;
+
+        var askNum1 = maxOrderSize / newAskPrice1;
+        var askDen1 = maxOrderSize;
     }
 
     await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
@@ -406,6 +400,20 @@ async function marketMake(a, b, im) {
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     
+    var txData1 = bathPairContractKovan.methods.executeStrategy(
+        strategyKovanAddr, 
+        web3.utils.toWei((askNum1).toFixed(18).toString()),
+        web3.utils.toWei(askDen1.toFixed(18).toString()),
+        web3.utils.toWei((bidNum1).toFixed(18).toString()),
+        web3.utils.toWei(bidDen1.toFixed(18).toString())
+    ).encodeABI();
+    var tx1 = {
+        gas: 9000000,
+        data: txData1.toString(),
+        from: process.env.OP_KOVAN_ADMIN.toString(),
+        to: process.env.OP_KOVAN_BATHWAYNEUSDC,
+        gasPrice: web3.utils.toWei("0", "Gwei")
+    }
     // web3.eth.estimateGas(tx).then(console.log);
     // // Estimate the gas
     bathPairContractKovan.methods.executeStrategy(
@@ -418,8 +426,13 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');
-                console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
+                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
+                //     setTimeout(async () => {await sendTx(tx1, 'New trades placed at ' + newBidPrice1.toFixed(3).toString() + '$ and ' + newAskPrice1.toFixed(3).toString()+'$' + '\n')}, 500);
+                    
+                // });
+
+                // await sendTx(tx1, 'New trades placed at ' + (newBidPrice*0.99).toFixed(3).toString() + '$ and ' + (newAskPrice*1.01).toFixed(3).toString()+'$' + '\n');
+                // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
             } else {
                 console.log("**ERROR Executing Strategy**: \n");
                 console.log(e);
@@ -469,6 +482,7 @@ async function startBot() {
             const IMfactor = manageInventory(currentAsk, currentBid);
             await checkForScrub();
             await marketMake(currentAsk, currentBid, IMfactor);
+            // await marketMake(currentAsk, currentBid, IMfactor);
         });
         console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
@@ -476,7 +490,7 @@ async function startBot() {
       startBot();
 
       // Every 6 sec
-    }, 6000);
+    }, 2500);
  
 }
 
