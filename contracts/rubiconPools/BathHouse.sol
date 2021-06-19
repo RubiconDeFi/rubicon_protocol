@@ -2,7 +2,7 @@
 
 /// @author Benjamin Hughes - Rubicon
 /// @notice This contract acts as the admin for the Rubicon Pools system
-/// @notice The BathHouse approves strategist contracts and initializes bathPairs
+/// @notice The BathHouse approves library contracts and initializes bathPairs
 
 pragma solidity =0.7.6;
 
@@ -179,7 +179,6 @@ contract BathHouse {
     function approveStrategy(address strategy)
         external
         onlyAdmin
-        returns (bool)
     {
         approvedStrategies[strategy] = true;
     }
@@ -199,7 +198,6 @@ contract BathHouse {
     function approveBathToken(address bathToken)
         external
         onlyAdmin
-        returns (bool)
     {
         approvedBathTokens[bathToken] = true;
     }

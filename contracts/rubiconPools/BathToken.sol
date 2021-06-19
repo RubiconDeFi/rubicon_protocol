@@ -16,7 +16,6 @@ import "./BathHouse.sol";
 contract BathToken {
     // using SafeERC20 for IERC20;
     using SafeMath for uint256;
-    // using Address for address;
 
     string public symbol;
     string public constant name = "BathToken v1";

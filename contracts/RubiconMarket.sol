@@ -1,8 +1,8 @@
-/// @title RubiconMarket.sol
-/// @notice Please see the repository for this code at https://github.com/RubiconDeFi/rubicon_protocol;
-
 /// SPDX-License-Identifier: Apache-2.0
 /// This contract is a derivative work of the open-source work of Oasis DEX: https://github.com/OasisDEX/oasis
+
+/// @title RubiconMarket.sol
+/// @notice Please see the repository for this code at https://github.com/RubiconDeFi/rubicon_protocol;
 
 pragma solidity =0.7.6;
 

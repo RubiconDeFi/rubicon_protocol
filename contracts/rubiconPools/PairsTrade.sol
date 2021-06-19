@@ -14,6 +14,8 @@ import "./BathHouse.sol";
 import "./BathPair.sol";
 
 contract PairsTrade {
+    using SafeMath for uint256;
+
     string public name;
 
     address public bathHouse;
@@ -37,7 +39,7 @@ contract PairsTrade {
         string memory _name,
         address _bathHouse,
         address _rubiconMarket
-    ) public {
+    ) {
         name = _name;
         bathHouse = _bathHouse;
         RubiconMarketAddress = _rubiconMarket;
@@ -116,7 +118,7 @@ contract PairsTrade {
         order memory bid,
         address asset,
         address quote
-    ) internal returns (bool) {
+    ) internal {
         address pair = BathHouse(bathHouse).getBathPair(asset, quote);
 
         if (
@@ -175,7 +177,7 @@ contract PairsTrade {
         uint256 askDenominator,
         uint256 bidNumerator,
         uint256 bidDenominator
-    ) external onlyPairs returns (uint256, uint256) {
+    ) external onlyPairs {
         // main function to chain the actions of a single strategic market making transaction (pairs trade w/ bid and ask)
 
         // Place pairs trade according to input

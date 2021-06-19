@@ -17,6 +17,8 @@ import "../interfaces/IPairsTrade.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
+    using SafeMath for uint256;
+
     address public bathHouse;
     address public underlyingAsset;
     address public underlyingQuote;
@@ -139,7 +141,7 @@ contract BathPair {
         shapeCoefNum = val;
     }
 
-    function getMidpointPrice() internal returns (int128) {
+    function getMidpointPrice() internal  view returns (int128) {
         uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
@@ -445,8 +447,8 @@ contract BathPair {
 
     // this throws on a zero value ofliquidity
     function getMaxOrderSize(address asset, address bathTokenAddress)
-        public
-        returns (uint256)
+        public view
+        returns (uint256 maxOrderSize)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
         int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000);

@@ -33,7 +33,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
 
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 5, 10);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 1000, 10);
 
         });
         it("Bath Token for asset is deployed and initialized", async function() {
