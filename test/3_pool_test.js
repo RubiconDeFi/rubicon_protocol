@@ -182,7 +182,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
             // TODO: validate this is correct
-            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "5200000000000000");
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "200000000000000");
         });
     });
 });
