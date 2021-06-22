@@ -63,7 +63,7 @@ contract BathPair {
         address _bathHouse,
         uint16 _maxOrderSizeBPS,
         int128 _shapeCoefNum
-    ) public {
+    ) external {
         require(!initialized);
         bathHouse = _bathHouse;
 
@@ -316,7 +316,6 @@ contract BathPair {
                     BathToken(bathQuoteAddress).cancel(
                         outstandingPairIDs[x][1]
                     );
-                    emit LogNote("cancelled: ", outstandingPairIDs[x][1]);
                     // true if quote fills -> asset yield
                     logFill(outstandingPairIDs[x][0], true);
                     removeElement(x);
@@ -334,8 +333,6 @@ contract BathPair {
                     BathToken(bathAssetAddress).cancel(
                         outstandingPairIDs[x][0]
                     );
-                    emit LogNote("cancelled: ", outstandingPairIDs[x][0]);
-
                     logFill(outstandingPairIDs[x][1], false);
                     removeElement(x);
                     continue;
@@ -354,25 +351,17 @@ contract BathPair {
                         outstandingPairIDs[x][2] <
                         (block.timestamp - BathHouse(bathHouse).timeDelay())
                     ) {
+                        // Cancel due to outstanding for too long
                         BathToken(bathAssetAddress).cancel(
                             outstandingPairIDs[x][0]
                         );
                         BathToken(bathQuoteAddress).cancel(
                             outstandingPairIDs[x][1]
                         );
-                        emit LogNote(
-                            "cancelled both: ",
-                            outstandingPairIDs[x][0]
-                        );
-                        emit LogNote(
-                            "cancelled both: ",
-                            outstandingPairIDs[x][1]
-                        );
                         removeElement(x);
                         continue;
                     } else {
-                        logFill(outstandingPairIDs[x][1], false);
-                        logFill(outstandingPairIDs[x][0], true);
+                        continue;
                     }
                 }
             }
@@ -587,7 +576,7 @@ contract BathPair {
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
-    function bathScrub() public {
+    function bathScrub() external {
         // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
 

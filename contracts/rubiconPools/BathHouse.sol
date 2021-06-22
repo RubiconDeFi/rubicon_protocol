@@ -18,14 +18,14 @@ contract BathHouse {
     address public RubiconMarketAddress;
 
     // List of approved strategies
-    mapping(address => bool) approvedStrategies;
-    mapping(address => bool) approvedBathTokens;
-    mapping(address => bool) approvedPairs;
-    mapping(address => bool) bathQuoteExists;
-    mapping(address => bool) bathAssetExists;
-    mapping(address => uint8) propToStrategists;
-    mapping(address => address) quoteToBathQuote;
-    mapping(address => address) assetToBathAsset;
+    mapping(address => bool) public approvedStrategies;
+    mapping(address => bool) public approvedBathTokens;
+    mapping(address => bool) public approvedPairs;
+    mapping(address => bool) internal bathQuoteExists;
+    mapping(address => bool) internal bathAssetExists;
+    mapping(address => uint8) public propToStrategists;
+    mapping(address => address) internal quoteToBathQuote;
+    mapping(address => address) internal assetToBathAsset;
 
     bool public initialized;
 
@@ -43,7 +43,7 @@ contract BathHouse {
         uint256 _reserveRatio,
         uint256 _timeDelay,
         uint256 mopc
-    ) public {
+    ) external {
         require(!initialized);
         name = "Rubicon Bath House";
         admin = msg.sender;
@@ -84,6 +84,10 @@ contract BathHouse {
     modifier onlyAdmin {
         require(msg.sender == admin);
         _;
+    }
+
+    function setBathHouseAdmin(address newAdmin) external onlyAdmin {
+        admin = newAdmin;
     }
 
     // Setter Functions for paramters - onlyAdmin
@@ -148,20 +152,20 @@ contract BathHouse {
     }
 
     // Getter Functions for parameters - onlyAdmin
-    function getMarket() public view returns (address) {
+    function getMarket() external view returns (address) {
         return RubiconMarketAddress;
     }
 
-    function getReserveRatio() public view returns (uint256) {
+    function getReserveRatio() external view returns (uint256) {
         return reserveRatio;
     }
 
-    function getCancelTimeDelay() public view returns (uint256) {
+    function getCancelTimeDelay() external view returns (uint256) {
         return timeDelay;
     }
 
     function getBathPair(address asset, address quote)
-        public
+        external
         view
         returns (address pair)
     {
@@ -236,11 +240,11 @@ contract BathHouse {
         }
     }
 
-    function doesQuoteExist(address quote) public view returns (bool) {
+    function doesQuoteExist(address quote) external view returns (bool) {
         return bathQuoteExists[quote];
     }
 
-    function doesAssetExist(address asset) public view returns (bool) {
+    function doesAssetExist(address asset) external view returns (bool) {
         return bathAssetExists[asset];
     }
 

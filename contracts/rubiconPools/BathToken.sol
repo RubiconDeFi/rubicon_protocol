@@ -71,7 +71,7 @@ contract BathToken {
         IERC20 token,
         address market,
         address _bathHouse
-    ) public {
+    ) external {
         require(!initialized);
         symbol = bathName;
         underlyingToken = token;
@@ -179,7 +179,7 @@ contract BathToken {
     }
 
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) external {
         uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
         uint256 _before = underlyingToken.balanceOf(address(this));
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
@@ -195,7 +195,7 @@ contract BathToken {
     }
 
     // No rebalance implementation for lower fees and faster swaps
-    function withdraw(uint256 _shares) public {
+    function withdraw(uint256 _shares) external {
         uint256 r = (
             IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)
         )
@@ -214,7 +214,7 @@ contract BathToken {
         address underlyingAsset, /* sister asset */
         uint8 stratProportion
     ) external onlyPair {
-        require(stratProportion > 0 && stratProportion < 20);
+        require(stratProportion > 0 && stratProportion < 50);
         uint256 stratReward = (stratProportion *
             (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
         IERC20(underlyingAsset).transfer(
@@ -290,7 +290,7 @@ contract BathToken {
         bytes32 r,
         bytes32 s
     ) external {
-        require(deadline >= block.timestamp, "UniswapV2: EXPIRED");
+        require(deadline >= block.timestamp, "bathToken: EXPIRED");
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
@@ -310,7 +310,7 @@ contract BathToken {
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(
             recoveredAddress != address(0) && recoveredAddress == owner,
-            "UniswapV2: INVALID_SIGNATURE"
+            "bathToken: INVALID_SIGNATURE"
         );
         _approve(owner, spender, value);
     }

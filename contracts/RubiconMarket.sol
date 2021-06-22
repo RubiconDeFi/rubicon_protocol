@@ -549,7 +549,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     mapping(address => mapping(address => uint256)) public _span; //number of offers stored for token pair in sorted orderbook
     mapping(address => uint256) public _dust; //minimum sell amount for a token to avoid dust offers
     mapping(uint256 => uint256) public _near; //next unsorted offer id
-    uint256 _head; //first unsorted offer id
+    uint256 public _head; //first unsorted offer id
     uint256 public dustId; // id of the latest offer marked as dust
 
     function initialize(bool RBCNDist, address _feeTo) public {
