@@ -270,6 +270,9 @@ async function logInfo(mA, mB, a, b, im) {
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
+    console.log("balanceOf underlying", underlying);
+    console.log("totalSupply", r);
+
     if (uOverC >= 1) {
         naiveAPR = "+" +(((await (underlying / r)) - 1)*100).toFixed(3).toString() + "%";
     } else {
@@ -426,7 +429,7 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
+                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
                 //     setTimeout(async () => {await sendTx(tx1, 'New trades placed at ' + newBidPrice1.toFixed(3).toString() + '$ and ' + newAskPrice1.toFixed(3).toString()+'$' + '\n')}, 500);
                     
                 // });

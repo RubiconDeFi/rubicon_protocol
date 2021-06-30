@@ -47,13 +47,13 @@ module.exports = {
         gasPrice: 0,
       },
       optimismKovan: {
-        url: 'https://kovan.optimism.io',
+        url: 'https://optimism-kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
         ovm: true,
-        gasPrice: 0,
+        gasPrice: 15000000,
         chainId: 69,
         accounts: [process.env.PRIVATE_KEY_KOVAN],
         gasLimit: 9000000,
-        timeout: 4000
+        timeout: 40000
       }
   },
   // etherscan: {

@@ -450,7 +450,6 @@ contract BathPair {
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
-            // uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
             int128 ratio = ABDKMath64x64.divu(
                 underlyingBalance,
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)

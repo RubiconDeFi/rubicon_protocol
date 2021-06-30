@@ -136,7 +136,7 @@ contract DaiWithFaucet is LibNote {
     }
 
     function faucet() external returns (bool) {
-        if (block.timestamp < faucetCheck[msg.sender] + 1 days) {
+        if (block.timestamp < faucetCheck[msg.sender] + 3 days) {
             return false;
         }
         mint(msg.sender, 100e18);

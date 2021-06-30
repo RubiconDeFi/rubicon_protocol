@@ -19,25 +19,33 @@ const func = async (hre) => {
 //     );
 // }
 // // USDC
-// const USDCdeployResult = await deploy('DaiWithFaucet', {
-//     from: deployer,
-//     args: [69],
-//     log: true
-//      });
-//   if (USDCdeployResult.newlyDeployed) {
-//     console.log(
-//       `USDC deployed at ${USDCdeployResult.address}`
-//     );
-// }
-  //   assetsToDeploy = [
-  //   "WAYNE",
-  //   "STARK",
-  //   "GME",
-  //   "OPT",
-  //   "SPXE",
-  //   "WBTC",
-  //   "COIN"
-  // ];
+const USDCdeployResult = await deploy('DaiWithFaucet', {
+    from: deployer,
+    args: [69],
+    log: true
+     });
+  if (USDCdeployResult.newlyDeployed) {
+    console.log(
+      `USDC deployed at ${USDCdeployResult.address}`
+    );
+  }
+  
+  
+  const assetsToDeploy = [
+    "WBTC",
+    "MKR",
+    "SNX",
+    "REP",
+    "RGT"
+  ];
+
+  assetsToDeploy.forEach(async (asset) => {  
+  const TokenFactory = await hre.ethers.getContractFactory("EquityToken");
+  await TokenFactory.deploy(process.env.OP_KOVAN_ADMIN, 10000e18, asset, asset).then(async function(r) {
+    console.log("bath" + asset + " deployed at " + await r.address);
+  return await r.address;
+  });
+});
 
   //   const deployResult = await deploy('EquityToken', {
   //       from: deployer,
