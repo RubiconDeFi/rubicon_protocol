@@ -311,7 +311,7 @@ async function checkForScrub(){
             data: await bathPairContractKovan.methods.bathScrub().encodeABI(),
             from: process.env.OP_KOVAN_ADMIN.toString(),
             to: process.env.OP_KOVAN_BATHWAYNEUSDC,
-            gasPrice: web3.utils.toWei("0", "Gwei")
+            gasPrice: web3.utils.toWei("0.015", "Gwei")
         };
         await bathPairContractKovan.methods.bathScrub().estimateGas(tx, (async function(r, d) {
             if (d > 0) { 
@@ -320,7 +320,6 @@ async function checkForScrub(){
                 throw("gas estimation in bathScrub failed");
             }
         }));
-    
 }
 
 async function marketMake(a, b, im) {
@@ -429,7 +428,7 @@ async function marketMake(a, b, im) {
             if (await d != null || d >= 0) {
                 // Send the transaction
                 // console.log(d);
-                // await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
+                await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
                 //     setTimeout(async () => {await sendTx(tx1, 'New trades placed at ' + newBidPrice1.toFixed(3).toString() + '$ and ' + newAskPrice1.toFixed(3).toString()+'$' + '\n')}, 500);
                     
                 // });

@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-waffle'
 import 'hardhat-deploy'
 import '@eth-optimism/hardhat-ovm'
 import '@openzeppelin/hardhat-upgrades'
+import "@nomiclabs/hardhat-web3"
 
 module.exports = {
   ovm: {
@@ -47,12 +48,12 @@ module.exports = {
         gasPrice: 0,
       },
       optimismKovan: {
-        url: 'https://optimism-kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
+        url: 'https://optimism-kovan.infura.io/v3/2989f59dba68436a9c9221bc6d1603d4',
         ovm: true,
         gasPrice: 15000000,
         chainId: 69,
-        accounts: [process.env.PRIVATE_KEY_KOVAN],
-        gasLimit: 9000000,
+        accounts: [process.env.OP_KOVAN_ADMIN_KEY],
+        gasLimit: 18547064,
         timeout: 40000
       }
   },
