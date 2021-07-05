@@ -7,19 +7,19 @@ const func = async (hre) => {
   const { deployer } = await getNamedAccounts()
 
   // Uncomment the below block for deployment ***
-  // const deployResult = await deploy('RubiconMarket', {
-  //   from: deployer,
-  //   log: true
-  // });
-  // if (deployResult.newlyDeployed) {
-  //   console.log(
-  //     `contract RubiconMarket deployed at ${deployResult.address}`
-  //   );
-  //   // Initialize Rubicon Market
-  //   const rmi = await hre.ethers.getContractFactory("RubiconMarket");
-  //   const RMI = await rmi.attach(deployResult.address);
-  //   await RMI.initialize(false, process.env.OP_KOVAN_ADMIN).then((r ) => console.log("Initialized Rubicon Market"));
-  // }
+  const deployResult = await deploy('RubiconMarket', {
+    from: deployer,
+    log: true
+  });
+  if (deployResult.newlyDeployed) {
+    console.log(
+      `contract RubiconMarket deployed at ${deployResult.address}`
+    );
+    // Initialize Rubicon Market
+    const rmi = await hre.ethers.getContractFactory("RubiconMarket");
+    const RMI = await rmi.attach(deployResult.address);
+    await RMI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then((r ) => console.log("Initialized Rubicon Market"));
+  }
 
 
 
