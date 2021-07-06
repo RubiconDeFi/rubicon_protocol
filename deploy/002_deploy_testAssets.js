@@ -41,7 +41,7 @@ const func = async (hre) => {
 //   }
   // ****************************
   // const USDCFactory = await hre.ethers.getContractFactory("DaiWithFaucet");
-  // await USDCFactory.deploy(69, {gasLimit: 60050000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
+  // await USDCFactory.deploy(69, "USDC", "USDC", {gasLimit: 60050000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
 
   const assetsToDeploy = [
     "WBTC",
@@ -84,8 +84,8 @@ const func = async (hre) => {
 //     const newBathPair = await bathPairFactory.deploy({nonce: getNonce()}).then(async function(r) {
 //             console.log("bath" + asset +  "-USDC deployed at " + await r.address);
 //             const btUInst = await bathPairFactory.attach(await r.address);
-//             await btUInst.estimateGas.initialize(process.env['OP_KOVAN_TC_BATH'+asset], process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHHOUSE, 500, -5, {gasLimit: 8999999}) .then(async function (g) {
-//               await btUInst.initialize(process.env['OP_KOVAN_TC_BATH'+asset], process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHHOUSE, 500, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
+//             await btUInst.estimateGas.initialize(process.env['OP_KOVAN_TC_BATH'+asset], process.env.OP_KOVAN_TC_BATHUSDC, process.env.OP_KOVAN_TC_BATHHOUSE, 500, -5, {gasLimit: 8999999}) .then(async function (g) {
+//               await btUInst.initialize(process.env['OP_KOVAN_TC_BATH'+asset], process.env.OP_KOVAN_TC_BATHUSDC, process.env.OP_KOVAN_TC_BATHHOUSE, 500, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
 //           });
     
 //   });
@@ -102,6 +102,26 @@ const func = async (hre) => {
     
   }
 
+  //   // remove BathPairs on BathHouse
+  //   for (let index = 0; index < assetsToDeploy.length; index++) {
+  //   const asset = assetsToDeploy[index];
+  //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
+  //   await bh.estimateGas.removePair(process.env['OP_KOVAN_TC_BATH'+asset+'USDC']).then(async function(g) {
+  //             await bh.removePair(process.env['OP_KOVAN_TC_BATH'+asset+'USDC'], {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("remove of bath" + asset+ "-USDC success on BH"));
+  //         });
+    
+  // }
+
+  // // // Deploy BathToken for USDC
+  //    const bathTokenFactoryUSDC = await hre.ethers.getContractFactory('BathToken');
+  //    const bathUSDCAddr = await bathTokenFactoryUSDC.deploy({nonce: getNonce()}).then(async function(r) {
+  //     console.log("bathUSDC deployed at " + await r.address);
+  //     const btUInst = await bathTokenFactoryUSDC.attach(await r.address);
+  //     await btUInst.estimateGas.initialize("bathUSDC", process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_MARKET, process.env.OP_KOVAN_TC_BATHHOUSE, {gasLimit: 8999999}) .then(async function (g) {
+  //       await btUInst.initialize("bathUSDC", process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_MARKET, process.env.OP_KOVAN_TC_BATHHOUSE, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of Bath USDC success"));
+  //   });
+  // });
   // *************************************
 
 

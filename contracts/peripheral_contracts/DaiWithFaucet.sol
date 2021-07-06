@@ -3,6 +3,9 @@
 // hevm: flattened sources of /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/dai.sol
 pragma solidity =0.7.6;
 
+// import "./IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 ////// /nix/store/8xb41r4qd0cjb63wcrxf1qmfg88p0961-dss-6fd7de0/src/lib.sol
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,8 +19,6 @@ pragma solidity =0.7.6;
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-/* pragma solidity 0.5.12; */
 
 contract LibNote {
     event LogNote(
@@ -49,7 +50,7 @@ contract LibNote {
 
 /* import "./lib.sol"; */
 
-contract DaiWithFaucet is LibNote {
+contract DaiWithFaucet is LibNote, ERC20 {
     // --- Auth ---
     mapping(address => uint256) public wards;
 
@@ -67,19 +68,8 @@ contract DaiWithFaucet is LibNote {
     }
 
     // --- ERC20 Data ---
-    string public constant name = "USDC Stablecoin";
-    string public constant symbol = "USDC";
     string public constant version = "1";
-    uint8 public constant decimals = 18;
-    uint256 public totalSupply;
-
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
-    mapping(address => uint256) public nonces;
     mapping(address => uint256) public faucetCheck;
-
-    event Approval(address indexed src, address indexed guy, uint256 wad);
-    event Transfer(address indexed src, address indexed dst, uint256 wad);
 
     // --- Math ---
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
@@ -96,14 +86,14 @@ contract DaiWithFaucet is LibNote {
     bytes32 public constant PERMIT_TYPEHASH =
         0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
-    constructor(uint256 chainId_) public {
+    constructor(uint256 chainId_, string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256(
                     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
                 ),
-                keccak256(bytes(name)),
+                keccak256(bytes(_name)),
                 keccak256(bytes(version)),
                 chainId_,
                 address(this)
@@ -112,61 +102,12 @@ contract DaiWithFaucet is LibNote {
     }
 
     // --- Token ---
-    function transfer(address dst, uint256 wad) external returns (bool) {
-        return transferFrom(msg.sender, dst, wad);
-    }
-
-    function transferFrom(
-        address src,
-        address dst,
-        uint256 wad
-    ) public returns (bool) {
-        require(balanceOf[src] >= wad, "Dai/insufficient-balance");
-        if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {
-            require(
-                allowance[src][msg.sender] >= wad,
-                "Dai/insufficient-allowance"
-            );
-            allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
-        }
-        balanceOf[src] = sub(balanceOf[src], wad);
-        balanceOf[dst] = add(balanceOf[dst], wad);
-        emit Transfer(src, dst, wad);
-        return true;
-    }
-
     function faucet() external returns (bool) {
         if (block.timestamp < faucetCheck[msg.sender] + 5 days) {
             return false;
         }
-        mint(msg.sender, 1000e18);
+        _mint(msg.sender, 1000e18);
         faucetCheck[msg.sender] = block.timestamp;
-        return true;
-    }
-
-    function mint(address usr, uint256 wad) internal {
-        balanceOf[usr] = add(balanceOf[usr], wad);
-        totalSupply = add(totalSupply, wad);
-        emit Transfer(address(0), usr, wad);
-    }
-
-    function burn(address usr, uint256 wad) external {
-        require(balanceOf[usr] >= wad, "Dai/insufficient-balance");
-        if (usr != msg.sender && allowance[usr][msg.sender] != uint256(-1)) {
-            require(
-                allowance[usr][msg.sender] >= wad,
-                "Dai/insufficient-allowance"
-            );
-            allowance[usr][msg.sender] = sub(allowance[usr][msg.sender], wad);
-        }
-        balanceOf[usr] = sub(balanceOf[usr], wad);
-        totalSupply = sub(totalSupply, wad);
-        emit Transfer(usr, address(0), wad);
-    }
-
-    function approve(address usr, uint256 wad) external returns (bool) {
-        allowance[msg.sender][usr] = wad;
-        emit Approval(msg.sender, usr, wad);
         return true;
     }
 
@@ -185,42 +126,5 @@ contract DaiWithFaucet is LibNote {
         uint256 wad
     ) external {
         transferFrom(src, dst, wad);
-    }
-
-    // --- Approve by signature ---
-    function permit(
-        address holder,
-        address spender,
-        uint256 nonce,
-        uint256 expiry,
-        bool allowed,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(
-                    abi.encode(
-                        PERMIT_TYPEHASH,
-                        holder,
-                        spender,
-                        nonce,
-                        expiry,
-                        allowed
-                    )
-                )
-            )
-        );
-
-        require(holder != address(0), "Dai/invalid-address-0");
-        require(holder == ecrecover(digest, v, r, s), "Dai/invalid-permit");
-        require(expiry == 0 || block.timestamp <= expiry, "Dai/permit-expired");
-        require(nonce == nonces[holder]++, "Dai/invalid-nonce");
-        uint256 wad = allowed ? uint256(-1) : 0;
-        allowance[holder][spender] = wad;
-        emit Approval(holder, spender, wad);
     }
 }
