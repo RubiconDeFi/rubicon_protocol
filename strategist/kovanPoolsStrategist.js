@@ -2,7 +2,7 @@ const Web3 = require('web3');
 // var Contract = require('web3-eth-contract');
 var fs = require('fs');
 require("dotenv").config();
-
+const BigNumber = require('bignumber.js');
 // ************ Rubicon Pools Kovan Setup ***************
 
 // Initialize Web3
@@ -261,7 +261,7 @@ async function checkForScrub(ticker){
                 };
                 await contract.methods.bathScrub().estimateGas(tx, (async function(r, d) {
                     if (d > 0) { 
-                    await sendTx(tx, "\n<* I have successfully scrubbed the" + ticker + " bath, Master *>\n");
+                    await sendTx(tx, "\n<* I have successfully scrubbed the " + ticker + " bath, Master *>\n");
                     } else{
                         throw("gas estimation in bathScrub failed");
                     }
@@ -274,166 +274,74 @@ async function checkForScrub(ticker){
 
 }
 
-// async function marketMake(a, b, im) {
-//     // ***Market Maker Inputs***
-//     const targetSpread = 0.02; // the % of the spread we want to improve
-//     const maxOrderSize =  1;//size in *quote currency* of the orders
-//     const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
-//     // *************************
-//     var midPoint = (a + b) / 2;
-//     if (midPoint == oldMidpoint) {
-//         console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
-//         return;
-//     } else {
-//         oldMidpoint = midPoint;
-//     }
-//     var newBidPrice = midPoint * (1-targetSpread);
-//     var newAskPrice = midPoint * (1+targetSpread);
-    
-//     // Oversupply of bathQuote -> dynamic ask size
-//     if (im > 1) {
-//         var dynNum = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newAskPrice;
-//         var dynDen = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
-//         var askNum = dynNum;
-//         var askDen = dynDen;
-    
-//         var bidNum = maxOrderSize;
-//         var bidDen = maxOrderSize / newBidPrice;
-//     } else {
-//         var dynNum = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
-//         var dynDen = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newBidPrice;
-//         var bidNum = dynNum;
-//         var bidDen = dynDen;
-
-//         var askNum = maxOrderSize / newAskPrice;
-//         var askDen = maxOrderSize;
-//     }
-
-//     newAskPrice1 = newAskPrice * 1.01
-//     newBidPrice1 = newBidPrice * 0.99
-
-//     if (im > 1) {
-//         var dynNum1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newAskPrice1;
-//         var dynDen1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
-//         var askNum1 = dynNum;
-//         var askDen1 = dynDen;
-    
-//         var bidNum1 = maxOrderSize;
-//         var bidDen1 = maxOrderSize / newBidPrice1;
-//     } else {
-//         var dynNum1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im))));
-//         var dynDen1 = (maxOrderSize * Math.pow((Math.E),((shapeFactor)* await (im)))) / newBidPrice1;
-//         var bidNum1 = dynNum;
-//         var bidDen1 = dynDen;
-
-//         var askNum1 = maxOrderSize / newAskPrice1;
-//         var askDen1 = maxOrderSize;
-//     }
-
-//     await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
-
-//     // console.log('new ask price', askDen / askNum);
-//     // console.log('new bid price', bidNum / bidDen);
-//     // console.log("askNum: ", web3.utils.toWei(askNum.toFixed(18).toString()));
-//     // console.log("askDen: ", web3.utils.toWei(askDen.toString()));
-//     // console.log("bidDen: ", web3.utils.toWei(bidDen.toString()));
-//     // console.log("bidNum: ", web3.utils.toWei(bidNum.toFixed(18).toString()));
-//     // execute strategy with tighter spread
-
-//     var txData = bathPairContractKovan.methods.executeStrategy(
-//         strategyKovanAddr, 
-//         web3.utils.toWei(askNum.toFixed(18).toString()),
-//         web3.utils.toWei(askDen.toFixed(18).toString()),
-//         web3.utils.toWei(bidNum.toFixed(18).toString()),
-//         web3.utils.toWei(bidDen.toFixed(18).toString())
-//     ).encodeABI();
-//     var tx = {
-//         gas: 9000000,
-//         data: txData.toString(),
-//         from: process.env.OP_KOVAN_ADMIN.toString(),
-//         to: process.env.OP_KOVAN_TC_BATHWBTCUSDC,
-//         gasPrice: web3.utils.toWei("0", "Gwei")
-//     }
-
-//     // Estimate the gas
-//     bathPairContractKovan.methods.executeStrategy(
-//         strategyKovanAddr, 
-//         web3.utils.toWei(askNum.toFixed(18).toString()),
-//         web3.utils.toWei(askDen.toFixed(18).toString()),
-//         web3.utils.toWei(bidNum.toFixed(18).toString()),
-//         web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(tx,
-//             async function(e, d) {
-//             if (await d != null || d >= 0) {
-//                 // Send the transaction
-//                 await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
-//                 //     setTimeout(async () => {await sendTx(tx1, 'New trades placed at ' + newBidPrice1.toFixed(3).toString() + '$ and ' + newAskPrice1.toFixed(3).toString()+'$' + '\n')}, 500);
-                    
-//                 // });
-
-//                 // await sendTx(tx1, 'New trades placed at ' + (newBidPrice*0.99).toFixed(3).toString() + '$ and ' + (newAskPrice*1.01).toFixed(3).toString()+'$' + '\n');
-//                 // console.log('Pools Successful ~GAS ESTIMATE~ Execution of Strategist Bot\'s Trade - Yay Strategist Bot!');
-//             } else {
-//                 console.log("**ERROR Executing Strategy**: \n");
-//                 console.log(e);
-//             }
-//         });
-// }
-
-let oldMidpoint;
+let oldMidpoint = [];
+let zeroMP = 0;
 async function marketMake(a, b, ticker, im) {
     const contract = await getContractFromToken(ticker, "BathPair");
     // ***Market Maker Inputs***
     const targetSpread = 0.02; // the % of the spread we want to improve
-    const maxOrderSize =  1;//size in *quote currency* of the orders
-    const shapeFactor = -0.005 // factor for dynamic ordersizing according to Fushimi, et al
+    const scaleBack =  5; // used to scale back maxOrderSize   
     // *************************
     // Check if midpoint is unchanged before market making
     var midPoint = (a + b) / 2;
-    if (midPoint == oldMidpoint) {
+    if (midPoint == oldMidpoint[ticker]) {
         console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
         return;
-    } else {
-        oldMidpoint = midPoint;
+    } else if (midPoint == 0 ) {
+        zeroMP++;
+        console.log("got a zero midpoint, skipping market make, total times is: ", zeroMP);
+        return;
     }
+    else {
+        oldMidpoint[ticker] = midPoint;
+    }
+
     var newBidPrice = midPoint * (1-targetSpread);
     var newAskPrice = midPoint * (1+targetSpread);
 
     // getMaxOrderSize from contract for bid and ask
-    await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + ticker], process.env['OP_KOVAN_TC_BATH' + ticker]).call().then((r) => { console.log("Max ask size of " + web3.utils.fromWei(r))});
-    await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => { console.log("Max Bid size for " + web3.utils.fromWei(r))});
+    const maxAskSize = await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + ticker], process.env['OP_KOVAN_TC_BATH' + ticker]).call();
+    console.log("Max ask size of " + web3.utils.fromWei(maxAskSize));
+    const maxBidSize = await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call();
+    console.log("Max bid size of " + web3.utils.fromWei(maxBidSize));
+    const askNum = maxAskSize / scaleBack;
+    const askDen = (askNum * newAskPrice);
 
-    // await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
+    const bidNum = maxBidSize / scaleBack;
+    const bidDen = bidNum / newBidPrice;
 
-    // var txData = contract.methods.executeStrategy(
-    //     process.env.OP_KOVAN_TC_PAIRSTRADE, 
-    //     web3.utils.toWei(askNum.toFixed(18).toString()),
-    //     web3.utils.toWei(askDen.toFixed(18).toString()),
-    //     web3.utils.toWei(bidNum.toFixed(18).toString()),
-    //     web3.utils.toWei(bidDen.toFixed(18).toString())
-    // ).encodeABI();
-    // var tx = {
-    //     gas: 9000000,
-    //     data: txData.toString(),
-    //     from: process.env.OP_KOVAN_ADMIN.toString(),
-    //     to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
-    //     gasPrice: web3.utils.toWei("0", "Gwei")
-    // }
+    await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
-    // // Estimate the gas
-    // bathPairContractKovan.methods.executeStrategy(
-    //     process.env.OP_KOVAN_TC_PAIRSTRADE, 
-    //     web3.utils.toWei(askNum.toFixed(18).toString()),
-    //     web3.utils.toWei(askDen.toFixed(18).toString()),
-    //     web3.utils.toWei(bidNum.toFixed(18).toString()),
-    //     web3.utils.toWei(bidDen.toFixed(18).toString())).estimateGas(tx,
-    //         async function(e, d) {
-    //         if (await d != null || d >= 0) {
-    //             await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
-    //         } else {
-    //             console.log("**ERROR Executing Strategy**: \n");
-    //             console.log(e);
-    //         }
-    //     });
+    var txData = contract.methods.executeStrategy(
+        process.env.OP_KOVAN_TC_PAIRSTRADE, 
+        (web3.utils.toBN(Number(askNum).toString(16))),
+        (web3.utils.toBN(Number(askDen).toString(16))),
+        (web3.utils.toBN(Number(bidNum).toString(16))),
+        (web3.utils.toBN(Number(bidDen).toString(16)))
+    ).encodeABI();
+    var tx = {
+        gas: 9000000,
+        data: txData.toString(),
+        from: process.env.OP_KOVAN_ADMIN.toString(),
+        to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
+        gasPrice: web3.utils.toWei("0", "Gwei")
+    }
+
+    // Estimate the gas
+    contract.methods.executeStrategy( process.env.OP_KOVAN_TC_PAIRSTRADE, 
+        (web3.utils.toBN(Number(askNum).toString(16))),
+        (web3.utils.toBN(Number(askDen).toString(16))),
+        (web3.utils.toBN(Number(bidNum).toString(16))),
+        (web3.utils.toBN(Number(bidDen).toString(16)))).estimateGas(tx,
+            async function(e, d) {
+            if (await d != null || d >= 0) {
+                // console.log("LFG");
+                await sendTx(tx, 'New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toFixed(3).toString() + '$ and [ask]: ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
+            } else {
+                console.log("**ERROR Executing Strategy**: \n");
+                console.log(e);
+            }
+        });
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -495,5 +403,7 @@ async function startBot(token) {
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 startBot("WBTC");
+startBot("MKR");
+
 
 
