@@ -67,6 +67,7 @@ function getNonce() {
 
 async function sendTx(tx, msg) {
     tx.nonce = await getNonce();
+    console.log('outgoing transaction: ', tx);
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
             console.log("*transaction success* => ", msg);
@@ -282,7 +283,7 @@ async function logInfo(mA, mB, a, b, im) {
     // APR CALCULATIONS
  (await bathWayneContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHWAYNE).call();
+    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHWBTC).call();
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
@@ -299,7 +300,7 @@ async function logInfo(mA, mB, a, b, im) {
 
      (await bathUsdcContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_BATHUSDC).call();
+    var underlying = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHUSDC).call();
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
@@ -403,6 +404,7 @@ async function marketMake(a, b, im) {
     // console.log("bidDen: ", web3.utils.toWei(bidDen.toString()));
     // console.log("bidNum: ", web3.utils.toWei(bidNum.toFixed(18).toString()));
     // execute strategy with tighter spread
+
     var txData = bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
         web3.utils.toWei(askNum.toFixed(18).toString()),
@@ -417,23 +419,8 @@ async function marketMake(a, b, im) {
         to: process.env.OP_KOVAN_TC_BATHWBTCUSDC,
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
-    
-    var txData1 = bathPairContractKovan.methods.executeStrategy(
-        strategyKovanAddr, 
-        web3.utils.toWei((askNum1).toFixed(18).toString()),
-        web3.utils.toWei(askDen1.toFixed(18).toString()),
-        web3.utils.toWei((bidNum1).toFixed(18).toString()),
-        web3.utils.toWei(bidDen1.toFixed(18).toString())
-    ).encodeABI();
-    var tx1 = {
-        gas: 9000000,
-        data: txData1.toString(),
-        from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: process.env.OP_KOVAN_TC_BATHWAYNEUSDC,
-        gasPrice: web3.utils.toWei("0", "Gwei")
-    }
-    // web3.eth.estimateGas(tx).then(console.log);
-    // // Estimate the gas
+
+    // Estimate the gas
     bathPairContractKovan.methods.executeStrategy(
         strategyKovanAddr, 
         web3.utils.toWei(askNum.toFixed(18).toString()),
@@ -443,7 +430,6 @@ async function marketMake(a, b, im) {
             async function(e, d) {
             if (await d != null || d >= 0) {
                 // Send the transaction
-                // console.log(d);
                 await sendTx(tx, 'New trades placed at ' + newBidPrice.toFixed(3).toString() + '$ and ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
                 //     setTimeout(async () => {await sendTx(tx1, 'New trades placed at ' + newBidPrice1.toFixed(3).toString() + '$ and ' + newAskPrice1.toFixed(3).toString()+'$' + '\n')}, 500);
                     
@@ -509,7 +495,6 @@ async function startBot() {
 
       // Every 6 sec
     }, 2500);
- 
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
