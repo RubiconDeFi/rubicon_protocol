@@ -67,7 +67,8 @@ function getNonce() {
 
 async function sendTx(tx, msg) {
     tx.nonce = await getNonce();
-    console.log('outgoing transaction: ', tx);
+    tx.gasPrice = web3.utils.toWei("0.015", "gwei");
+    // console.log('outgoing transaction: ', tx);
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
             console.log("*transaction success* => ", msg);
@@ -245,9 +246,14 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 
 
 // // Will revert if no bathToken liquidity
-console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WAYNE: " + web3.utils.fromWei(r))));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WBTC: " + web3.utils.fromWei(r))));
 console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
-
+bathUsdcContractKovan.methods.totalSupply().call().then((r) =>{
+   console.log("Total supply of BathUSDC", web3.utils.fromWei(r))
+});
+bathPairContractKovan.methods.maxOrderSizeBPS().call().then((r) =>{
+    console.log("Max order sizeBPD of BathPair", (r))
+ });
 
 // ------------------------------------
 
