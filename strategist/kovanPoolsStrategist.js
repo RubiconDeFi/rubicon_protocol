@@ -80,6 +80,7 @@ async function sendTx(tx, msg) {
     });
 }
 
+//#region 
 // // **Approve bathPair to recieve WAYNE and DAI first**
 // var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_BATHWAYNE, web3.utils.toWei("200000")).encodeABI();
 // var tx = {
@@ -172,92 +173,91 @@ async function sendTx(tx, msg) {
 // // Send the transaction
 // sendTx(tx);
 
-// // ------------------- Validate Migrations ------------------
-//  BATH HOUSE
-// Strategy is Approved
-bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_TC_PAIRSTRADE).call().then((r) => {
-    if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
-});
-bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_TC_BATHWBTCUSDC).call().then((r) => {
-if (r == true) {console.log("BH isApprovedPair CORRECT")} else {console.log("BH isApprovedPair ** ERROR **")}
-});
+// // // ------------------- Validate Migrations ------------------
+// //  BATH HOUSE
+// // Strategy is Approved
+// bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_TC_PAIRSTRADE).call().then((r) => {
+//     if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
+// });
+// bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_TC_BATHWBTCUSDC).call().then((r) => {
+// if (r == true) {console.log("BH isApprovedPair CORRECT")} else {console.log("BH isApprovedPair ** ERROR **")}
+// });
 
-bathHouseContractKovan.methods.getMarket().call().then((r) => {
-    if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BH getMarket CORRECT")} else {console.log("getMarket ** ERROR **")}
-});
-console.log(bathHouseContractKovan.methods.getBathPair(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_USDC).call().then((r) => {
-    // console.log(r);
-    if (r == process.env.OP_KOVAN_TC_BATHWBTCUSDC) {console.log("BH getBathPair CORRECT")} else {console.log("BH getBathPair ** ERROR **")}
-}));
+// bathHouseContractKovan.methods.getMarket().call().then((r) => {
+//     if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BH getMarket CORRECT")} else {console.log("getMarket ** ERROR **")}
+// });
+// console.log(bathHouseContractKovan.methods.getBathPair(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_USDC).call().then((r) => {
+//     // console.log(r);
+//     if (r == process.env.OP_KOVAN_TC_BATHWBTCUSDC) {console.log("BH getBathPair CORRECT")} else {console.log("BH getBathPair ** ERROR **")}
+// }));
 
-//  BATH TOKENS
-console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
-    if (r == "bathUSDC") {console.log("BTUSDC symbol CORRECT")} else {console.log("BTUSDC symbol ** ERROR **", r)}
-}));
-bathUsdcContractKovan.methods.initialized().call().then((r) =>{
-    if (r == true) {console.log("BTUSDC initialized CORRECT")} else {console.log("BTUSDC initi ** ERROR **", r)}
-});
-console.log(bathUsdcContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BTUSDC bathHouse CORRECT")} else {console.log("BTUSDC bathHouse ** ERROR **", r)}
-}));
-console.log(bathUsdcContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BTUSDC market CORRECT")} else {console.log("BTUSDC market ** ERROR **"), r}
-}));
-console.log(bathUsdcContractKovan.methods.underlyingToken().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BTUSDC underlyingToken CORRECT")} else {console.log("BTUSDC underlyingToken ** ERROR **")}
-}));
+// //  BATH TOKENS
+// console.log(bathUsdcContractKovan.methods.symbol().call().then((r) =>{
+//     if (r == "bathUSDC") {console.log("BTUSDC symbol CORRECT")} else {console.log("BTUSDC symbol ** ERROR **", r)}
+// }));
+// bathUsdcContractKovan.methods.initialized().call().then((r) =>{
+//     if (r == true) {console.log("BTUSDC initialized CORRECT")} else {console.log("BTUSDC initi ** ERROR **", r)}
+// });
+// console.log(bathUsdcContractKovan.methods.bathHouse().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BTUSDC bathHouse CORRECT")} else {console.log("BTUSDC bathHouse ** ERROR **", r)}
+// }));
+// console.log(bathUsdcContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BTUSDC market CORRECT")} else {console.log("BTUSDC market ** ERROR **"), r}
+// }));
+// console.log(bathUsdcContractKovan.methods.underlyingToken().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BTUSDC underlyingToken CORRECT")} else {console.log("BTUSDC underlyingToken ** ERROR **")}
+// }));
 
-console.log(bathWayneContractKovan.methods.symbol().call().then((r) =>{
-    if (r == "bathWBTC") {console.log("BTWBTC symbol CORRECT")} else {console.log("BTWAYNE symbol ** ERROR **",r )}
-}));
-console.log(bathWayneContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BTWAYNE bathHouse CORRECT")} else {console.log("BTWAYNE bathHouse ** ERROR **", r)}
-}));
-console.log(bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BTWAYNE market CORRECT")} else {console.log("BTWAYNE market ** ERROR **", r)}
-}));
-console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **", r)}
-}));
-RubiconMarketContractKovan.methods.getMinSell(process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
-    console.log("min sell wayne: ", r)
-});
+// console.log(bathWayneContractKovan.methods.symbol().call().then((r) =>{
+//     if (r == "bathWBTC") {console.log("BTWBTC symbol CORRECT")} else {console.log("BTWAYNE symbol ** ERROR **",r )}
+// }));
+// console.log(bathWayneContractKovan.methods.bathHouse().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BTWAYNE bathHouse CORRECT")} else {console.log("BTWAYNE bathHouse ** ERROR **", r)}
+// }));
+// console.log(bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_MARKET) {console.log("BTWAYNE market CORRECT")} else {console.log("BTWAYNE market ** ERROR **", r)}
+// }));
+// console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **", r)}
+// }));
+// RubiconMarketContractKovan.methods.getMinSell(process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
+//     console.log("min sell wayne: ", r)
+// });
 
-// BATH PAIR
-// Bath pair ask and bid 
-bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
-    if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BP underlyingAsset CORRECT")} else {console.log("underlyingAsset ** ERROR **", r)}
-});
-bathPairContractKovan.methods.underlyingQuote().call().then((r) => {
-    if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BP underlyingQuote CORRECT")} else {console.log("underlyingQuote ** ERROR **", r)}
-});
-console.log(bathPairContractKovan.methods.initialized().call().then((r) =>{
-    if (r == true) {console.log("BP initialized CORRECT")} else {console.log("BP initialized ** ERROR **")}
-}));
-console.log(bathPairContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BP bathHouse CORRECT")} else {console.log("BP bathHouse ** ERROR **")}
-}));
-console.log(bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHWBTC) {console.log("BP bathWAYNE CORRECT")} else {console.log("BP bathWAYNE ** ERROR **")}
-}));
-console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
-}));
+// // BATH PAIR
+// // Bath pair ask and bid 
+// bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
+//     if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BP underlyingAsset CORRECT")} else {console.log("underlyingAsset ** ERROR **", r)}
+// });
+// bathPairContractKovan.methods.underlyingQuote().call().then((r) => {
+//     if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BP underlyingQuote CORRECT")} else {console.log("underlyingQuote ** ERROR **", r)}
+// });
+// console.log(bathPairContractKovan.methods.initialized().call().then((r) =>{
+//     if (r == true) {console.log("BP initialized CORRECT")} else {console.log("BP initialized ** ERROR **")}
+// }));
+// console.log(bathPairContractKovan.methods.bathHouse().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BP bathHouse CORRECT")} else {console.log("BP bathHouse ** ERROR **")}
+// }));
+// console.log(bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_BATHWBTC) {console.log("BP bathWAYNE CORRECT")} else {console.log("BP bathWAYNE ** ERROR **")}
+// }));
+// console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
+//     if (r == process.env.OP_KOVAN_TC_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
+// }));
 
 
 // // Will revert if no bathToken liquidity
 console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WBTC: " + web3.utils.fromWei(r))));
 console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
-bathUsdcContractKovan.methods.totalSupply().call().then((r) =>{
-   console.log("Total supply of BathUSDC", web3.utils.fromWei(r))
-});
-bathPairContractKovan.methods.maxOrderSizeBPS().call().then((r) =>{
-    console.log("Max order sizeBPD of BathPair", (r))
- });
+// bathUsdcContractKovan.methods.totalSupply().call().then((r) =>{
+//    console.log("Total supply of BathUSDC", web3.utils.fromWei(r))
+// });
+// bathPairContractKovan.methods.maxOrderSizeBPS().call().then((r) =>{
+//     console.log("Max order sizeBPD of BathPair", (r))
+//  });
 
+//#endregion
 // ------------------------------------
-
-// ************ The above was used to successfully deposit assets into the bath WAYNE/DAI pair on Kovan *************
 
 // MarketMake:
 // Pseudocode - As a loop:
@@ -492,7 +492,6 @@ async function startBot() {
             const IMfactor = manageInventory(currentAsk, currentBid);
             await checkForScrub();
             await marketMake(currentAsk, currentBid, IMfactor);
-            // await marketMake(currentAsk, currentBid, IMfactor);
         });
         console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
