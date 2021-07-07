@@ -20,37 +20,37 @@ const func = async (hre) => {
     }
     // console.log('Current Nonce', web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN).then((r) => {console.log("trans count", r)}));
 //1. Deploy and init Bath House
-  const deployResultBH = await deploy('BathHouse', {
-    from: deployer,
-    log: true,
-    // proxy: {
-    //     methodName: 'initialize',
-    //     // owner: process.env.OP_KOVAN_MULTISIG
-    //     proxyContract: 'TransparentUpgradeableProxy'
-    // },
-    // args: [process.env.OP_KOVAN_MARKET, 80, 259200, 10],
-    gasLimit: 69180000,
-    nonce: getNonce()
-  }).then(async function(d) {
-    const newBHAddr = await d.address;
-    console.log(`bathHouse is at ${newBHAddr}`);
-    if (await d.newlyDeployed) {
-    console.log(
-      `contract BathHouse deployed at ${newBHAddr}`
-    );
+//   const deployResultBH = await deploy('BathHouse', {
+//     from: deployer,
+//     log: true,
+//     // proxy: {
+//     //     methodName: 'initialize',
+//     //     // owner: process.env.OP_KOVAN_MULTISIG
+//     //     proxyContract: 'TransparentUpgradeableProxy'
+//     // },
+//     // args: [process.env.OP_KOVAN_MARKET, 80, 259200, 10],
+//     gasLimit: 69180000,
+//     nonce: getNonce()
+//   }).then(async function(d) {
+//     const newBHAddr = await d.address;
+//     console.log(`bathHouse is at ${newBHAddr}`);
+//     if (await d.newlyDeployed) {
+//     console.log(
+//       `contract BathHouse deployed at ${newBHAddr}`
+//     );
 
-    // Init BathHouse
-        const bh = await hre.ethers.getContractFactory("BathHouse");
-        const BHI = await bh.attach(newBHAddr);
-        await BHI.estimateGas.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10).then(async function(g) {
-          setTimeout(() => {}, 2000);
-          await BHI.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
-        });
-      return await newBHAddr;
-} else {
-  return process.env.OP_KOVAN_BATHHOUSE;
-} // 2 Launch Bath Tokens
-});
+//     // Init BathHouse
+//         const bh = await hre.ethers.getContractFactory("BathHouse");
+//         const BHI = await bh.attach(newBHAddr);
+//         await BHI.estimateGas.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10).then(async function(g) {
+//           setTimeout(() => {}, 2000);
+//           await BHI.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
+//         });
+//       return await newBHAddr;
+// } else {
+//   return process.env.OP_KOVAN_BATHHOUSE;
+// } // 2 Launch Bath Tokens
+// });
 // .then(async function(newBHAddr) {
 //       // Deploy BathTokens
 //   // Deploy BathToken for WAYNE

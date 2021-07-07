@@ -58,7 +58,15 @@ var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 var sender = process.env.OP_KOVAN_ADMIN;
 var key = process.env.OP_KOVAN_ADMIN_KEY;
 
+// *** Nonce Manager ***
+let baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN);
+let nonceOffset = 0;
+function getNonce() {
+  return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
+}
+
 async function sendTx(tx, msg) {
+    tx.nonce = await getNonce();
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
             console.log("*transaction success* => ", msg);
@@ -235,9 +243,9 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 }));
 
 
-// // // // Will revert if no bathToken liquidity
-// // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_WAYNE, process.env.OP_KOVAN_BATHWAYNE).call().then((r) => console.log("POOLS Max order size for WAYNE: " + web3.utils.fromWei(r))));
-// // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_USDC, process.env.OP_KOVAN_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
+// // Will revert if no bathToken liquidity
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WAYNE: " + web3.utils.fromWei(r))));
+console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
 
 
 // ------------------------------------
@@ -274,7 +282,7 @@ async function logInfo(mA, mB, a, b, im) {
     // APR CALCULATIONS
  (await bathWayneContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_BATHWAYNE).call();
+    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHWAYNE).call();
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
@@ -318,7 +326,7 @@ async function checkForScrub(){
             gas: 9000000,
             data: await bathPairContractKovan.methods.bathScrub().encodeABI(),
             from: process.env.OP_KOVAN_ADMIN.toString(),
-            to: process.env.OP_KOVAN_BATHWAYNEUSDC,
+            to: process.env.OP_KOVAN_TC_BATHWBTCUSDC,
             gasPrice: web3.utils.toWei("0.015", "Gwei")
         };
         await bathPairContractKovan.methods.bathScrub().estimateGas(tx, (async function(r, d) {
@@ -406,7 +414,7 @@ async function marketMake(a, b, im) {
         gas: 9000000,
         data: txData.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: process.env.OP_KOVAN_BATHWAYNEUSDC,
+        to: process.env.OP_KOVAN_TC_BATHWBTCUSDC,
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     
@@ -421,7 +429,7 @@ async function marketMake(a, b, im) {
         gas: 9000000,
         data: txData1.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: process.env.OP_KOVAN_BATHWAYNEUSDC,
+        to: process.env.OP_KOVAN_TC_BATHWAYNEUSDC,
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     // web3.eth.estimateGas(tx).then(console.log);
@@ -505,6 +513,6 @@ async function startBot() {
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
-// startBot();
+startBot();
 
 

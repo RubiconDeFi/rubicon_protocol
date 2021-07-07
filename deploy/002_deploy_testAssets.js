@@ -41,7 +41,7 @@ const func = async (hre) => {
 //   }
   // ****************************
   // const USDCFactory = await hre.ethers.getContractFactory("DaiWithFaucet");
-  // await USDCFactory.deploy(69, "USDC", "USDC", {gasLimit: 60050000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
+  // await USDCFactory.deploy(69, process.env.OP_KOVAN_ADMIN, "USDC", "USDC", {gasLimit: 114380000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
 
   const assetsToDeploy = [
     "WBTC",
