@@ -200,24 +200,24 @@ const func = async (hre) => {
     //     });
     // ---------------------------------------------------------------------
 
-      // 4. Deploy pairs trade
-  const deployResultPT = await deploy('PairsTrade', {
-    from: deployer,
-    args: ["Pools Trade Library", process.env.OP_KOVAN_TC_BATHHOUSE, process.env.OP_KOVAN_TC_MARKET],
-    log: true
-  });
-  if (deployResultPT.newlyDeployed) {
-    console.log(
-      `contract Pairs Trade deployed at ${deployResultPT.address}`
-    );
-        //5. Approve the Pairs Trade strategy
-    const bh = await hre.ethers.getContractFactory("BathHouse");
-    const BHI = await bh.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
-    await BHI.estimateGas.approveStrategy(deployResultPT.address).then(async function(g) {
-      await BHI.approveStrategy(deployResultPT.address, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("PairsTrade approved \n" + r));
-      console.log('Pairs Trade Approved');
-    });
-    }
+  //     // 4. Deploy pairs trade
+  // const deployResultPT = await deploy('PairsTrade', {
+  //   from: deployer,
+  //   args: ["Pools Trade Library", process.env.OP_KOVAN_TC_BATHHOUSE, process.env.OP_KOVAN_TC_MARKET],
+  //   log: true
+  // });
+  // if (deployResultPT.newlyDeployed) {
+  //   console.log(
+  //     `contract Pairs Trade deployed at ${deployResultPT.address}`
+  //   );
+  //       //5. Approve the Pairs Trade strategy
+  //   const bh = await hre.ethers.getContractFactory("BathHouse");
+  //   const BHI = await bh.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
+  //   await BHI.estimateGas.approveStrategy(deployResultPT.address).then(async function(g) {
+  //     await BHI.approveStrategy(deployResultPT.address, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("PairsTrade approved \n" + r));
+  //     console.log('Pairs Trade Approved');
+  //   });
+  //   }
 
 
 
