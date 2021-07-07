@@ -18,3 +18,4 @@ artifacts-ovm/
 cache-ovm/
 .openzeppelin
 .openzeppelin/
+randomCodeSnippets.js
