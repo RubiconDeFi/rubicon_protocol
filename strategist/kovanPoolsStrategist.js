@@ -3,6 +3,8 @@ const Web3 = require('web3');
 var fs = require('fs');
 require("dotenv").config();
 const BigNumber = require('bignumber.js');
+BigNumber.config({ DECIMAL_PLACES: 18 });
+BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 // ************ Rubicon Pools Kovan Setup ***************
 
 // Initialize Web3
@@ -52,6 +54,7 @@ var bathQuoteToken = process.env.OP_KOVAN_TC_BATHUSDC;
 
 // Load in BathPair Contract
 var { abi } = require("../build/contracts/BathPair.json");
+const { ethers } = require('ethers');
 var bathPairKovanAddr = process.env.OP_KOVAN_TC_BATHWBTCUSDC;
 var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 
@@ -67,7 +70,9 @@ function getNonce() {
 
 async function sendTx(tx, msg) {
     tx.nonce = await getNonce();
-    tx.gasPrice = web3.utils.toWei("0.015", "gwei");
+    tx.gasPrice = 15000000;
+    tx.gasLimit = 21000000;
+    tx.gas = 21000000;
     // console.log('outgoing transaction: ', tx);
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
@@ -75,6 +80,7 @@ async function sendTx(tx, msg) {
             // return;
             // console.log(r);
         }).catch((c) =>  {
+            console.log('** Transaction Failed **', msg);
             throw (c);
         });
     });
@@ -249,11 +255,11 @@ async function logInfo(mA, mB, a, b, im) {
 async function checkForScrub(ticker){
         const contract = await getContractFromToken(ticker, "BathPair");
         await contract.methods.getOutstandingPairCount().call().then(async (r) => {
-            if (r > 3) {
+            if (r > 5) {
                 // Scrub the bath
                 var txData = await contract.methods.bathScrub().encodeABI();
                 var tx = {
-                    gas: 9000000,
+                    gas: 9530000,
                     data: txData,
                     from: process.env.OP_KOVAN_ADMIN.toString(),
                     to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
@@ -280,7 +286,7 @@ async function marketMake(a, b, ticker, im) {
     const contract = await getContractFromToken(ticker, "BathPair");
     // ***Market Maker Inputs***
     const targetSpread = 0.02; // the % of the spread we want to improve
-    const scaleBack =  5; // used to scale back maxOrderSize   
+    const scaleBack =  new BigNumber(5); // used to scale back maxOrderSize   
     // *************************
     // Check if midpoint is unchanged before market making
     var midPoint = (a + b) / 2;
@@ -296,28 +302,28 @@ async function marketMake(a, b, ticker, im) {
         oldMidpoint[ticker] = midPoint;
     }
 
-    var newBidPrice = midPoint * (1-targetSpread);
-    var newAskPrice = midPoint * (1+targetSpread);
+    var newBidPrice = new BigNumber(parseFloat(midPoint * (1-targetSpread)));
+    var newAskPrice = new BigNumber(parseFloat(midPoint * (1+targetSpread)));
 
     // getMaxOrderSize from contract for bid and ask
-    const maxAskSize = await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + ticker], process.env['OP_KOVAN_TC_BATH' + ticker]).call();
-    console.log("Max ask size of " + web3.utils.fromWei(maxAskSize));
-    const maxBidSize = await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call();
-    console.log("Max bid size of " + web3.utils.fromWei(maxBidSize));
-    const askNum = maxAskSize / scaleBack;
-    const askDen = (askNum * newAskPrice);
+    const maxAskSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + ticker], process.env['OP_KOVAN_TC_BATH' + ticker]).call());
+    const maxBidSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call());
+    
+    // in wei
+    const askNum = maxAskSize.dividedBy(scaleBack);
+    const askDen = (askNum.multipliedBy(newAskPrice));
 
-    const bidNum = maxBidSize / scaleBack;
-    const bidDen = bidNum / newBidPrice;
+    const bidNum = maxBidSize.dividedBy( scaleBack);
+    const bidDen = bidNum.dividedBy(newBidPrice);
 
     await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
     var txData = contract.methods.executeStrategy(
         process.env.OP_KOVAN_TC_PAIRSTRADE, 
-        (web3.utils.toBN(Number(askNum).toString(16))),
-        (web3.utils.toBN(Number(askDen).toString(16))),
-        (web3.utils.toBN(Number(bidNum).toString(16))),
-        (web3.utils.toBN(Number(bidDen).toString(16)))
+        web3.utils.toBN(askNum.decimalPlaces(0).toString()),
+        web3.utils.toBN(askDen.decimalPlaces(0).toString()),
+        web3.utils.toBN(bidNum.decimalPlaces(0).toString()),
+        web3.utils.toBN(bidDen.decimalPlaces(0).toString())
     ).encodeABI();
     var tx = {
         gas: 9000000,
@@ -327,21 +333,7 @@ async function marketMake(a, b, ticker, im) {
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
 
-    // Estimate the gas
-    contract.methods.executeStrategy( process.env.OP_KOVAN_TC_PAIRSTRADE, 
-        (web3.utils.toBN(Number(askNum).toString(16))),
-        (web3.utils.toBN(Number(askDen).toString(16))),
-        (web3.utils.toBN(Number(bidNum).toString(16))),
-        (web3.utils.toBN(Number(bidDen).toString(16)))).estimateGas(tx,
-            async function(e, d) {
-            if (await d != null || d >= 0) {
-                // console.log("LFG");
-                await sendTx(tx, 'New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toFixed(3).toString() + '$ and [ask]: ' + newAskPrice.toFixed(3).toString()+'$' + '\n');//.then(async () => {
-            } else {
-                console.log("**ERROR Executing Strategy**: \n");
-                console.log(e);
-            }
-        });
+    await sendTx(tx, 'New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -403,7 +395,7 @@ async function startBot(token) {
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 startBot("WBTC");
-startBot("MKR");
+// startBot("MKR");
 
 
 
