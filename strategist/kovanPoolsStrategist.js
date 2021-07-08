@@ -320,10 +320,10 @@ async function marketMake(a, b, ticker, im) {
 
     var txData = contract.methods.executeStrategy(
         process.env.OP_KOVAN_TC_PAIRSTRADE, 
-        web3.utils.toBN(askNum.decimalPlaces(0).toString()),
-        web3.utils.toBN(askDen.decimalPlaces(0).toString()),
-        web3.utils.toBN(bidNum.decimalPlaces(0).toString()),
-        web3.utils.toBN(bidDen.decimalPlaces(0).toString())
+        web3.utils.toBN(askNum.decimalPlaces(0)),
+        web3.utils.toBN(askDen.decimalPlaces(0)),
+        web3.utils.toBN(bidNum.decimalPlaces(0)),
+        web3.utils.toBN(bidDen.decimalPlaces(0))
     ).encodeABI();
     var tx = {
         gas: 9000000,
@@ -395,7 +395,7 @@ async function startBot(token) {
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 startBot("WBTC");
-// startBot("MKR");
+startBot("MKR");
 
 
 
