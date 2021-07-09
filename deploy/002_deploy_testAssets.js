@@ -149,7 +149,27 @@ const func = async (hre) => {
   //   await bh.estimateGas.initBathPair(process.env['OP_KOVAN_TC_ETH'], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_TC_BATHETHUSDC'], 5).then(async function(g) {
   //             await bh.initBathPair(process.env['OP_KOVAN_TC_ETH'], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_TC_BATHETHUSDC'], 5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bathETH-USDC success on BH"));
   //         });
+
+  //   // set max ordersize bps on BathHouse
+  //   for (let index = 0; index < assetsToDeploy.length; index++) {
+  //   const asset = assetsToDeploy[index];
+  //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
+  //   await bh.estimateGas.setBathPairMOSBPS(process.env['OP_KOVAN_TC_BATH'+asset+'USDC'], 25).then(async function(g) {
+  //             await bh.setBathPairMOSBPS(process.env['OP_KOVAN_TC_BATH'+asset+'USDC'], 25,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set max order size bps " + asset+ "-USDC success on BH"));
+  //         });
+    
+  // }
   
+  // set BathHouse Variable
+    const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+    const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
+    await bh.estimateGas.setCancelTimeDelay(86400).then(async function(g) {
+              await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
+    });
+    
+  
+
   // *************************************
 
 

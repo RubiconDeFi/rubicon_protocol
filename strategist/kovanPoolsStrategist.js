@@ -71,8 +71,8 @@ function getNonce() {
 async function sendTx(tx, msg) {
     tx.nonce = await getNonce();
     tx.gasPrice = 15000000;
-    tx.gasLimit = 21000000;
-    tx.gas = 21000000;
+    tx.gasLimit = 13000000;
+    tx.gas = 13000000;
     // console.log('outgoing transaction: ', tx);
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
@@ -282,10 +282,10 @@ async function checkForScrub(ticker){
 
 let oldMidpoint = [];
 let zeroMP = 0;
-async function marketMake(a, b, ticker, im) {
+async function marketMake(a, b, ticker, im, spread) {
     const contract = await getContractFromToken(ticker, "BathPair");
     // ***Market Maker Inputs***
-    const targetSpread = 0.02; // the % of the spread we want to improve
+    const targetSpread = spread; // the % of the spread we want to improve
     const scaleBack =  new BigNumber(5); // used to scale back maxOrderSize   
     // *************************
     // Check if midpoint is unchanged before market making
@@ -316,7 +316,7 @@ async function marketMake(a, b, ticker, im) {
     const bidNum = maxBidSize.dividedBy( scaleBack);
     const bidDen = bidNum.dividedBy(newBidPrice);
 
-    await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
+    // await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
     var txData = contract.methods.executeStrategy(
         process.env.OP_KOVAN_TC_PAIRSTRADE, 
@@ -332,7 +332,7 @@ async function marketMake(a, b, ticker, im) {
         to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
-
+    // console.log('New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
     await sendTx(tx, 'New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
 }
 
@@ -346,8 +346,8 @@ async function checkInventory(currentAsk, currentBid, ticker) {
     var quoteBalance = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHUSDC).call();
     const bathQuoteSupply = await bathUsdcContractKovan.methods.totalSupply().call();
     const bathAssetSupply = await contractBP.methods.totalSupply().call();
-    console.log('Current asset liquidity balance: ', web3.utils.fromWei(assetBalance),  ticker);
-    console.log('Current quote liquidity balance: ', web3.utils.fromWei(quoteBalance), "USDC");
+    // console.log('Current asset liquidity balance: ', web3.utils.fromWei(assetBalance),  ticker);
+    // console.log('Current quote liquidity balance: ', web3.utils.fromWei(quoteBalance), "USDC");
 
     if (assetBalance == 0 || quoteBalance == 0) {
         throw ("ERROR: no liquidity in quote or asset bathToken");
@@ -368,7 +368,7 @@ async function checkInventory(currentAsk, currentBid, ticker) {
 }
 
 // This function sets off the chain of calls to successfully marketMake
-async function startBot(token) {
+async function startBot(token, spread) {
     setTimeout(async function() {
         // Returns best bid and ask price
         await stoikov(token).then(async function(data) {
@@ -382,20 +382,28 @@ async function startBot(token) {
             await checkForScrub(token);
 
             // Sends executeTransaction()
-            await marketMake(currentAsk, currentBid, token, IMfactor);
+            await marketMake(currentAsk, currentBid, token, IMfactor, spread);
         });
         console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
       // Again
-      startBot(token);
+      startBot(token, spread);
 
       // Every 6 sec
     }, 2500);
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
-startBot("WBTC");
-startBot("MKR");
+
+// **** Key inputs ****
+const asset = "WBTC";
+
+startBot(asset, 0.02);
+startBot(asset, 0.03);
+startBot(asset, 0.05);
+startBot(asset, 0.06);
+
+// startBot("MKR");
 
 
 
