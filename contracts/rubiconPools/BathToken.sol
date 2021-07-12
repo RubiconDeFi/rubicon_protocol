@@ -16,40 +16,31 @@ import "./BathHouse.sol";
 contract BathToken {
     // using SafeERC20 for IERC20;
     using SafeMath for uint256;
+    bool public initialized;
 
     string public symbol;
     string public constant name = "BathToken v1";
     uint8 public constant decimals = 18;
 
-    IERC20 public underlyingToken;
     address public RubiconMarketAddress;
-
-    // admin
-    address public bathHouse;
-
+    address public bathHouse; // admin
     address public feeTo;
+    IERC20 public underlyingToken;
     uint256 public feeBPS;
     uint256 public feeDenominator = 10000;
 
     uint256 public totalSupply;
     uint256 MAX_INT = 2**256 - 1;
+    uint256[] outstandingIDs;
 
     mapping(address => uint256) public balanceOf;
-
-    // This maps a user's address to cumulative pool yield at the time of deposit
-    mapping(address => uint256) public diveInTheBath;
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
-
-    // This tracks cumulative yield over time [amount, timestmap]
-    // amount should be token being passed from another bathToken to this one (pair) - market price at the time
-    uint256[2][] public yieldTracker;
 
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    bool public initialized;
 
     event Approval(
         address indexed owner,
@@ -63,7 +54,6 @@ contract BathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     );
-    event LogYield(uint256 yield);
     event LogInit(uint256 timeOfInit);
 
     function initialize(
@@ -148,7 +138,10 @@ contract BathToken {
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
+        require(initialized);
+
         RubiconMarket(RubiconMarketAddress).cancel(id);
+        delete outstandingIDs[id];
     }
 
     // function that places a bid/ask in the orderbook for a given pair
@@ -158,6 +151,8 @@ contract BathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     ) external onlyApprovedStrategy returns (uint256) {
+        require(initialized);
+
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
@@ -169,7 +164,7 @@ contract BathToken {
             0,
             false
         );
-        emit LogTrade(pay_amt, pay_gem, buy_amt, buy_gem);
+        outstandingIDs.push(id);
         return (id);
     }
 
@@ -178,13 +173,34 @@ contract BathToken {
         return address(underlyingToken);
     }
 
+    /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to 
+    ///         any tokens that may be outstanding in the Rubicon order book
+    function underlyingBalance() public view returns (uint) {
+        uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
+        uint256 _OBvalue;
+        for (uint256 index = 0; index < outstandingIDs.length; index++) {
+            if (outstandingIDs[index] == 0) {
+                continue;
+            } else {
+                (uint pay, IERC20 pay_gem, uint buy, IERC20 buy_gem) = RubiconMarket(RubiconMarketAddress).getOffer(outstandingIDs[index]);
+                _OBvalue += pay;
+            }
+        }
+        return _pool.add(_OBvalue);
+    }
+
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) external {
-        uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
+        require(initialized);
+
+        uint256 _pool = underlyingBalance();
         uint256 _before = underlyingToken.balanceOf(address(this));
+        // uint256 _pool = _before + outstandingTokens;
+
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
         uint256 _after = underlyingToken.balanceOf(address(this));
         _amount = _after.sub(_before); // Additional check for deflationary tokens
+        
         uint256 shares = 0;
         if (totalSupply == 0) {
             shares = _amount;
@@ -196,8 +212,10 @@ contract BathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) external {
+        require(initialized);
+
         uint256 r = (
-            IERC20(underlyingToken).balanceOf(address(this)).mul(_shares)
+            underlyingBalance().mul(_shares)
         )
         .div(totalSupply);
         _burn(msg.sender, _shares);
@@ -214,7 +232,7 @@ contract BathToken {
         address underlyingAsset, /* sister asset */
         uint8 stratProportion
     ) external onlyPair {
-        require(stratProportion > 0 && stratProportion < 50);
+        require(stratProportion > 0 && stratProportion < 50 && initialized);
         uint256 stratReward = (stratProportion *
             (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
         IERC20(underlyingAsset).transfer(

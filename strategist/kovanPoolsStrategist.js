@@ -68,7 +68,7 @@ function getNonce() {
   return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
 }
 
-async function sendTx(tx, msg) {
+async function sendTx(tx, msg, ticker) {
     tx.nonce = await getNonce();
     tx.gasPrice = 15000000;
     tx.gasLimit = 13000000;
@@ -76,12 +76,11 @@ async function sendTx(tx, msg) {
     // console.log('outgoing transaction: ', tx);
     web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
-            console.log("*transaction success* => ", msg);
+            console.log("*transaction success*" + ticker + " => " + msg);
             // return;
             // console.log(r);
         }).catch((c) =>  {
-            console.log('** Transaction Failed **', msg);
-            throw (c);
+            console.log('** ' + ticker+ ' Transaction Failed **');
         });
     });
 }
@@ -255,7 +254,6 @@ async function logInfo(mA, mB, a, b, im) {
 async function checkForScrub(ticker){
         const contract = await getContractFromToken(ticker, "BathPair");
         await contract.methods.getOutstandingPairCount().call().then(async (r) => {
-            if (r > 5) {
                 // Scrub the bath
                 var txData = await contract.methods.bathScrub().encodeABI();
                 var tx = {
@@ -267,31 +265,29 @@ async function checkForScrub(ticker){
                 };
                 await contract.methods.bathScrub().estimateGas(tx, (async function(r, d) {
                     if (d > 0) { 
-                    await sendTx(tx, "\n<* I have successfully scrubbed the " + ticker + " bath, Master *>\n");
+                    await sendTx(tx, "\n<* I have successfully scrubbed the " + ticker + " bath, Master *>\n", ticker + " bath Scrub!");
                     } else{
                         throw("gas estimation in bathScrub failed");
                     }
                 }));
-            } else {
-                return;
-            }
-        });
 
+        });
 
 }
 
 let oldMidpoint = [];
 let zeroMP = 0;
-async function marketMake(a, b, ticker, im, spread) {
-    const contract = await getContractFromToken(ticker, "BathPair");
+async function marketMake(a, b, t, im, spread) {
+    const ticker = await t;
+    const contract = await getContractFromToken(await ticker, "BathPair");
     // ***Market Maker Inputs***
-    const targetSpread = spread; // the % of the spread we want to improve
-    const scaleBack =  new BigNumber(5); // used to scale back maxOrderSize   
+    const targetSpread = await spread; // the % of the spread we want to improve
+    const scaleBack =  new BigNumber(10); // used to scale back maxOrderSize   
     // *************************
     // Check if midpoint is unchanged before market making
-    var midPoint = (a + b) / 2;
+    var midPoint = (await a + await b) / 2;
     if (midPoint == oldMidpoint[ticker]) {
-        console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
+        // console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
         return;
     } else if (midPoint == 0 ) {
         zeroMP++;
@@ -302,11 +298,13 @@ async function marketMake(a, b, ticker, im, spread) {
         oldMidpoint[ticker] = midPoint;
     }
 
+    await checkForScrub(t);
+
     var newBidPrice = new BigNumber(parseFloat(midPoint * (1-targetSpread)));
     var newAskPrice = new BigNumber(parseFloat(midPoint * (1+targetSpread)));
 
     // getMaxOrderSize from contract for bid and ask
-    const maxAskSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + ticker], process.env['OP_KOVAN_TC_BATH' + ticker]).call());
+    const maxAskSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + await ticker], process.env['OP_KOVAN_TC_BATH' + await ticker]).call());
     const maxBidSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call());
     
     // in wei
@@ -329,17 +327,17 @@ async function marketMake(a, b, ticker, im, spread) {
         gas: 9000000,
         data: txData.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
+        to: process.env['OP_KOVAN_TC_BATH' + await ticker + 'USDC'],
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     // console.log('New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
-    await sendTx(tx, 'New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
+    // await sendTx(tx, 'New ' + await ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n', ticker);
 }
 
 // This function should return a positive or negative number reflecting the balance.
 async function checkInventory(currentAsk, currentBid, ticker) {
-    const contractBP = await getContractFromToken(ticker, "BathToken");
-    const contractT = await getContractFromToken(ticker, "EquityToken");
+    const contractBP = await getContractFromToken(await ticker, "BathToken");
+    const contractT = await getContractFromToken(await ticker, "EquityToken");
 
     var currentReserveRatio = (80.00 / 100.00);
     var assetBalance = await contractT.methods.balanceOf(process.env['OP_KOVAN_TC_BATH' + ticker]).call();
@@ -379,31 +377,39 @@ async function startBot(token, spread) {
             const IMfactor = checkInventory(currentAsk, currentBid, token);
             
             // Sends a scrubBath() call
-            await checkForScrub(token);
+            // 
 
             // Sends executeTransaction()
-            await marketMake(currentAsk, currentBid, token, IMfactor, spread);
+            await marketMake(await currentAsk, await currentBid, await token, await IMfactor, await spread);
         });
-        console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
+        // console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
       // Again
       startBot(token, spread);
 
-      // Every 6 sec
+      // Every 2.5 sec
     }, 2500);
 }
 
 console.log('\n<* Strategist Bot Begins its Service to Rubicon *>\n');
 
 // **** Key inputs ****
-const asset = "WBTC";
+const assets = [
+    "WBTC",
+    "MKR",
+    "SNX",
+    "REP",
+    "RGT",
+    "ETH"
+];
 
-startBot(asset, 0.02);
-startBot(asset, 0.03);
-startBot(asset, 0.05);
-startBot(asset, 0.06);
-
-// startBot("MKR");
+for (let index = 0; index < assets.length; index++) {
+    const element = assets[index];
+    startBot(element, 0.02);
+    // startBot(element, 0.03);
+    startBot(element, 0.04);
+    // startBot(element, 0.07);
+}
 
 
 
