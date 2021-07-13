@@ -231,14 +231,18 @@ contract BathToken {
     function rebalance(
         address sisterBath,
         address underlyingAsset, /* sister asset */
-        uint8 stratProportion
+        uint256 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 50 && initialized);
-        uint256 stratReward = (stratProportion *
-            (IERC20(underlyingAsset).balanceOf(address(this)))) / 100;
+        uint256 stratReward = (
+            stratProportion.mul(
+                IERC20(underlyingAsset).balanceOf(address(this))
+            )
+        )
+        .div(100);
         IERC20(underlyingAsset).transfer(
             sisterBath,
-            IERC20(underlyingAsset).balanceOf(address(this)) - stratReward
+            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
         );
         IERC20(underlyingAsset).transfer(msg.sender, stratReward);
     }
