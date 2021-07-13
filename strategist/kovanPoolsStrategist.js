@@ -35,8 +35,8 @@ var { abi } = require("../build/contracts/BathToken.json");
 var bathUsdcKovanAddr = process.env.OP_KOVAN_TC_BATHUSDC;
 var bathUsdcContractKovan = new web3.eth.Contract(abi, bathUsdcKovanAddr);
 
-var { abi } = require("../build/contracts/PairsTrade.json");
-var strategyKovanAddr = process.env.OP_KOVAN_TC_PAIRSTRADE;
+var { abi } = require("../build/contracts/BidAskUtil.json");
+var strategyKovanAddr = process.env.OP_KOVAN_TC_BidAskUtil;
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 // Load in WAYNE Contract
@@ -91,7 +91,7 @@ async function sendTx(tx, msg, ticker) {
 // // // ------------------- Validate Migrations ------------------
 // //  BATH HOUSE
 // // Strategy is Approved
-// bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_TC_PAIRSTRADE).call().then((r) => {
+// bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_TC_BidAskUtil).call().then((r) => {
 //     if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
 // });
 // bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_TC_BATHWBTCUSDC).call().then((r) => {
@@ -317,7 +317,7 @@ async function marketMake(a, b, t, im, spread) {
     // await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
     var txData = contract.methods.executeStrategy(
-        process.env.OP_KOVAN_TC_PAIRSTRADE, 
+        process.env.OP_KOVAN_TC_BidAskUtil, 
         web3.utils.toBN(askNum.decimalPlaces(0)),
         web3.utils.toBN(askDen.decimalPlaces(0)),
         web3.utils.toBN(bidNum.decimalPlaces(0)),

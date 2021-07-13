@@ -105,7 +105,7 @@ const func = async (hre) => {
 //   }
 // }).then(async function(data) {
 //           // 4. Deploy pairs trade
-//   const deployResultPT = await deploy('PairsTrade', {
+//   const deployResultPT = await deploy('BidAskUtil', {
 //     from: deployer,
 //     args: ["Pairs Trade", data[2], process.env.OP_KOVAN_MARKET],
 //     log: true,
@@ -119,7 +119,7 @@ const func = async (hre) => {
 //     return data;
 //     }
 //   else {
-//     data.push(process.env.OP_KOVAN_PAIRSTRADE);
+//     data.push(process.env.OP_KOVAN_BidAskUtil);
 //     return data;
 //   }
 // }).then(async function(data) {
@@ -201,7 +201,7 @@ const func = async (hre) => {
     // ---------------------------------------------------------------------
 
   //     // 4. Deploy pairs trade
-  // const deployResultPT = await deploy('PairsTrade', {
+  // const deployResultPT = await deploy('BidAskUtil', {
   //   from: deployer,
   //   args: ["Pools Trade Library", process.env.OP_KOVAN_TC_BATHHOUSE, process.env.OP_KOVAN_TC_MARKET],
   //   log: true
@@ -214,7 +214,7 @@ const func = async (hre) => {
   //   const bh = await hre.ethers.getContractFactory("BathHouse");
   //   const BHI = await bh.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
   //   await BHI.estimateGas.approveStrategy(deployResultPT.address).then(async function(g) {
-  //     await BHI.approveStrategy(deployResultPT.address, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("PairsTrade approved \n" + r));
+  //     await BHI.approveStrategy(deployResultPT.address, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BidAskUtil approved \n" + r));
   //     console.log('Pairs Trade Approved');
   //   });
   //   }

@@ -4,7 +4,7 @@ const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
-const PairsTrade = artifacts.require("PairsTrade");
+const BidAskUtil = artifacts.require("BidAskUtil");
 
 function logIndented(...args) {
     console.log("       ", ...args); 
@@ -133,7 +133,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await rubiconMarketInstance.offer( web3.utils.toWei((4).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
         it("Can initialize an approved strategy", async function () {
-            strategyInstance = await PairsTrade.deployed();
+            strategyInstance = await BidAskUtil.deployed();
 
             await bathHouseInstance.approveStrategy(strategyInstance.address);
         });

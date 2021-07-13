@@ -13,7 +13,7 @@ import "../RubiconMarket.sol";
 import "./BathHouse.sol";
 import "./BathPair.sol";
 
-contract PairsTrade {
+contract BidAskUtil {
     using SafeMath for uint256;
 
     string public name;

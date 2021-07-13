@@ -3,7 +3,7 @@ var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
 var BathToken = artifacts.require("./contracts/rubiconPoolsv0/BathToken.sol");
-var PairsTrade = artifacts.require("./contracts/PairsTrade.sol");
+var BidAskUtil = artifacts.require("./contracts/BidAskUtil.sol");
 
 var WETH = artifacts.require("./contracts/WETH9.sol");
 var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
@@ -32,17 +32,8 @@ module.exports = async function(deployer, network, accounts) {
             // rubiconMarketInstance = await RubiconMarket.deployed();
 
             return deployer.deploy(BathHouse).then(async function() {
-              // bathHouseInstance = await BathHouse.deployed();
-              // bathWETHInstance = await deployer.deploy(BathToken);
-              // bathUSDCInstance = await deployer.deploy(BathToken);
-  
-              // await bathWETHInstance.initialize("bathWETH", wethInstance.address, rubiconMarketInstance.address, BathHouse.address);
-              // await bathUSDCInstance.initialize("bathUSDC", daiInstance.address, rubiconMarketInstance.address, BathHouse.address);
-              // // await deployer.deploy(BathToken);
-              // // await deployer.deploy(BathToken);
-
               await deployer.deploy(BathPair);
-              return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
+              return deployer.deploy(BidAskUtil, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
             }); 
         });
       }

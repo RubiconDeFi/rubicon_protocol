@@ -10,7 +10,7 @@ pragma solidity =0.7.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../RubiconMarket.sol";
-import "./PairsTrade.sol";
+import "./BidAskUtil.sol";
 import "./BathHouse.sol";
 
 contract BathToken {

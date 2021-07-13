@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
-import "../interfaces/IPairsTrade.sol";
+import "../interfaces/IBidAskUtil.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
@@ -558,7 +558,7 @@ contract BathPair {
         );
 
         // 2. Strategist executes a pair trade
-        IPairsTrade(targetStrategy).execute(
+        IBidAskUtil(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,
