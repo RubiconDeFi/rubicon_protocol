@@ -14,7 +14,6 @@ import "./BidAskUtil.sol";
 import "./BathHouse.sol";
 
 contract BathToken {
-    // using SafeERC20 for IERC20;
     using SafeMath for uint256;
     bool public initialized;
 
@@ -36,12 +35,12 @@ contract BathToken {
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
-    mapping(address => uint256) public nonces;
 
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    mapping(address => uint256) public nonces;
 
     event Approval(
         address indexed owner,
