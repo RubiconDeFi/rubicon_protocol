@@ -35,8 +35,8 @@ jobs:
         # For the error "Something went wrong while attempting to connect to the
         # network", implicate this line that starts up ganache.
       
-      - name: Run Rubicon Pools Tests
-        run: npm run test:pools
+      - name: Run Rubicon Tests
+        run: npm run test
       
 
 # Opens a shell on the runner. Useful for debugging actions.

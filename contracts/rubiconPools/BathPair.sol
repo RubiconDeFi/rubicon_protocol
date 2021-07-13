@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
-import "../interfaces/IPairsTrade.sol";
+import "../interfaces/IBidAskUtil.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
 
 contract BathPair {
@@ -30,8 +30,8 @@ contract BathPair {
 
     bool public initialized;
 
-    uint16 public maxOrderSizeBPS;
     int128 internal shapeCoefNum;
+    uint256 public maxOrderSizeBPS;
 
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
@@ -61,7 +61,7 @@ contract BathPair {
         address _bathAssetAddress,
         address _bathQuoteAddress,
         address _bathHouse,
-        uint16 _maxOrderSizeBPS,
+        uint256 _maxOrderSizeBPS,
         int128 _shapeCoefNum
     ) external {
         require(!initialized);
@@ -105,31 +105,47 @@ contract BathPair {
         _;
     }
 
+    modifier onlyApprovedStrategist(address targetStrategist) {
+        require(
+            BathHouse(bathHouse).isApprovedStrategist(targetStrategist) == true,
+            "you are not an approved strategist - bathPair"
+        );
+        _;
+    }
+
     modifier enforceReserveRatio {
         require(
-            (BathToken(bathAssetAddress).totalSupply() *
-                BathHouse(bathHouse).reserveRatio()) /
-                100 <=
-                IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+            (
+                BathToken(bathAssetAddress).totalSupply().mul(
+                    BathHouse(bathHouse).reserveRatio()
+                )
+            )
+            .div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() *
-                BathHouse(bathHouse).reserveRatio()) /
-                100 <=
-                IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+            (
+                BathToken(bathQuoteAddress).totalSupply().mul(
+                    BathHouse(bathHouse).reserveRatio()
+                )
+            )
+            .div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
         _;
         require(
-            (BathToken(bathAssetAddress).totalSupply() *
-                BathHouse(bathHouse).reserveRatio()) /
-                100 <=
-                IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+            (
+                BathToken(bathAssetAddress).totalSupply().mul(
+                    BathHouse(bathHouse).reserveRatio()
+                )
+            )
+            .div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
-            (BathToken(bathQuoteAddress).totalSupply() *
-                BathHouse(bathHouse).reserveRatio()) /
-                100 <=
-                IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+            (
+                BathToken(bathQuoteAddress).totalSupply().mul(
+                    BathHouse(bathHouse).reserveRatio()
+                )
+            )
+            .div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
     }
 
@@ -141,7 +157,7 @@ contract BathPair {
         shapeCoefNum = val;
     }
 
-    function getMidpointPrice() internal  view returns (int128) {
+    function getMidpointPrice() internal view returns (int128) {
         uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
@@ -150,13 +166,19 @@ contract BathPair {
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
-        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to get a Midpoint");        
+        require(
+            bestAskID > 0 && bestBidID > 0,
+            "bids or asks are missing to get a Midpoint"
+        );
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
         int128 midpoint = ABDKMath64x64.divu(
-            ((bestAsk.buy_amt / bestAsk.pay_amt) +
-                (bestBid.pay_amt / bestBid.buy_amt)),
+            (
+                (bestAsk.buy_amt.div(bestAsk.pay_amt)).add(
+                    bestBid.pay_amt.div(bestBid.buy_amt)
+                )
+            ),
             2
         );
         return midpoint;
@@ -184,33 +206,51 @@ contract BathPair {
             ERC20(underlyingAsset)
         );
 
-        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to enforce a spread");        
-
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
+
+        // If orders in the order book, adhere to more constraints
+        if (
+            bestAsk.pay_amt > 0 &&
+            bestAsk.buy_amt > 0 &&
+            bestBid.pay_amt > 0 &&
+            bestBid.buy_amt > 0
+        ) {
+            if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
+                require(
+                    ((bestAsk.buy_amt.mul(bidD)) >
+                        (bestAsk.pay_amt.mul(bidN))) &&
+                        ((askD.mul(bestBid.buy_amt)) >
+                            (bestBid.pay_amt.mul(askN))),
+                    "bid must be < bestAsk && ask must be > best Bid in Price"
+                );
+            } else if (bidN > 0 && bidD > 0) {
+                // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
+                require(
+                    (bestAsk.buy_amt.mul(bidD)) > (bestAsk.pay_amt.mul(bidN)),
+                    "bid price is not less than the best ask"
+                );
+            } else if (askN > 0 && askD > 0) {
+                // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
+                require(
+                    (askD.mul(bestBid.buy_amt)) > (bestBid.pay_amt.mul(askN)),
+                    "ask price not greater than best bid"
+                );
+            }
+        }
+        // check that ask price > bid price if two offers given
         if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-              require(
-                ((bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN))
-                && ((askD * bestBid.buy_amt) > (bestBid.pay_amt * askN)),
-                "bid must be < bestAsk && ask must be > best Bid in Price"
-            );
-        } else if (bidN > 0 && bidD > 0) {
-            // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
-               require(
-                (bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN),
-                "bid price is not less than the best ask"
-            );
-        } else if (askN > 0 && askD > 0) {
-            // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
-            require((askD * bestBid.buy_amt) > (bestBid.pay_amt * askN), "ask price not greater than best bid");
+            require((askD.mul(bidD)) > (bidN.mul(askN)));
         }
     }
 
     function getThisBathQuote() external view returns (address) {
+        require(initialized);
         return bathQuoteAddress;
     }
 
     function getThisBathAsset() external view returns (address) {
+        require(initialized);
         return bathAssetAddress;
     }
 
@@ -245,16 +285,18 @@ contract BathPair {
         uint256 fillCountA = strategist2FillsAsset[msg.sender];
         uint256 fillCountQ = strategist2FillsQuote[msg.sender];
         if (fillCountA > 0) {
-            uint256 booty = (fillCountA *
-                ERC20(underlyingAsset).balanceOf(address(this))) /
-                totalAssetFills;
+            uint256 booty = (
+                fillCountA.mul(ERC20(underlyingAsset).balanceOf(address(this)))
+            )
+            .div(totalAssetFills);
             IERC20(underlyingAsset).transfer(msg.sender, booty);
             totalAssetFills -= fillCountA;
         }
         if (fillCountQ > 0) {
-            uint256 booty = (fillCountQ *
-                ERC20(underlyingQuote).balanceOf(address(this))) /
-                totalQuoteFills;
+            uint256 booty = (
+                fillCountQ.mul(ERC20(underlyingQuote).balanceOf(address(this)))
+            )
+            .div(totalQuoteFills);
             IERC20(underlyingQuote).transfer(msg.sender, booty);
             totalQuoteFills -= fillCountQ;
         }
@@ -436,7 +478,8 @@ contract BathPair {
 
     // this throws on a zero value ofliquidity
     function getMaxOrderSize(address asset, address bathTokenAddress)
-        public view
+        public
+        view
         returns (uint256 maxOrderSize)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
@@ -450,17 +493,18 @@ contract BathPair {
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
         if (asset == underlyingAsset) {
-            // uint ratio = underlyingBalance / IERC20(underlyingQuote).balanceOf(bathQuoteAddress); //this ratio should equal price
             int128 ratio = ABDKMath64x64.divu(
                 underlyingBalance,
                 IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
             );
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
-                return (maxOrderSizeBPS * underlyingBalance) / 10000;
+                return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) / 10000;
+                uint256 maxSize = maxOrderSizeBPS.mul(underlyingBalance).div(
+                    10000
+                );
                 int128 shapeFactor = ABDKMath64x64.exp(
                     ABDKMath64x64.mul(
                         shapeCoef,
@@ -478,10 +522,12 @@ contract BathPair {
                 IERC20(underlyingAsset).balanceOf(bathAssetAddress)
             );
             if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2**64)) {
-                return (maxOrderSizeBPS * underlyingBalance) / 10000;
+                return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
             } else {
                 // return dynamic order size
-                uint256 maxSize = (maxOrderSizeBPS * underlyingBalance) / 10000;
+                uint256 maxSize = maxOrderSizeBPS.mul(underlyingBalance).div(
+                    10000
+                );
                 int128 shapeFactor = ABDKMath64x64.exp(
                     ABDKMath64x64.mul(
                         shapeCoef,
@@ -499,7 +545,7 @@ contract BathPair {
     // Used to map a strategist to their orders
     function newTradeIDs(address strategist)
         internal
-        returns (uint256[3] memory)
+    // returns (uint256[3] memory)
     {
         require(
             outstandingPairIDs[outstandingPairIDs.length - 1][2] ==
@@ -511,7 +557,7 @@ contract BathPair {
         IDs2strategist[
             outstandingPairIDs[outstandingPairIDs.length - 1][1]
         ] = strategist;
-        return outstandingPairIDs[outstandingPairIDs.length - 1];
+        // return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
     function getLastTradeIDs() external view returns (uint256[3] memory) {
@@ -526,7 +572,12 @@ contract BathPair {
         uint256 askDenominator, // Asset / Quote
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
-    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+    )
+        external
+        onlyApprovedStrategy(targetStrategy)
+        enforceReserveRatio
+        onlyApprovedStrategist(msg.sender)
+    {
         // Require at least one order is non-zero
         require(
             (askNumerator > 0 && askDenominator > 0) ||
@@ -559,7 +610,7 @@ contract BathPair {
         );
 
         // 2. Strategist executes a pair trade
-        IPairsTrade(targetStrategy).execute(
+        IBidAskUtil(targetStrategy).execute(
             underlyingAsset,
             bathAssetAddress,
             underlyingQuote,

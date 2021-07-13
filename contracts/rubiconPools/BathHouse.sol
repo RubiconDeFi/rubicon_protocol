@@ -21,6 +21,8 @@ contract BathHouse {
     mapping(address => bool) public approvedStrategies;
     mapping(address => bool) public approvedBathTokens;
     mapping(address => bool) public approvedPairs;
+    mapping(address => bool) public approvedStrategists;
+
     mapping(address => bool) internal bathQuoteExists;
     mapping(address => bool) internal bathAssetExists;
     mapping(address => uint8) public propToStrategists;
@@ -28,6 +30,7 @@ contract BathHouse {
     mapping(address => address) internal assetToBathAsset;
 
     bool public initialized;
+    bool public permissionedStrategists; //if true strategists are permissioned
 
     // Key, system-wide risk parameters for Pools
     uint256 public reserveRatio; // proportion of the pool that must remain present in the pair
@@ -55,6 +58,8 @@ contract BathHouse {
         maxOutstandingPairCount = mopc;
 
         RubiconMarketAddress = market;
+        approveStrategist(admin);
+        permissionedStrategists = true;
         initialized = true;
     }
 
@@ -88,6 +93,10 @@ contract BathHouse {
 
     function setBathHouseAdmin(address newAdmin) external onlyAdmin {
         admin = newAdmin;
+    }
+
+    function setPermissionedStrategists(bool _new) external onlyAdmin {
+        permissionedStrategists = _new;
     }
 
     // Setter Functions for paramters - onlyAdmin
@@ -180,10 +189,7 @@ contract BathHouse {
         }
     }
 
-    function approveStrategy(address strategy)
-        external
-        onlyAdmin
-    {
+    function approveStrategy(address strategy) external onlyAdmin {
         approvedStrategies[strategy] = true;
     }
 
@@ -199,10 +205,26 @@ contract BathHouse {
         }
     }
 
-    function approveBathToken(address bathToken)
+    function isApprovedStrategist(address wouldBeStrategist)
         external
-        onlyAdmin
+        view
+        returns (bool)
     {
+        if (
+            approvedStrategists[wouldBeStrategist] == true ||
+            !permissionedStrategists
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function approveStrategist(address strategist) public onlyAdmin {
+        approvedStrategists[strategist] = true;
+    }
+
+    function approveBathToken(address bathToken) external onlyAdmin {
         approvedBathTokens[bathToken] = true;
     }
 

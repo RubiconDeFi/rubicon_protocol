@@ -4,7 +4,7 @@ const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("DaiWithFaucet");
 const WETH = artifacts.require("WETH9");
-const PairsTrade = artifacts.require("PairsTrade");
+const BidAskUtil = artifacts.require("BidAskUtil");
 
 function logIndented(...args) {
     console.log("       ", ...args); 
@@ -46,7 +46,6 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             return await BathToken.new().then(async function(instance) {
                 await instance.initialize("bathDAI", DAIInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
                 bathQuoteInstance = await instance;
-                console.log("new bathDAI addr", bathQuoteInstance.address);
             })
         });
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
@@ -91,7 +90,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
         });
         it("Withdraw quote funds by sending in bathTokens", async function() {
             await bathQuoteInstance.withdraw(web3.utils.toWei((100).toString()), {from: accounts[2]});
-            assert.equal(await DAIInstance.balanceOf(accounts[2]), web3.utils.toWei((100).toString()));
+            assert.equal((await DAIInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei("1000").toString());
         });
         it("both users have no bath Tokens post withdraw", async function() {
             assert.equal("0", await bathAssetInstance.balanceOf(accounts[1]));
@@ -133,7 +132,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await rubiconMarketInstance.offer( web3.utils.toWei((4).toString(), "ether"), DAIInstance.address, web3.utils.toWei((0.1).toString(), "ether"), WETHInstance.address,  0, {from: accounts[4], gas: 0x1ffffff });        
         });
         it("Can initialize an approved strategy", async function () {
-            strategyInstance = await PairsTrade.deployed();
+            strategyInstance = await BidAskUtil.deployed();
 
             await bathHouseInstance.approveStrategy(strategyInstance.address);
         });
@@ -161,19 +160,24 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await bathPairInstance.removeLiquidity(8);
             // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
         });
-        for (let i = 1; i < 10; i++) {
-            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+        it("New strategist can be added to pools", async function () {
+            await bathHouseInstance.approveStrategist(accounts[6]);
+            await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator, {from: accounts[6]});
+            await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
+        });
+        // for (let i = 1; i < 10; i++) {
+        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
 
-                await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-                if (i % 3) {
-                    await bathPairInstance.bathScrub();
-                }
-                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-            });
-        }
+        //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+        //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+        //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+        //         if (i % 3) {
+        //             await bathPairInstance.bathScrub();
+        //         }
+        //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+        //     });
+        // }
         it("Funds are correctly returned to bathTokens", async function () {
             await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");
@@ -182,7 +186,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
         it("Strategist can claim funds", async function () {
             (await bathPairInstance.strategistBootyClaim());
             // TODO: validate this is correct
-            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "200000000000000");
+            assert.equal((await WETHInstance.balanceOf(accounts[0])).toString(), "20000000000000");
         });
     });
 });

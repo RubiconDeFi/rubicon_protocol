@@ -11,10 +11,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // }
 
 contract EquityToken is ERC20 {
-    constructor(address admin, uint256 initialSupply)
-        public
-        ERC20("Regulation A+ Equity", "EQT")
-    {
+    constructor(
+        address admin,
+        uint256 initialSupply,
+        string memory _name,
+        string memory _symbol
+    ) public ERC20(_name, _symbol) {
         _mint(admin, initialSupply);
     }
 }
