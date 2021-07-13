@@ -245,10 +245,12 @@ contract BathPair {
     }
 
     function getThisBathQuote() external view returns (address) {
+        require(initialized);
         return bathQuoteAddress;
     }
 
     function getThisBathAsset() external view returns (address) {
+        require(initialized);
         return bathAssetAddress;
     }
 

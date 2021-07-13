@@ -48,7 +48,7 @@ module.exports = {
         gasPrice: 0,
       },
       optimismKovan: {
-        url: 'https://optimism-kovan.infura.io/v3/2989f59dba68436a9c9221bc6d1603d4',
+        url: 'https://optimism-kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
         ovm: true,
         gasPrice: 15000000,
         chainId: 69,

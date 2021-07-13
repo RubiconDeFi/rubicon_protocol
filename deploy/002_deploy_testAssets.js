@@ -162,11 +162,11 @@ const func = async (hre) => {
   // }
   
   // set BathHouse Variable
-    const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-    const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
-    await bh.estimateGas.setCancelTimeDelay(86400).then(async function(g) {
-              await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
-    });
+    // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+    // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_TC_BATHHOUSE);
+    // await bh.estimateGas.setCancelTimeDelay(86400).then(async function(g) {
+    //           await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
+    // });
     
   
 
