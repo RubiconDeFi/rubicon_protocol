@@ -33,9 +33,13 @@ module.exports = async function(deployer, network, accounts) {
 
             return deployer.deploy(BathHouse).then(async function() {
               // bathHouseInstance = await BathHouse.deployed();
-              
-              // await deployer.deploy(BathToken);
-              // await deployer.deploy(BathToken);
+              // bathWETHInstance = await deployer.deploy(BathToken);
+              // bathUSDCInstance = await deployer.deploy(BathToken);
+  
+              // await bathWETHInstance.initialize("bathWETH", wethInstance.address, rubiconMarketInstance.address, BathHouse.address);
+              // await bathUSDCInstance.initialize("bathUSDC", daiInstance.address, rubiconMarketInstance.address, BathHouse.address);
+              // // await deployer.deploy(BathToken);
+              // // await deployer.deploy(BathToken);
 
               await deployer.deploy(BathPair);
               return deployer.deploy(PairsTrade, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);

@@ -31,7 +31,8 @@ contract BathToken {
 
     uint256 public totalSupply;
     uint256 MAX_INT = 2**256 - 1;
-    uint256[] outstandingIDs;
+    uint[] outstandingIDs;
+    mapping(uint => uint) id2Ind;
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
@@ -135,13 +136,20 @@ contract BathToken {
         feeTo = _feeTo;
     }
 
+    function removeElement(uint256 index) internal {
+        outstandingIDs[index] = outstandingIDs[
+            outstandingIDs.length - 1
+        ];
+        outstandingIDs.pop();
+    }
+
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
         require(initialized);
 
         RubiconMarket(RubiconMarketAddress).cancel(id);
-        delete outstandingIDs[id];
+        removeElement(id2Ind[id]);
     }
 
     // function that places a bid/ask in the orderbook for a given pair
@@ -165,6 +173,7 @@ contract BathToken {
             false
         );
         outstandingIDs.push(id);
+        id2Ind[id] = outstandingIDs.length - 1;
         return (id);
     }
 
@@ -182,7 +191,8 @@ contract BathToken {
             if (outstandingIDs[index] == 0) {
                 continue;
             } else {
-                (uint pay, IERC20 pay_gem, uint buy, IERC20 buy_gem) = RubiconMarket(RubiconMarketAddress).getOffer(outstandingIDs[index]);
+                (uint pay, IERC20 pay_gem, , ) = RubiconMarket(RubiconMarketAddress).getOffer(outstandingIDs[index]);
+                require(pay_gem == underlyingToken);
                 _OBvalue += pay;
             }
         }
