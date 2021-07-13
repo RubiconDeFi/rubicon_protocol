@@ -31,8 +31,8 @@ contract BathToken {
 
     uint256 public totalSupply;
     uint256 MAX_INT = 2**256 - 1;
-    uint[] outstandingIDs;
-    mapping(uint => uint) id2Ind;
+    uint256[] outstandingIDs;
+    mapping(uint256 => uint256) id2Ind;
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
@@ -137,9 +137,7 @@ contract BathToken {
     }
 
     function removeElement(uint256 index) internal {
-        outstandingIDs[index] = outstandingIDs[
-            outstandingIDs.length - 1
-        ];
+        outstandingIDs[index] = outstandingIDs[outstandingIDs.length - 1];
         outstandingIDs.pop();
     }
 
@@ -178,9 +176,9 @@ contract BathToken {
         return address(underlyingToken);
     }
 
-    /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to 
+    /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to
     ///         any tokens that may be outstanding in the Rubicon order book
-    function underlyingBalance() public view returns (uint) {
+    function underlyingBalance() public view returns (uint256) {
         require(initialized, "BathToken not initialized");
 
         uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
@@ -189,7 +187,9 @@ contract BathToken {
             if (outstandingIDs[index] == 0) {
                 continue;
             } else {
-                (uint pay, IERC20 pay_gem, , ) = RubiconMarket(RubiconMarketAddress).getOffer(outstandingIDs[index]);
+                (uint256 pay, IERC20 pay_gem, , ) = RubiconMarket(
+                    RubiconMarketAddress
+                ).getOffer(outstandingIDs[index]);
                 require(pay_gem == underlyingToken);
                 _OBvalue += pay;
             }
@@ -206,7 +206,7 @@ contract BathToken {
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
         uint256 _after = underlyingToken.balanceOf(address(this));
         _amount = _after.sub(_before); // Additional check for deflationary tokens
-        
+
         uint256 shares = 0;
         if (totalSupply == 0) {
             shares = _amount;
@@ -218,10 +218,7 @@ contract BathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) external {
-        uint256 r = (
-            underlyingBalance().mul(_shares)
-        )
-        .div(totalSupply);
+        uint256 r = (underlyingBalance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
 
         uint256 _fee = r.mul(feeBPS).div(feeDenominator);

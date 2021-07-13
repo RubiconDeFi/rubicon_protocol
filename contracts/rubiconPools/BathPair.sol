@@ -113,7 +113,6 @@ contract BathPair {
         _;
     }
 
-
     modifier enforceReserveRatio {
         require(
             (BathToken(bathAssetAddress).totalSupply() *
@@ -150,7 +149,7 @@ contract BathPair {
         shapeCoefNum = val;
     }
 
-    function getMidpointPrice() internal  view returns (int128) {
+    function getMidpointPrice() internal view returns (int128) {
         uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
@@ -159,7 +158,10 @@ contract BathPair {
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
-        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to get a Midpoint");        
+        require(
+            bestAskID > 0 && bestBidID > 0,
+            "bids or asks are missing to get a Midpoint"
+        );
 
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
@@ -193,25 +195,39 @@ contract BathPair {
             ERC20(underlyingAsset)
         );
 
-        require(bestAskID > 0 && bestBidID > 0, "bids or asks are missing to enforce a spread");        
-
         order memory bestAsk = getOfferInfo(bestAskID);
         order memory bestBid = getOfferInfo(bestBidID);
+
+        // If orders in the order book, adhere to more constraints
+        if (
+            bestAsk.pay_amt > 0 &&
+            bestAsk.buy_amt > 0 &&
+            bestBid.pay_amt > 0 &&
+            bestBid.buy_amt > 0
+        ) {
+            if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
+                require(
+                    ((bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN)) &&
+                        ((askD * bestBid.buy_amt) > (bestBid.pay_amt * askN)),
+                    "bid must be < bestAsk && ask must be > best Bid in Price"
+                );
+            } else if (bidN > 0 && bidD > 0) {
+                // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
+                require(
+                    (bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN),
+                    "bid price is not less than the best ask"
+                );
+            } else if (askN > 0 && askD > 0) {
+                // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
+                require(
+                    (askD * bestBid.buy_amt) > (bestBid.pay_amt * askN),
+                    "ask price not greater than best bid"
+                );
+            }
+        }
+        // check that ask price > bid price if two offers given
         if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-              require(
-                ((bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN))
-                && ((askD * bestBid.buy_amt) > (bestBid.pay_amt * askN)),
-                "bid must be < bestAsk && ask must be > best Bid in Price"
-            );
-        } else if (bidN > 0 && bidD > 0) {
-            // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
-               require(
-                (bestAsk.buy_amt * bidD) > (bestAsk.pay_amt * bidN),
-                "bid price is not less than the best ask"
-            );
-        } else if (askN > 0 && askD > 0) {
-            // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
-            require((askD * bestBid.buy_amt) > (bestBid.pay_amt * askN), "ask price not greater than best bid");
+            require((askD * bidD) > (bidN * askN));
         }
     }
 
@@ -445,7 +461,8 @@ contract BathPair {
 
     // this throws on a zero value ofliquidity
     function getMaxOrderSize(address asset, address bathTokenAddress)
-        public view
+        public
+        view
         returns (uint256 maxOrderSize)
     {
         require(asset == underlyingAsset || asset == underlyingQuote);
@@ -507,7 +524,7 @@ contract BathPair {
     // Used to map a strategist to their orders
     function newTradeIDs(address strategist)
         internal
-        // returns (uint256[3] memory)
+    // returns (uint256[3] memory)
     {
         require(
             outstandingPairIDs[outstandingPairIDs.length - 1][2] ==
@@ -534,7 +551,12 @@ contract BathPair {
         uint256 askDenominator, // Asset / Quote
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
-    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio onlyApprovedStrategist(msg.sender) {
+    )
+        external
+        onlyApprovedStrategy(targetStrategy)
+        enforceReserveRatio
+        onlyApprovedStrategist(msg.sender)
+    {
         // Require at least one order is non-zero
         require(
             (askNumerator > 0 && askDenominator > 0) ||

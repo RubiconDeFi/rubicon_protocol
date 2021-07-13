@@ -86,7 +86,12 @@ contract DaiWithFaucet is LibNote, ERC20 {
     bytes32 public constant PERMIT_TYPEHASH =
         0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
-    constructor(uint256 chainId_, address admin, string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
+    constructor(
+        uint256 chainId_,
+        address admin,
+        string memory _name,
+        string memory _symbol
+    ) public ERC20(_name, _symbol) {
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(

@@ -189,10 +189,7 @@ contract BathHouse {
         }
     }
 
-    function approveStrategy(address strategy)
-        external
-        onlyAdmin
-    {
+    function approveStrategy(address strategy) external onlyAdmin {
         approvedStrategies[strategy] = true;
     }
 
@@ -213,24 +210,21 @@ contract BathHouse {
         view
         returns (bool)
     {
-        if (approvedStrategists[wouldBeStrategist] == true || !permissionedStrategists) {
+        if (
+            approvedStrategists[wouldBeStrategist] == true ||
+            !permissionedStrategists
+        ) {
             return true;
         } else {
             return false;
         }
     }
 
-    function approveStrategist(address strategist)
-        public
-        onlyAdmin
-    {
+    function approveStrategist(address strategist) public onlyAdmin {
         approvedStrategists[strategist] = true;
     }
 
-    function approveBathToken(address bathToken)
-        external
-        onlyAdmin
-    {
+    function approveBathToken(address bathToken) external onlyAdmin {
         approvedBathTokens[bathToken] = true;
     }
 
