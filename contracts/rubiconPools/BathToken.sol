@@ -146,8 +146,6 @@ contract BathToken {
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
-        require(initialized);
-
         RubiconMarket(RubiconMarketAddress).cancel(id);
         removeElement(id2Ind[id]);
     }
@@ -159,8 +157,6 @@ contract BathToken {
         uint256 buy_amt,
         ERC20 buy_gem
     ) external onlyApprovedStrategy returns (uint256) {
-        require(initialized);
-
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
@@ -185,6 +181,8 @@ contract BathToken {
     /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to 
     ///         any tokens that may be outstanding in the Rubicon order book
     function underlyingBalance() public view returns (uint) {
+        require(initialized, "BathToken not initialized");
+
         uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
         uint256 _OBvalue;
         for (uint256 index = 0; index < outstandingIDs.length; index++) {
@@ -201,8 +199,6 @@ contract BathToken {
 
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) external {
-        require(initialized);
-
         uint256 _pool = underlyingBalance();
         uint256 _before = underlyingToken.balanceOf(address(this));
         // uint256 _pool = _before + outstandingTokens;
@@ -222,8 +218,6 @@ contract BathToken {
 
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint256 _shares) external {
-        require(initialized);
-
         uint256 r = (
             underlyingBalance().mul(_shares)
         )

@@ -105,6 +105,15 @@ contract BathPair {
         _;
     }
 
+    modifier onlyApprovedStrategist(address targetStrategist) {
+        require(
+            BathHouse(bathHouse).isApprovedStrategist(targetStrategist) == true,
+            "you are not an approved strategist - bathPair"
+        );
+        _;
+    }
+
+
     modifier enforceReserveRatio {
         require(
             (BathToken(bathAssetAddress).totalSupply() *
@@ -498,7 +507,7 @@ contract BathPair {
     // Used to map a strategist to their orders
     function newTradeIDs(address strategist)
         internal
-        returns (uint256[3] memory)
+        // returns (uint256[3] memory)
     {
         require(
             outstandingPairIDs[outstandingPairIDs.length - 1][2] ==
@@ -510,7 +519,7 @@ contract BathPair {
         IDs2strategist[
             outstandingPairIDs[outstandingPairIDs.length - 1][1]
         ] = strategist;
-        return outstandingPairIDs[outstandingPairIDs.length - 1];
+        // return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
     function getLastTradeIDs() external view returns (uint256[3] memory) {
@@ -525,7 +534,7 @@ contract BathPair {
         uint256 askDenominator, // Asset / Quote
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
-    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio {
+    ) external onlyApprovedStrategy(targetStrategy) enforceReserveRatio onlyApprovedStrategist(msg.sender) {
         // Require at least one order is non-zero
         require(
             (askNumerator > 0 && askDenominator > 0) ||

@@ -46,7 +46,6 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             return await BathToken.new().then(async function(instance) {
                 await instance.initialize("bathDAI", DAIInstance.address, rubiconMarketInstance.address, bathHouseInstance.address);
                 bathQuoteInstance = await instance;
-                console.log("new bathDAI addr", bathQuoteInstance.address);
             })
         });
         it("Bath Pair is deployed and initialized w/ BathHouse", async function() {
@@ -160,6 +159,11 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             
             await bathPairInstance.removeLiquidity(8);
             // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
+        });
+        it("New strategist can be added to pools", async function () {
+            await bathHouseInstance.approveStrategist(accounts[6]);
+            await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator, {from: accounts[6]});
+            await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
         });
         // for (let i = 1; i < 10; i++) {
         //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
