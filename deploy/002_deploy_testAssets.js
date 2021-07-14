@@ -16,29 +16,29 @@ const func = async (hre) => {
     return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
   }
 
-//   // WETH
-//   const WETHdeployResult = await deploy('WETH9', {
-//     from: deployer,
-//     log: true
-//      });
-//   if (WETHdeployResult.newlyDeployed) {
-//     console.log(
-//       `WETH deployed at ${WETHdeployResult.address}`
-//     );
-// }
-// USDC
-// const USDCdeployResult = await deploy('DaiWithFaucet', {
-//     from: deployer,
-//     args: [69],
-//     log: true,
-//     gasLimit: 60050000,
-//     nonce: getNonce()
-//      });
-//   if (USDCdeployResult.newlyDeployed) {
-//     console.log(
-//       `USDC deployed at ${USDCdeployResult.address}`
-//     );
-//   }
+//1. Deploy and init Bath House
+const deployResultBH = await deploy('BathHouse', {
+  from: deployer,
+  log: true,
+  gasLimit: 135990000,
+  nonce: getNonce()
+}).then(async function(d) {
+  const newBHAddr = await d.address;
+  console.log(`bathHouse is at ${newBHAddr}`);
+  if (await d.newlyDeployed) {
+  console.log(
+    `contract BathHouse deployed at ${newBHAddr}`
+  );
+
+  // Init BathHouse
+      const bh = await hre.ethers.getContractFactory("BathHouse");
+      const BHI = await bh.attach(newBHAddr);
+      await BHI.estimateGas.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10).then(async function(g) {
+        await BHI.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
+        return newBHAddr;          
+      }).then(async (addr) => {await deployProxy(addr, "bathHouse")});
+}
+});
   // ****************************
   // const USDCFactory = await hre.ethers.getContractFactory("DaiWithFaucet");
   // await USDCFactory.deploy(69, process.env.OP_KOVAN_ADMIN, "USDC", "USDC", {gasLimit: 114380000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
