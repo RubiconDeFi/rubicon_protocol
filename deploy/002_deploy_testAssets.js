@@ -72,8 +72,9 @@ const func = async (hre) => {
 //             const btUInst = await bathTokenFactory.attach(await r.address);
 //             await btUInst.estimateGas.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_MARKET, process.env.OP_KOVAN_TC_BATHHOUSE, {gasLimit: 8999999}) .then(async function (g) {
 //               await btUInst.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_MARKET, process.env.OP_KOVAN_TC_BATHHOUSE, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ " success"));
-//           });
-    
+//               return r.address;
+//     }).then(async (addr) => {await deployProxy(addr, "bath" + asset)})
+//     // await deployProxy(, "bath" + asset)
 //   });
 // }
 
@@ -171,14 +172,20 @@ const func = async (hre) => {
 
   // ************** Proxies ***********************
     
-    // Deploy TransparentUpgradeableProxy 
+    // Deploy TransparentUpgradeableProxy
+    // return the address of the proxy that wraps `address` 
     async function deployProxy(address, msg) {
       const proxyFactory = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
       const newProxy = await proxyFactory.deploy(address, process.env.OP_KOVAN_PROXY_ADMIN,0,{nonce: await getNonce(), gasLimit: 82410000}).then(async function(r) {
                     console.log("Transparent Upgradeable Proxy deployed at: " + await r.address + " for " + msg);
                     const inst = await proxyFactory.attach(await r.address);
+                    return await r.address;
       });
     }
+
+    // async function updateProxy(address, msg) {
+
+    // }
 
 }
   
