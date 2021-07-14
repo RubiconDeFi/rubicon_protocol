@@ -167,21 +167,18 @@ const func = async (hre) => {
     // await bh.estimateGas.setCancelTimeDelay(86400).then(async function(g) {
     //           await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
     // });
+
+
+  // ************** Proxies ***********************
     
-  
-
-  // *************************************
-
-
-  //   const deployResult = await deploy('EquityToken', {
-  //       from: deployer,
-  //       args: [process.env.OP_KOVAN_ADMIN, BigNumber.from("1000000000000000000000")],
-  //       log: true
-  //    });
-  //   if (deployResult.newlyDeployed) {
-  //    console.log(
-  //      `contract WAYNE deployed at ${deployResult.address}`
-  //   );
+    // Deploy TransparentUpgradeableProxy 
+    async function deployProxy(address, msg) {
+      const proxyFactory = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
+      const newProxy = await proxyFactory.deploy(address, process.env.OP_KOVAN_PROXY_ADMIN,0,{nonce: await getNonce(), gasLimit: 82410000}).then(async function(r) {
+                    console.log("Transparent Upgradeable Proxy deployed at: " + await r.address + " for " + msg);
+                    const inst = await proxyFactory.attach(await r.address);
+      });
+    }
 
 }
   
