@@ -6,6 +6,7 @@ import 'hardhat-deploy'
 import '@eth-optimism/hardhat-ovm'
 import '@openzeppelin/hardhat-upgrades'
 import "@nomiclabs/hardhat-web3"
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
 module.exports = {
   ovm: {
@@ -64,7 +65,7 @@ module.exports = {
   // },
   namedAccounts: {
     deployer: {
-      default: 0
+      default: 0,
     }
   }
 };

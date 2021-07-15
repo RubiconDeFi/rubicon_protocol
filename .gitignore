@@ -19,3 +19,5 @@ cache-ovm/
 .openzeppelin
 .openzeppelin/
 randomCodeSnippets.js
+deploy/*
+deploy/
