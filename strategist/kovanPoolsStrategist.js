@@ -158,7 +158,60 @@ console.log(bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 }));
 
 
-// // Will revert if no bathToken liquidity
+// // // **Approve bathPair to recieve WAYNE and DAI first**
+// var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_1_BATHWBTC, web3.utils.toWei("10000000")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: WAYNEKovanAddr,
+//     gasPrice: web3.utils.toWei("0", "Gwei")
+// }
+// // Send the transaction
+// sendTx(tx, "Approve bathPair to recieve WAYNE");
+
+// // setTimeout(() => {console.log('waiting for nonce update')}, 2000)
+
+// var txData = DAIContractKovan.methods.approve(process.env.OP_KOVAN_1_BATHUSDC, web3.utils.toWei("30000000")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: USDC_OP_KOVAN,
+//     gasPrice: web3.utils.toWei("0", "Gwei")
+// }
+// // Send the transaction
+// sendTx(tx, "dai approve");
+// ---------------------------------------------------------
+// // Deposit WAYNE into BathToken WAYNE
+// var txData = bathWayneContractKovan.methods.deposit(web3.utils.toWei("50")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: process.env.OP_KOVAN_BATHWAYNE,
+//     gasPrice: web3.utils.toWei("0", "Gwei")
+// }
+// // Send the transaction
+// sendTx(tx, "Deposit WAYNE into BathToken WAYNE");
+
+// // console.log(bathUsdcContractKovan.methods.symbol().call().then((r) => console.log(r)));
+// // console.log(DAIContractKovan.methods.allowance(sender,process.env.OP_KOVAN_BATHUSDC ).call().then((r) => console.log(r)));
+
+// // // Deposit USDC into BathToken USDC
+// var txData = bathUsdcContractKovan.methods.deposit(web3.utils.toWei("100")).encodeABI();
+// var tx = {
+//     gas: 12500000,
+//     data: txData.toString(),
+//     from: sender,
+//     to: process.env.OP_KOVAN_BATHUSDC,
+//     gasPrice: "0"
+// }
+// // Send the transaction
+// sendTx(tx, "Deposit USDC into BathToken USDC");
+
+
+// Will revert if no bathToken liquidity
 // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WBTC: " + web3.utils.fromWei(r))));
 // console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
 // bathUsdcContractKovan.methods.totalSupply().call().then((r) =>{
@@ -286,7 +339,7 @@ async function marketMake(a, b, t, im, spread) {
     if (midPoint == oldMidpoint[ticker]) {
         // console.log('\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n');
         return;
-    } else if (midPoint == 0 ) {
+    } else if (midPoint == 0 || isNaN(midPoint)) {
         zeroMP++;
         console.log("got a zero midpoint, skipping market make, total times is: ", zeroMP);
         return;
@@ -308,7 +361,7 @@ async function marketMake(a, b, t, im, spread) {
     const askNum = maxAskSize.dividedBy(scaleBack);
     const askDen = (askNum.multipliedBy(newAskPrice));
 
-    const bidNum = maxBidSize.dividedBy( scaleBack);
+    const bidNum = maxBidSize.dividedBy(scaleBack);
     const bidDen = bidNum.dividedBy(newBidPrice);
 
     // await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
@@ -403,7 +456,7 @@ const assets = [
 // Start bots
 // for (let index = 0; index < assets.length; index++) {
 //     const element = assets[index];
-//     startBot(element, 0.02);
+    startBot("WBTC", 0.02);
 //     // startBot(element, 0.03);
 //     startBot(element, 0.04);
 //     // startBot(element, 0.07);
