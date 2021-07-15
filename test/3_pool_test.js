@@ -139,6 +139,9 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
         it("Any user can call executeStrategy() on bath Pairs", async function () {
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
         });
+        it("bathTokens maintains the correct underlyingBalance()", async function () {
+            assert.equal((await bathAssetInstance.underlyingBalance()).toString(), web3.utils.toWei((10).toString()));
+        });
         it("Taker can fill part of trade", async function () {
             await WETHInstance.deposit({from: accounts[5],value: web3.utils.toWei((100).toString())});
             await WETHInstance.approve(rubiconMarketInstance.address, web3.utils.toWei((100).toString()), {from: accounts[5]});
