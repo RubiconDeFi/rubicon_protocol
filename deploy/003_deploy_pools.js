@@ -19,7 +19,7 @@ const func = async (hre) => {
       return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
     }
     // console.log('Current Nonce', web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN).then((r) => {console.log("trans count", r)}));
-//1. Deploy and init Bath House
+// //1. Deploy and init Bath House
 //   const deployResultBH = await deploy('BathHouse', {
 //     from: deployer,
 //     log: true,
@@ -43,9 +43,9 @@ const func = async (hre) => {
 //         const bh = await hre.ethers.getContractFactory("BathHouse");
 //         const BHI = await bh.attach(newBHAddr);
 //         await BHI.estimateGas.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10).then(async function(g) {
-//           setTimeout(() => {}, 2000);
 //           await BHI.initialize(process.env.OP_KOVAN_TC_MARKET, 80, 259200, 10, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
-//         });
+//           return newBHAddr          
+//         }).then(async (addr) => {await deployProxy(addr, "bath" + asset)})
 //       return await newBHAddr;
 // } else {
 //   return process.env.OP_KOVAN_BATHHOUSE;
