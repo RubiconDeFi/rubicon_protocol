@@ -16,7 +16,7 @@ import "./BathPair.sol";
 contract BidAskUtil {
     using SafeMath for uint256;
     bool public initialized;
-    
+
     string public name;
 
     address public bathHouse;
@@ -39,7 +39,8 @@ contract BidAskUtil {
     function initialize(
         string memory _name,
         address _bathHouse,
-        address _rubiconMarket) external {
+        address _rubiconMarket
+    ) external {
         require(!initialized);
         name = _name;
         bathHouse = _bathHouse;

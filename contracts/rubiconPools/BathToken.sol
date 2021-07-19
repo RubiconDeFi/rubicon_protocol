@@ -84,7 +84,7 @@ contract BathToken {
         );
         name = "BathToken v1";
         decimals = 18;
-        
+
         // Add infinite approval of Rubicon Market for this asset
 
         IERC20(address(token)).approve(RubiconMarketAddress, 2**256 - 1);

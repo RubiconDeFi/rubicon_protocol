@@ -40,7 +40,7 @@ contract BathHouse {
 
     // Constraint variable for the max amount of outstanding market making pairs at a time
     uint256 public maxOutstandingPairCount;
-    
+
     /// @dev Proxy-safe initialization of storage
     function initialize(
         address market,

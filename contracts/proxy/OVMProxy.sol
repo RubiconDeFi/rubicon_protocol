@@ -20,7 +20,9 @@ abstract contract OVMProxy {
      */
     function _delegate(address implementation) internal virtual {
         // solhint-disable-next-line no-inline-assembly
-        (bool success, bytes memory returndata) = implementation.delegatecall(msg.data);
+        (bool success, bytes memory returndata) = implementation.delegatecall(
+            msg.data
+        );
 
         if (success) {
             assembly {
