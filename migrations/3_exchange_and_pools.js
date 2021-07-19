@@ -31,9 +31,11 @@ module.exports = async function(deployer, network, accounts) {
             // await deployer.deploy(BathToken)
             // rubiconMarketInstance = await RubiconMarket.deployed();
 
-            return deployer.deploy(BathHouse).then(async function() {
+            await deployer.deploy(BathHouse).then(async function() {
               await deployer.deploy(BathPair);
-              return deployer.deploy(BidAskUtil, "Pairs Trade", BathHouse.address, RubiconMarket.address,/* {gas: 0x1ffffff}*/);
+              bau = await deployer.deploy(BidAskUtil);
+              await bau.initialize("Pairs Trade", BathHouse.address, RubiconMarket.address);
+              return;
             }); 
         });
       }

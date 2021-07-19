@@ -15,7 +15,8 @@ import "./BathPair.sol";
 
 contract BidAskUtil {
     using SafeMath for uint256;
-
+    bool public initialized;
+    
     string public name;
 
     address public bathHouse;
@@ -35,14 +36,15 @@ contract BidAskUtil {
         ERC20 buy_gem;
     }
 
-    constructor(
+    function initialize(
         string memory _name,
         address _bathHouse,
-        address _rubiconMarket
-    ) {
+        address _rubiconMarket) external {
+        require(!initialized);
         name = _name;
         bathHouse = _bathHouse;
         RubiconMarketAddress = _rubiconMarket;
+        initialized = true;
     }
 
     modifier onlyPairs {

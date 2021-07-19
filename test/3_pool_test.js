@@ -135,6 +135,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             strategyInstance = await BidAskUtil.deployed();
 
             await bathHouseInstance.approveStrategy(strategyInstance.address);
+            assert.equal((await strategyInstance.initialized()), true);
         });
         it("Any user can call executeStrategy() on bath Pairs", async function () {
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
