@@ -17,7 +17,7 @@ const func = async (hre) => {
   }
 
   // ********************************
-// // //1. Deploy and init Rubicon Market
+// //1. Deploy and init Rubicon Market
 // const deployResultBH = await deploy('RubiconMarket', {
 //   from: deployer,
 //   log: true,
@@ -31,18 +31,17 @@ const func = async (hre) => {
 //     `contract RubiconMarket deployed at ${newBHAddr}`
 //   );
 
-// //   await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
-// //         console.log("proxywrapped", proxyWrapped);
+//   await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
+//         console.log("proxywrapped", proxyWrapped);
 
-// //         // Init BathHouse
-// //         const bh = await hre.ethers.getContractFactory("RubiconMarket");
-// //         const BHI = await bh.attach(proxyWrapped);
-// //         await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_ADMIN).then(async function(g) {
-// //           await BHI.initialize(false, process.env.OP_KOVAN_ADMIN, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
-// //           return newBHAddr;          
-// //         }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
-// //   });
-
+//         // Init BathHouse
+//         const bh = await hre.ethers.getContractFactory("RubiconMarket");
+//         const BHI = await bh.attach(proxyWrapped);
+//         await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then(async function(g) {
+//           await BHI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
+//           return newBHAddr;          
+//         }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
+//   });
 //   }
 // });
 
@@ -282,6 +281,14 @@ const func = async (hre) => {
   //             await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
   //   });
 
+    
+  // // // set market Variable
+  //   const bathHouseFactory = await hre.ethers.getContractFactory("RubiconMarket");
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_1_MARKET);
+  //   await bh.estimateGas.setMatchingEnabled(true).then(async function(g) {
+  //             await bh.setMatchingEnabled(true, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set matching enabled on BH"));
+  //   });
+
   // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
   // const bh = await bathHouseFactory.attach("0x61435E59B6840c7B3f4efbDc07b0f57c1D9f71Ac");
   // console.log(await bh.RubiconMarketAddress());
@@ -307,11 +314,6 @@ const func = async (hre) => {
              return await d.address;
      });
     }
-
-    // async function updateProxy(address, msg) {
-
-    // }
-
 }
   
 

@@ -616,8 +616,6 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         ERC20 buy_gem //taker (ask) buy which token
     ) public override returns (uint256) {
         require(!locked, "Reentrancy attempt");
-
-
             function(uint256, ERC20, uint256, ERC20) returns (uint256) fn
          = matchingEnabled ? _offeru : super.offer;
         return fn(pay_amt, pay_gem, buy_amt, buy_gem);

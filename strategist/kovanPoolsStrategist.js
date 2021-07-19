@@ -9,10 +9,10 @@ BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 
 // Initialize Web3
 // Kovan
-// let web3 = new Web3("https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY);
+let web3 = new Web3("https://optimism-kovan.infura.io/v3/" + process.env.INFURA_API_KEY);
 
 // OP Kovan
-let web3 = new Web3("https://kovan.optimism.io");
+// let web3 = new Web3("https://kovan.optimism.io");
 // console.log("Web3 Version: ", web3.version);
 
 // Load the RubiconMarket contract
@@ -77,6 +77,7 @@ async function sendTx(tx, msg, ticker) {
             // return;
             // console.log(r);
         }).catch((c) =>  {
+            console.log(c);
             console.log('** ' + ticker+ ' Transaction Failed **');
         });
     });
@@ -135,7 +136,39 @@ console.log(bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
 RubiconMarketContractKovan.methods.getMinSell(process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
     console.log("min sell wayne: ", r)
 });
-
+RubiconMarketContractKovan.methods.initialized().call().then((r) => {
+    console.log("Market is initialized", r)
+});
+RubiconMarketContractKovan.methods.owner().call().then((r) => {
+    console.log("market owner", r);
+});
+RubiconMarketContractKovan.methods.matchingEnabled().call().then((r) => {
+    console.log("Market matching is enabled", r)
+});
+RubiconMarketContractKovan.methods.AqueductDistributionLive().call().then((r) => {
+    console.log("Aqueduct", r)
+});
+RubiconMarketContractKovan.methods.getBestOffer(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
+    console.log("best offer", r);
+    RubiconMarketContractKovan.methods.getOffer(r).call().then(async (s) => {
+        console.log("best offer INFO", s[2]);
+        var txData = RubiconMarketContractKovan.methods.buy(
+            r,
+            s[2]
+        ).encodeABI();
+        var tx = {
+            gas: 9000000,
+            data: txData.toString(),
+            gasLimit: 20000000,
+            from: process.env.OP_KOVAN_ADMIN.toString(),
+            to: process.env.OP_KOVAN_1_MARKET
+        };
+        RubiconMarketContractKovan.methods.buy(r,
+            s[2]).estimateGas(tx, async (r) => {console.log(await r)})
+        await sendTx(tx, "buy random market order", "lol");
+        
+    });
+});
 // BATH PAIR
 // Bath pair ask and bid 
 bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
@@ -456,7 +489,7 @@ const assets = [
 // Start bots
 // for (let index = 0; index < assets.length; index++) {
 //     const element = assets[index];
-    startBot("WBTC", 0.02);
+    // startBot("WBTC", 0.02);
 //     // startBot(element, 0.03);
 //     startBot(element, 0.04);
 //     // startBot(element, 0.07);
