@@ -17,33 +17,33 @@ const func = async (hre) => {
   }
 
   // ********************************
-//1. Deploy and init Rubicon Market
-const deployResultBH = await deploy('RubiconMarket', {
-  from: deployer,
-  log: true,
-  gasLimit: 337220000,
-  nonce: getNonce()
-}).then(async function(d) {
-  const newBHAddr = await d.address;
-  console.log(`Market is at ${newBHAddr}`);
-  if (await d.newlyDeployed) {
-  console.log(
-    `contract RubiconMarket deployed at ${newBHAddr}`
-  );
+// //1. Deploy and init Rubicon Market
+// const deployResultBH = await deploy('RubiconMarket', {
+//   from: deployer,
+//   log: true,
+//   gasLimit: 337220000,
+//   nonce: getNonce()
+// }).then(async function(d) {
+//   const newBHAddr = await d.address;
+//   console.log(`Market is at ${newBHAddr}`);
+//   if (await d.newlyDeployed) {
+//   console.log(
+//     `contract RubiconMarket deployed at ${newBHAddr}`
+//   );
 
-  await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
-        console.log("proxywrapped", proxyWrapped);
+//   await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
+//         console.log("proxywrapped", proxyWrapped);
 
-        // Init BathHouse
-        const bh = await hre.ethers.getContractFactory("RubiconMarket");
-        const BHI = await bh.attach(proxyWrapped);
-        await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then(async function(g) {
-          await BHI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
-          return newBHAddr;          
-        }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
-  });
-  }
-});
+//         // Init BathHouse
+//         const bh = await hre.ethers.getContractFactory("RubiconMarket");
+//         const BHI = await bh.attach(proxyWrapped);
+//         await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then(async function(g) {
+//           await BHI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
+//           return newBHAddr;          
+//         }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
+//   });
+//   }
+// });
 
 // //2. Deploy and init BathHouse
 // const deployResultBH = await deploy('BathHouse', {
@@ -65,16 +65,26 @@ const deployResultBH = await deploy('RubiconMarket', {
 //         // Init BathHouse
 //         const bh = await hre.ethers.getContractFactory("BathHouse");
 //         const BHI = await bh.attach(proxyWrapped);
-//         await BHI.estimateGas.initialize(process.env.OP_KOVAN_1_MARKET, 80, 86400, 15).then(async function(g) {
-//           await BHI.initialize(process.env.OP_KOVAN_1_MARKET, 80, 86400, 15, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
+//         await BHI.estimateGas.initialize(process.env.OP_KOVAN_2_MARKET, 80, 86400, 15).then(async function(g) {
+//           await BHI.initialize(process.env.OP_KOVAN_2_MARKET, 80, 86400, 15, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("BH Init Call sent!\n"));
 //           return newBHAddr;          
 //         }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
 //   });
 
 //   }
 // });
-// 3. 
+// // 3. 
 //   // deploy BathTokens
+//   const assetsToDeploy = [
+//     "WBTC",
+//     "MKR",
+//     "SNX",
+//     "REP",
+//     "RGT",
+//     "ETH",
+//     "USDC"
+//   ];
+
 //   for (let index = 0; index < assetsToDeploy.length; index++) {
 //     const asset = assetsToDeploy[index];
 //     const bathTokenFactory = await hre.ethers.getContractFactory("BathToken");
@@ -82,44 +92,44 @@ const deployResultBH = await deploy('RubiconMarket', {
 //             console.log("bath" + asset +  " deployed at " + await r.address);
 //             await deployProxy(await r.address, "bath" + asset).then(async (proxyWrapped) =>  {
 //               const btUInst = await bathTokenFactory.attach(proxyWrapped);
-//               await btUInst.estimateGas.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_1_MARKET, process.env.OP_KOVAN_1_BATHHOUSE, {gasLimit: 8999999}) .then(async function (g) {
-//                 await btUInst.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_1_MARKET, process.env.OP_KOVAN_1_BATHHOUSE, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ " success"));
+//               await btUInst.estimateGas.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_2_MARKET, process.env.OP_KOVAN_2_BATHHOUSE, {gasLimit: 8999999}) .then(async function (g) {
+//                 await btUInst.initialize("bath" + asset, process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_2_MARKET, process.env.OP_KOVAN_2_BATHHOUSE, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ " success"));
 //                 return r.address;
 //                });
 //     // await deployProxy(, "bath" + asset)
 //     });
 //   });
 // }
-// const assetsToDeploy = [
-//   "WBTC",
-//   "MKR",
-//   "SNX",
-//   "REP",
-//   "RGT",
-//   "ETH"
-//   //"USDC" //*
-// ];
-  // 4. Deploy BathPairs
-    // for (let index = 0; index < assetsToDeploy.length; index++) {
-    // const asset = assetsToDeploy[index];
-  //   const asset = "ETH";
-  //   const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
-  //   const newBathPair = await bathPairFactory.deploy({nonce: getNonce()}).then(async function(r) {
-  //       await deployProxy(await r.address, "bath" + asset+"USDC").then(async (proxyWrapped) =>  {
+
+//   // 4. Deploy BathPairs
+//     const assetsToDeploy = [
+//     "WBTC",
+//     "MKR",
+//     "SNX",
+//     "REP",
+//     "RGT",
+//     "ETH"
+//     // "USDC" - USDC excluded as base
+//   ];
+//     for (let index = 0; index < assetsToDeploy.length; index++) {
+//     const asset = assetsToDeploy[index];
+//     const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
+//     const newBathPair = await bathPairFactory.deploy({nonce: getNonce()}).then(async function(r) {
+//         await deployProxy(await r.address, "bath" + asset+"USDC").then(async (proxyWrapped) =>  {
             
-  //           console.log("bath" + asset +  "-USDC deployed at " + await r.address);
-  //           const btUInst = await bathPairFactory.attach(proxyWrapped);
-  //           await btUInst.estimateGas.initialize(process.env['OP_KOVAN_1_BATH'+asset], process.env.OP_KOVAN_1_BATHUSDC, process.env.OP_KOVAN_1_BATHHOUSE, 75, -5, {gasLimit: 8999999}) .then(async function (g) {
-  //             await btUInst.initialize(process.env['OP_KOVAN_1_BATH'+asset], process.env.OP_KOVAN_1_BATHUSDC, process.env.OP_KOVAN_1_BATHHOUSE, 75, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
-  //         });
-  //       });
-  // });
+//             console.log("bath" + asset +  "-USDC deployed at " + await r.address);
+//             const btUInst = await bathPairFactory.attach(proxyWrapped);
+//             await btUInst.estimateGas.initialize(process.env['OP_KOVAN_2_BATH'+asset], process.env.OP_KOVAN_2_BATHUSDC, process.env.OP_KOVAN_2_BATHHOUSE, 75, -5, {gasLimit: 8999999}) .then(async function (g) {
+//               await btUInst.initialize(process.env['OP_KOVAN_2_BATH'+asset], process.env.OP_KOVAN_2_BATHUSDC, process.env.OP_KOVAN_2_BATHHOUSE, 75, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
+//           });
+//         });
+//   });
 // }
+
 // // 5. Deploy and init -> approve on BH BidAskUtil
 //   const deployResultBH = await deploy('BidAskUtil', {
 //     from: deployer,
 //     log: true,
-//     args: ["BidAskUtil", process.env.OP_KOVAN_1_BATHHOUSE, process.env.OP_KOVAN_1_MARKET],
 //     gasLimit: 135990000,
 //     nonce: getNonce()
 //   }).then(async function(d) {
@@ -131,11 +141,15 @@ const deployResultBH = await deploy('RubiconMarket', {
 //     );
   
 //     await deployProxy(newBHAddr, "BidAskUtil").then(async (proxyWrapped) =>  {
-//           console.log("proxywrapped", proxyWrapped);
-  
+//           console.log("proxywrapped", proxyWrapped);   
+//           const bauFactory = await hre.ethers.getContractFactory("BidAskUtil");
+//           const btUInst = await bauFactory.attach(proxyWrapped);
+//           await btUInst.estimateGas.initialize("BidAskUtil", process.env.OP_KOVAN_2_BATHHOUSE, process.env.OP_KOVAN_2_MARKET).then(async function (g) {
+//             await btUInst.initialize("BidAskUtil", process.env.OP_KOVAN_2_BATHHOUSE, process.env.OP_KOVAN_2_MARKET, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of BAU success"));
+//         });
 //           // Init on BathHouse
 //           const bh = await hre.ethers.getContractFactory("BathHouse");
-//           const BHI = await bh.attach(process.env.OP_KOVAN_1_BATHHOUSE);
+//           const BHI = await bh.attach(process.env.OP_KOVAN_2_BATHHOUSE);
 //           await BHI.estimateGas.approveStrategy(proxyWrapped).then(async function(g) {
 //             await BHI.approveStrategy(proxyWrapped, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("ApproveStrategy call sent!\n"));
 //             return newBHAddr;          
@@ -145,23 +159,22 @@ const deployResultBH = await deploy('RubiconMarket', {
 //     }
 //   });
 
-// 
-// const assetsToDeploy = [
-//   "WBTC",
-//   "MKR",
-//   "SNX",
-//   "REP",
-//   "RGT",
-//   "ETH"
-//   //"USDC" //*
-// ];
   // // 6. Approve BathPairs on BathHouse
+  // const assetsToDeploy = [
+  //   "WBTC",
+  //   "MKR",
+  //   "SNX",
+  //   "REP",
+  //   "RGT",
+  //   "ETH"
+  //   //"USDC" //*
+  // ];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
   //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_1_BATHHOUSE);
-  //   await bh.estimateGas.initBathPair(process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_1_BATH'+asset+'USDC'], 1).then(async function(g) {
-  //             await bh.initBathPair(process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_1_BATH'+asset+'USDC'], 1, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success on BH"));
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_2_BATHHOUSE);
+  //   await bh.estimateGas.initBathPair(process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_2_BATH'+asset+'USDC'], 1).then(async function(g) {
+  //             await bh.initBathPair(process.env['OP_KOVAN_TC_'+asset], process.env.OP_KOVAN_TC_USDC, process.env['OP_KOVAN_2_BATH'+asset+'USDC'], 1, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success on BH"));
   //         });
     
   // }
@@ -284,7 +297,7 @@ const deployResultBH = await deploy('RubiconMarket', {
     
   // // // set market Variable
   //   const bathHouseFactory = await hre.ethers.getContractFactory("RubiconMarket");
-  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_1_MARKET);
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_2_MARKET);
   //   await bh.estimateGas.setMatchingEnabled(true).then(async function(g) {
   //             await bh.setMatchingEnabled(true, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set matching enabled on BH"));
   //   });
