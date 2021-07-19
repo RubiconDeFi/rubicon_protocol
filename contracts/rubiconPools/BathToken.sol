@@ -18,18 +18,16 @@ contract BathToken {
     bool public initialized;
 
     string public symbol;
-    string public constant name = "BathToken v1";
-    uint8 public constant decimals = 18;
+    string public name;
+    uint8 public decimals;
 
     address public RubiconMarketAddress;
     address public bathHouse; // admin
     address public feeTo;
     IERC20 public underlyingToken;
     uint256 public feeBPS;
-    uint256 public feeDenominator = 10000;
 
     uint256 public totalSupply;
-    uint256 MAX_INT = 2**256 - 1;
     uint256[] outstandingIDs;
     mapping(uint256 => uint256) id2Ind;
 
@@ -56,6 +54,7 @@ contract BathToken {
     );
     event LogInit(uint256 timeOfInit);
 
+    /// @dev Proxy-safe initialization of storage
     function initialize(
         string memory bathName,
         IERC20 token,
@@ -83,10 +82,12 @@ contract BathToken {
                 address(this)
             )
         );
-
+        name = "BathToken v1";
+        decimals = 18;
+        
         // Add infinite approval of Rubicon Market for this asset
 
-        IERC20(address(token)).approve(RubiconMarketAddress, MAX_INT);
+        IERC20(address(token)).approve(RubiconMarketAddress, 2**256 - 1);
         emit LogInit(block.timestamp);
 
         require(
@@ -220,7 +221,7 @@ contract BathToken {
         uint256 r = (underlyingBalance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
 
-        uint256 _fee = r.mul(feeBPS).div(feeDenominator);
+        uint256 _fee = r.mul(feeBPS).div(10000);
         IERC20(underlyingToken).transfer(feeTo, _fee);
 
         underlyingToken.transfer(msg.sender, r.sub(_fee));

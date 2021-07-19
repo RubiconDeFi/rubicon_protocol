@@ -2,7 +2,7 @@
 
 pragma solidity >=0.6.0 <0.8.0;
 
-import "./Proxy.sol";
+import "./OVMProxy.sol";
 import "./Address.sol";
 
 /**
@@ -14,14 +14,14 @@ import "./Address.sol";
  * Upgradeability is only provided internally through {_upgradeTo}. For an externally upgradeable proxy see
  * {TransparentUpgradeableProxy}.
  */
-contract UpgradeableProxy is Proxy {
+contract UpgradeableProxy is OVMProxy {
     /**
      * @dev Initializes the upgradeable proxy with an initial implementation specified by `_logic`.
      *
      * If `_data` is nonempty, it's used as data in a delegate call to `_logic`. This will typically be an encoded
      * function call, and allows initializating the storage of the proxy like a Solidity constructor.
      */
-    constructor(address _logic, bytes memory _data) public payable {
+    constructor(address _logic, bytes memory _data) payable {
         assert(
             _IMPLEMENTATION_SLOT ==
                 bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)

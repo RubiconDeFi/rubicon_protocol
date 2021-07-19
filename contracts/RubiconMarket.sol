@@ -552,6 +552,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     uint256 public _head; //first unsorted offer id
     uint256 public dustId; // id of the latest offer marked as dust
 
+    /// @dev Proxy-safe initialization of storage
     function initialize(bool RBCNDist, address _feeTo) public {
         // require(msg.sender == ___deployer____);
         require(!initialized, "contract is already initialized");
@@ -564,6 +565,8 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
         /// @notice The starting fee on taker trades in basis points
         feeBPS = 20;
         initialized = true;
+        matchingEnabled = true;
+        buyEnabled = true;
     }
 
     // After close, anyone can cancel an offer

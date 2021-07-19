@@ -17,33 +17,33 @@ const func = async (hre) => {
   }
 
   // ********************************
-// //1. Deploy and init Rubicon Market
-// const deployResultBH = await deploy('RubiconMarket', {
-//   from: deployer,
-//   log: true,
-//   gasLimit: 337220000,
-//   nonce: getNonce()
-// }).then(async function(d) {
-//   const newBHAddr = await d.address;
-//   console.log(`Market is at ${newBHAddr}`);
-//   if (await d.newlyDeployed) {
-//   console.log(
-//     `contract RubiconMarket deployed at ${newBHAddr}`
-//   );
+//1. Deploy and init Rubicon Market
+const deployResultBH = await deploy('RubiconMarket', {
+  from: deployer,
+  log: true,
+  gasLimit: 337220000,
+  nonce: getNonce()
+}).then(async function(d) {
+  const newBHAddr = await d.address;
+  console.log(`Market is at ${newBHAddr}`);
+  if (await d.newlyDeployed) {
+  console.log(
+    `contract RubiconMarket deployed at ${newBHAddr}`
+  );
 
-//   await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
-//         console.log("proxywrapped", proxyWrapped);
+  await deployProxy(newBHAddr, "Rubicon Market").then(async (proxyWrapped) =>  {
+        console.log("proxywrapped", proxyWrapped);
 
-//         // Init BathHouse
-//         const bh = await hre.ethers.getContractFactory("RubiconMarket");
-//         const BHI = await bh.attach(proxyWrapped);
-//         await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then(async function(g) {
-//           await BHI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
-//           return newBHAddr;          
-//         }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
-//   });
-//   }
-// });
+        // Init BathHouse
+        const bh = await hre.ethers.getContractFactory("RubiconMarket");
+        const BHI = await bh.attach(proxyWrapped);
+        await BHI.estimateGas.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT).then(async function(g) {
+          await BHI.initialize(false, process.env.OP_KOVAN_TC_FEE_RECIPIENT, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("Market Init Call sent!\n"));
+          return newBHAddr;          
+        }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
+  });
+  }
+});
 
 // //2. Deploy and init BathHouse
 // const deployResultBH = await deploy('BathHouse', {

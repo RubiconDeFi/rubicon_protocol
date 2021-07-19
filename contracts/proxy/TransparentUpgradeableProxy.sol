@@ -34,7 +34,7 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
         address _logic,
         address admin_,
         bytes memory _data
-    ) public payable UpgradeableProxy(_logic, _data) {
+    ) payable UpgradeableProxy(_logic, _data) {
         assert(
             _ADMIN_SLOT ==
                 bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1)

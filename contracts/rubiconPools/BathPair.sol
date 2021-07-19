@@ -56,7 +56,7 @@ contract BathPair {
         ERC20 buy_gem;
     }
 
-    // constructor called to initialize a new Pair
+    /// @dev Proxy-safe initialization of storage
     function initialize(
         address _bathAssetAddress,
         address _bathQuoteAddress,
