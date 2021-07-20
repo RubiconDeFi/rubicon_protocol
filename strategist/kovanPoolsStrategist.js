@@ -53,17 +53,18 @@ var DAIContractKovan = new web3.eth.Contract(abi, USDC_OP_KOVAN);
 // Load in BathPair Contract
 var { abi } = require("../build/contracts/BathPair.json");
 const { ethers } = require('ethers');
-var bathPairKovanAddr = process.env.OP_KOVAN_TC_BATHWBTCUSDC;
+var bathPairKovanAddr = process.env.OP_KOVAN_2_BATHWBTCUSDC;
 var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 
 var sender = process.env.OP_KOVAN_ADMIN;
 var key = process.env.OP_KOVAN_ADMIN_KEY;
 
 // *** Nonce Manager ***
-let baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN);
+// https://ethereum.stackexchange.com/questions/39790/concurrency-patterns-for-account-nonce
 let nonceOffset = 0;
-function getNonce() {
-  return baseNonce.then((nonce) => (nonce + (nonceOffset++)));
+baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN, "pending");
+async function getNonce() {
+  return await baseNonce.then((nonce) => (nonce + (nonceOffset++)));
 }
 
 async function sendTx(tx, msg, ticker) {
@@ -72,128 +73,21 @@ async function sendTx(tx, msg, ticker) {
     tx.gasLimit = 13000000;
     tx.gas = 13000000;
     // console.log('outgoing transaction: ', tx);
-    web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
+    return web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', () => {}).then((r) => {
-            console.log("*transaction success*" + ticker + " => " + msg);
-            // return;
+            console.log("*transaction success* " + ticker + " => " + msg);
+            return true;
             // console.log(r);
         }).catch((c) =>  {
-            console.log(c);
             console.log('** ' + ticker+ ' Transaction Failed **');
+            console.log(c);
+            console.log('**************************************');
+            return false;
         });
     });
 }
 
-//#region 
-
-
-// // // // ------------------- Validate Migrations ------------------
-// //  BATH HOUSE
-// // Strategy is Approved
-bathHouseContractKovan.methods.isApprovedStrat(process.env.OP_KOVAN_2_BIDASKUTIL).call().then((r) => {
-    if (r == true) {console.log("BH isApprovedStrat CORRECT")} else {console.log("BH isApprovedStrat ** ERROR **")}
-});
-bathHouseContractKovan.methods.isApprovedPair(process.env.OP_KOVAN_2_BATHWBTCUSDC).call().then((r) => {
-if (r == true) {console.log("BH isApprovedPair CORRECT")} else {console.log("BH isApprovedPair ** ERROR **")}
-});
-
-bathHouseContractKovan.methods.getMarket().call().then((r) => {
-    if (r == process.env.OP_KOVAN_2_MARKET) {console.log("BH getMarket CORRECT")} else {console.log("getMarket ** ERROR **")}
-});
-console.log(bathHouseContractKovan.methods.getBathPair(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_USDC).call().then((r) => {
-    // console.log(r);
-    if (r == process.env.OP_KOVAN_2_BATHWBTCUSDC) {console.log("BH getBathPair CORRECT")} else {console.log("BH getBathPair ** ERROR **")}
-}));
-
-//  BATH TOKENS
-bathUsdcContractKovan.methods.symbol().call().then((r) =>{
-    if (r == "bathUSDC") {console.log("BTUSDC symbol CORRECT")} else {console.log("BTUSDC symbol ** ERROR **", r)}
-});
-bathUsdcContractKovan.methods.initialized().call().then((r) =>{
-    if (r == true) {console.log("BTUSDC initialized CORRECT")} else {console.log("BTUSDC initi ** ERROR **", r)}
-});
-bathUsdcContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_2_BATHHOUSE) {console.log("BTUSDC bathHouse CORRECT")} else {console.log("BTUSDC bathHouse ** ERROR **", r)}
-});
-bathUsdcContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_2_MARKET) {console.log("BTUSDC market CORRECT")} else {console.log("BTUSDC market ** ERROR **"), r}
-});
-bathUsdcContractKovan.methods.underlyingToken().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BTUSDC underlyingToken CORRECT")} else {console.log("BTUSDC underlyingToken ** ERROR **")}
-});
-
-bathWayneContractKovan.methods.symbol().call().then((r) =>{
-    if (r == "bathWBTC") {console.log("BTWBTC symbol CORRECT")} else {console.log("BTWAYNE symbol ** ERROR **",r )}
-});
-bathWayneContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_2_BATHHOUSE) {console.log("BTWAYNE bathHouse CORRECT")} else {console.log("BTWAYNE bathHouse ** ERROR **", r)}
-});
-bathWayneContractKovan.methods.RubiconMarketAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_2_MARKET) {console.log("BTWAYNE market CORRECT")} else {console.log("BTWAYNE market ** ERROR **", r)}
-});
-bathWayneContractKovan.methods.underlyingToken().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BTWAYNE underlyingToken CORRECT")} else {console.log("BTWAYNE underlyingToken ** ERROR **", r)}
-});
-RubiconMarketContractKovan.methods.getMinSell(process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
-    console.log("min sell wayne: ", r)
-});
-RubiconMarketContractKovan.methods.initialized().call().then((r) => {
-    console.log("Market is initialized", r)
-});
-RubiconMarketContractKovan.methods.owner().call().then((r) => {
-    console.log("market owner", r);
-});
-RubiconMarketContractKovan.methods.matchingEnabled().call().then((r) => {
-    console.log("Market matching is enabled", r)
-});
-RubiconMarketContractKovan.methods.buyEnabled().call().then((r) => {
-    console.log("buy is enabled", r)
-});
-RubiconMarketContractKovan.methods.AqueductDistributionLive().call().then((r) => {
-    console.log("Aqueduct", r)
-});
-// RubiconMarketContractKovan.methods.getBestOffer(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_WBTC).call().then((r) => {
-//     console.log("best offer", r);
-//     RubiconMarketContractKovan.methods.getOffer(r).call().then(async (s) => {
-//         console.log("best offer INFO", s[2]);
-//         var txData = RubiconMarketContractKovan.methods.buy(
-//             r,
-//             s[2]
-//         ).encodeABI();
-//         var tx = {
-//             gas: 9000000,
-//             data: txData.toString(),
-//             gasLimit: 20000000,
-//             from: process.env.OP_KOVAN_ADMIN.toString(),
-//             to: process.env.OP_KOVAN_2_MARKET
-//         };
-//         RubiconMarketContractKovan.methods.buy(r,
-//             s[2]).estimateGas(tx, async (r) => {console.log(await r)})
-//         await sendTx(tx, "buy random market order", "lol");
-        
-//     });
-// });
-// // BATH PAIR
-// Bath pair ask and bid 
-bathPairContractKovan.methods.underlyingAsset().call().then((r) => {
-    if (r == process.env.OP_KOVAN_TC_WBTC) {console.log("BP underlyingAsset CORRECT")} else {console.log("underlyingAsset ** ERROR **", r)}
-});
-bathPairContractKovan.methods.underlyingQuote().call().then((r) => {
-    if (r == process.env.OP_KOVAN_TC_USDC) {console.log("BP underlyingQuote CORRECT")} else {console.log("underlyingQuote ** ERROR **", r)}
-});
-bathPairContractKovan.methods.initialized().call().then((r) =>{
-    if (r == true) {console.log("BP initialized CORRECT")} else {console.log("BP initialized ** ERROR **")}
-});
-bathPairContractKovan.methods.bathHouse().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHHOUSE) {console.log("BP bathHouse CORRECT")} else {console.log("BP bathHouse ** ERROR **")}
-});
-bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHWBTC) {console.log("BP bathWAYNE CORRECT")} else {console.log("BP bathWAYNE ** ERROR **")}
-});
-bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
-    if (r == process.env.OP_KOVAN_TC_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
-});
-
+//#region
 
 // // // **Approve bathPair to recieve WAYNE and DAI first**
 // var txData = WAYNEContractKovan.methods.approve(process.env.OP_KOVAN_2_BATHWBTC, web3.utils.toWei("10000000")).encodeABI();
@@ -249,8 +143,8 @@ bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
 
 
 // Will revert if no bathToken liquidity
-// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WBTC: " + web3.utils.fromWei(r))));
-// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
+// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_2_BATHWBTC).call().then((r) => console.log("POOLS Max order size for WBTC: " + web3.utils.fromWei(r))));
+// console.log(bathPairContractKovan.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_2_BATHUSDC).call().then((r) => console.log("POOLS Max order size for USDC: " + web3.utils.fromWei(r))));
 // bathUsdcContractKovan.methods.totalSupply().call().then((r) =>{
 //    console.log("Total supply of BathUSDC", web3.utils.fromWei(r))
 // });
@@ -271,9 +165,9 @@ async function getContractFromToken(ticker, contract) {
     // Load in Dai Contract
     var { abi } = require("../build/contracts/" + contract + ".json");
     if (contract == "BathToken") {
-        var address = process.env['OP_KOVAN_TC_BATH' + ticker];
+        var address = process.env['OP_KOVAN_2_BATH' + ticker];
     } else if (contract == "BathPair") {
-        var address = process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'];
+        var address = process.env['OP_KOVAN_2_BATH' + ticker + 'USDC'];
     } else if (contract == "EquityToken") {
         var address = process.env['OP_KOVAN_TC_' + ticker];
     } else {
@@ -307,7 +201,7 @@ async function logInfo(mA, mB, a, b, im) {
     // APR CALCULATIONS
     (await bathWayneContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHWBTC).call();
+    var underlying = await WAYNEContractKovan.methods.balanceOf(process.env.OP_KOVAN_2_BATHWBTC).call();
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
@@ -324,7 +218,7 @@ async function logInfo(mA, mB, a, b, im) {
 
      (await bathUsdcContractKovan.methods.totalSupply().call().then(async function(r) {
     // console.log("Total Supply of bathWAYNE: ", r);
-    var underlying = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHUSDC).call();
+    var underlying = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_2_BATHUSDC).call();
     // console.log("Total Underlying: ", underlying);
     var uOverC = (await (underlying / r));
     let naiveAPR;
@@ -341,13 +235,14 @@ async function logInfo(mA, mB, a, b, im) {
 async function checkForScrub(ticker){
         const contract = await getContractFromToken(ticker, "BathPair");
         await contract.methods.getOutstandingPairCount().call().then(async (r) => {
+            if (r > 5 ){
                 // Scrub the bath
                 var txData = await contract.methods.bathScrub().encodeABI();
                 var tx = {
                     gas: 9530000,
                     data: txData,
                     from: process.env.OP_KOVAN_ADMIN.toString(),
-                    to: process.env['OP_KOVAN_TC_BATH' + ticker + 'USDC'],
+                    to: process.env['OP_KOVAN_2_BATH' + ticker + 'USDC'],
                     gasPrice: web3.utils.toWei("0.015", "Gwei")
                 };
                 await contract.methods.bathScrub().estimateGas(tx, (async function(r, d) {
@@ -357,7 +252,7 @@ async function checkForScrub(ticker){
                         throw("gas estimation in bathScrub failed");
                     }
                 }));
-
+            }
         });
 
 }
@@ -391,8 +286,8 @@ async function marketMake(a, b, t, im, spread) {
     var newAskPrice = new BigNumber(parseFloat(midPoint * (1+targetSpread)));
 
     // getMaxOrderSize from contract for bid and ask
-    const maxAskSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + await ticker], process.env['OP_KOVAN_TC_BATH' + await ticker]).call());
-    const maxBidSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_TC_BATHUSDC).call());
+    const maxAskSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env['OP_KOVAN_TC_' + await ticker], process.env['OP_KOVAN_2_BATH' + await ticker]).call());
+    const maxBidSize = new BigNumber(await contract.methods.getMaxOrderSize(process.env.OP_KOVAN_TC_USDC, process.env.OP_KOVAN_2_BATHUSDC).call());
     
     // in wei
     const askNum = maxAskSize.dividedBy(scaleBack);
@@ -404,7 +299,7 @@ async function marketMake(a, b, t, im, spread) {
     // await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
     var txData = contract.methods.executeStrategy(
-        process.env.OP_KOVAN_TC_BidAskUtil, 
+        process.env.OP_KOVAN_2_BIDASKUTIL, 
         web3.utils.toBN(askNum.decimalPlaces(0)),
         web3.utils.toBN(askDen.decimalPlaces(0)),
         web3.utils.toBN(bidNum.decimalPlaces(0)),
@@ -414,11 +309,17 @@ async function marketMake(a, b, t, im, spread) {
         gas: 9000000,
         data: txData.toString(),
         from: process.env.OP_KOVAN_ADMIN.toString(),
-        to: process.env['OP_KOVAN_TC_BATH' + await ticker + 'USDC'],
+        to: process.env['OP_KOVAN_2_BATH' + await ticker + 'USDC'],
         gasPrice: web3.utils.toWei("0", "Gwei")
     }
     // console.log('New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
-    // await sendTx(tx, 'New ' + await ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n', ticker);
+    let result = await sendTx(tx, 'New ' + await ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n', ticker);
+    if (result == true) {
+        return;
+    } else {
+        // if error, we want to change the midpoint so we try again
+        oldMidpoint[ticker] = 0;
+    }
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -427,8 +328,8 @@ async function checkInventory(currentAsk, currentBid, ticker) {
     const contractT = await getContractFromToken(await ticker, "EquityToken");
 
     var currentReserveRatio = (80.00 / 100.00);
-    var assetBalance = await contractT.methods.balanceOf(process.env['OP_KOVAN_TC_BATH' + ticker]).call();
-    var quoteBalance = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_TC_BATHUSDC).call();
+    var assetBalance = await contractT.methods.balanceOf(process.env['OP_KOVAN_2_BATH' + ticker]).call();
+    var quoteBalance = await DAIContractKovan.methods.balanceOf(process.env.OP_KOVAN_2_BATHUSDC).call();
     const bathQuoteSupply = await bathUsdcContractKovan.methods.totalSupply().call();
     const bathAssetSupply = await contractBP.methods.totalSupply().call();
     // console.log('Current asset liquidity balance: ', web3.utils.fromWei(assetBalance),  ticker);
@@ -452,7 +353,7 @@ async function checkInventory(currentAsk, currentBid, ticker) {
     return (quoteBalance / assetBalance) / ((currentAsk + currentBid) / 2); // This number represents if the pair is overweight in one direction    
 }
 
-// This function sets off the chain of calls to successfully marketMake
+// This function sets off the chain of calls to successfully marketMake with Pools
 async function startBot(token, spread) {
     setTimeout(async function() {
         // Returns best bid and ask price
@@ -462,9 +363,6 @@ async function startBot(token, spread) {
             
             // Returns a pair overweight
             const IMfactor = checkInventory(currentAsk, currentBid, token);
-            
-            // Sends a scrubBath() call
-            // 
 
             // Sends executeTransaction()
             await marketMake(await currentAsk, await currentBid, await token, await IMfactor, await spread);
@@ -491,13 +389,12 @@ const assets = [
 ];
 
 // Start bots
-// for (let index = 0; index < assets.length; index++) {
-//     const element = assets[index];
-    // startBot("WBTC", 0.02);
-//     // startBot(element, 0.03);
-//     startBot(element, 0.04);
-//     // startBot(element, 0.07);
-// }
+for (let index = 0; index < assets.length; index++) {
+    const element = assets[index];
+    startBot(element, 0.02);
+    // startBot(element, 0.04);
+    // startBot(element, 0.07);
+}
 
 
 
