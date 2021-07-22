@@ -294,6 +294,13 @@ const func = async (hre) => {
   //             await bh.setCancelTimeDelay(86400,{gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("set time delay on BH"));
   //   });
 
+    // // Whitelist a strategist
+    // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+    // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_2_BATHHOUSE);
+    // let newStrategist = process.env.OP_KOVAN_ADMIN;
+    // await bh.estimateGas.approveStrategist(newStrategist).then(async function(g) {
+    //           await bh.approveStrategist(newStrategist).then((r) => console.log("approved this strategist ", newStrategist));
+    // });
     
   // // // set market Variable
   //   const bathHouseFactory = await hre.ethers.getContractFactory("RubiconMarket");
