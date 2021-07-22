@@ -335,141 +335,54 @@ contract BathPair {
     }
 
     function cancelPartialFills() internal {
-        // ** Assume that any partialFill or totalFill resulted in yield **
+        uint timeDelay = BathHouse(bathHouse).timeDelay();
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
-            // If neither is zero...
-            if (
-                outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0
-            ) {
-                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+                if (
+                    outstandingPairIDs[x][2] <
+                    (block.timestamp - timeDelay)
+                ) {
+                    // If both filled fully
+                    // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
+                    order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+                    order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+                    BathToken(bathQuoteAddress).cancel(
+                        outstandingPairIDs[x][1]
+                    );
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][0]
+                    );
 
-                if (
-                    (offer1.pay_amt == 0 &&
-                        offer1.pay_gem == ERC20(0) &&
-                        offer1.buy_amt == 0 &&
-                        offer1.buy_gem == ERC20(0)) &&
-                    (offer2.pay_amt != 0 &&
-                        offer2.pay_gem != ERC20(0) &&
-                        offer2.buy_amt != 0 &&
-                        offer2.buy_gem != ERC20(0))
-                ) {
-                    // cancel offer2 and delete from outstandingPairsIDs as both orders are gone.
-                    BathToken(bathQuoteAddress).cancel(
-                        outstandingPairIDs[x][1]
-                    );
-                    // true if quote fills -> asset yield
-                    logFill(outstandingPairIDs[x][0], true);
-                    removeElement(x);
-                    continue;
-                } else if (
-                    (offer1.pay_amt != 0 &&
-                        offer1.pay_gem != ERC20(0) &&
-                        offer1.buy_amt != 0 &&
-                        offer1.pay_gem != ERC20(0)) &&
-                    (offer2.pay_amt == 0 &&
-                        offer2.pay_gem == ERC20(0) &&
-                        offer2.buy_amt == 0 &&
-                        offer2.buy_gem == ERC20(0))
-                ) {
-                    BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][0]
-                    );
-                    logFill(outstandingPairIDs[x][1], false);
-                    removeElement(x);
-                    continue;
-                } else if (
-                    (offer1.pay_amt != 0 &&
-                        offer1.pay_gem != ERC20(0) &&
-                        offer1.buy_amt != 0 &&
-                        offer1.pay_gem != ERC20(0)) &&
-                    (offer2.pay_amt != 0 &&
-                        offer2.pay_gem != ERC20(0) &&
-                        offer2.buy_amt != 0 &&
-                        offer2.buy_gem != ERC20(0))
-                ) {
-                    // delete the offer if it is too old - this forces the expungement of static orders
-                    if (
-                        outstandingPairIDs[x][2] <
-                        (block.timestamp - BathHouse(bathHouse).timeDelay())
-                    ) {
-                        // Cancel due to outstanding for too long
-                        BathToken(bathAssetAddress).cancel(
-                            outstandingPairIDs[x][0]
-                        );
-                        BathToken(bathQuoteAddress).cancel(
-                            outstandingPairIDs[x][1]
-                        );
-                        removeElement(x);
-                        continue;
-                    } else {
-                        continue;
+                    // If Yield: 
+                    // getOfferInfo will make no yield recognizable on an empty offer
+                    if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
+                        logFill(outstandingPairIDs[x][0], true);
+                        logFill(outstandingPairIDs[x][1], false);
+                    } else if (offer1.pay_amt == 0) {
+                        logFill(outstandingPairIDs[x][0], true);
+                    } else if (offer1.pay_amt == 0) {
+                        logFill(outstandingPairIDs[x][1], false); 
                     }
-                }
-            }
-            // just ask
-            else if (outstandingPairIDs[x][0] != 0) {
-                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-                // fill check
-                if (
-                    offer1.pay_amt == 0 &&
-                    offer1.pay_gem == ERC20(0) &&
-                    offer1.buy_amt == 0 &&
-                    offer1.pay_gem == ERC20(0)
-                ) {
-                    logFill(outstandingPairIDs[x][0], true);
+
                     removeElement(x);
-                    continue;
-                }
-                // time check
-                if (
-                    outstandingPairIDs[x][2] <
-                    (block.timestamp - BathHouse(bathHouse).timeDelay())
-                ) {
-                    BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][0]
-                    );
-                    removeElement(x);
-                    continue;
-                }
-            } else {
-                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
-                // fill check
-                if (
-                    offer2.pay_amt == 0 &&
-                    offer2.pay_gem == ERC20(0) &&
-                    offer2.buy_amt == 0 &&
-                    offer2.pay_gem == ERC20(0)
-                ) {
-                    logFill(outstandingPairIDs[x][1], false);
-                    removeElement(x);
-                    continue;
-                }
-                // time check
-                if (
-                    outstandingPairIDs[x][2] <
-                    (block.timestamp - BathHouse(bathHouse).timeDelay())
-                ) {
-                    BathToken(bathQuoteAddress).cancel(
-                        outstandingPairIDs[x][1]
-                    );
-                    removeElement(x);
-                    continue;
-                }
-            }
+                    }
         }
     }
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
-        (
+        if (id == 0) {
+            order memory offerInfo = order(420, ERC20(0), 69, ERC20(0));
+            return offerInfo;
+        } else {        
+            (
             uint256 ask_amt,
             ERC20 ask_gem,
             uint256 bid_amt,
             ERC20 bid_gem
         ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
         order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
-        return offerInfo;
+        return offerInfo;}
+
     }
 
     function getOutstandingPairCount() external view returns (uint256) {

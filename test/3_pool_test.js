@@ -33,7 +33,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
 
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 1000, 10);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 1, 10);
         });
         it("Bath Token for asset is deployed and initialized", async function() {
             return await BathToken.new().then(async function(instance) {
@@ -67,34 +67,34 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
             assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);
         });
-        it("bath tokens have the right name", async function() {
-            assert.equal(await bathAssetInstance.symbol(), "bathWETH");
-            assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
-        });
-        it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
-            await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
-            await WETHInstance.approve(bathAssetInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});
-            await bathAssetInstance.deposit(web3.utils.toWei((1).toString()), {from: accounts[1]});
-            assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((1).toString()));            
-        });
-        it("User can deposit quote funds with custom weights and receive bathTokens", async function() {
-            await DAIInstance.faucet({from: accounts[2]});
-            await DAIInstance.approve(bathQuoteInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
-            await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
-            assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
-        });
-        it("Withdraw asset funds by sending in bathTokens", async function() {
-            await bathAssetInstance.withdraw(web3.utils.toWei((1).toString()), {from: accounts[1]});
-            assert.equal(await WETHInstance.balanceOf(accounts[1]), web3.utils.toWei((1).toString()));
-        });
-        it("Withdraw quote funds by sending in bathTokens", async function() {
-            await bathQuoteInstance.withdraw(web3.utils.toWei((100).toString()), {from: accounts[2]});
-            assert.equal((await DAIInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei("1000").toString());
-        });
-        it("both users have no bath Tokens post withdraw", async function() {
-            assert.equal("0", await bathAssetInstance.balanceOf(accounts[1]));
-            assert.equal("0", await bathQuoteInstance.balanceOf(accounts[2]));
-        });
+        // it("bath tokens have the right name", async function() {
+        //     assert.equal(await bathAssetInstance.symbol(), "bathWETH");
+        //     assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
+        // });
+        // it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
+        //     await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
+        //     await WETHInstance.approve(bathAssetInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});
+        //     await bathAssetInstance.deposit(web3.utils.toWei((1).toString()), {from: accounts[1]});
+        //     assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((1).toString()));            
+        // });
+        // it("User can deposit quote funds with custom weights and receive bathTokens", async function() {
+        //     await DAIInstance.faucet({from: accounts[2]});
+        //     await DAIInstance.approve(bathQuoteInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
+        //     await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
+        //     assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
+        // });
+        // it("Withdraw asset funds by sending in bathTokens", async function() {
+        //     await bathAssetInstance.withdraw(web3.utils.toWei((1).toString()), {from: accounts[1]});
+        //     assert.equal(await WETHInstance.balanceOf(accounts[1]), web3.utils.toWei((1).toString()));
+        // });
+        // it("Withdraw quote funds by sending in bathTokens", async function() {
+        //     await bathQuoteInstance.withdraw(web3.utils.toWei((100).toString()), {from: accounts[2]});
+        //     assert.equal((await DAIInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei("1000").toString());
+        // });
+        // it("both users have no bath Tokens post withdraw", async function() {
+        //     assert.equal("0", await bathAssetInstance.balanceOf(accounts[1]));
+        //     assert.equal("0", await bathQuoteInstance.balanceOf(accounts[2]));
+        // });
     });
 
     // Test Market making functionality:
@@ -163,24 +163,28 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await bathPairInstance.removeLiquidity(8);
             // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
         });
-        it("New strategist can be added to pools", async function () {
+        it("New strategist can be added to pools ", async function () {
             await bathHouseInstance.approveStrategist(accounts[6]);
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator, {from: accounts[6]});
-            await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
+            // await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
         });
-        // for (let i = 1; i < 10; i++) {
-        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-
-        //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-        //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-        //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-        //         if (i % 3) {
-        //             await bathPairInstance.bathScrub();
-        //         }
-        //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-        //     });
-        // }
+        for (let i = 1; i < 10; i++) {
+            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+                // TODO: log gas while looping through multiple bathScrub calls
+                // See how it scales and if a solution is available to make it more gas efficient
+                // --> why in the OVM is bathScrub failing? This is the goal...
+                
+                await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+                let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
+                if (outstandingPairs > 5) {
+                    await bathPairInstance.bathScrub();
+                }
+                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+            });
+        }
         it("Funds are correctly returned to bathTokens", async function () {
             await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");

@@ -144,6 +144,7 @@ contract BathToken {
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
+        if(id == 0) {return;}
         RubiconMarket(RubiconMarketAddress).cancel(id);
         removeElement(id2Ind[id]);
     }
