@@ -234,7 +234,9 @@ async function logInfo(mA, mB, a, b, im) {
 
 async function checkForScrub(ticker){
         const contract = await getContractFromToken(ticker, "BathPair");
+        // console.log("got this contract", contract);
         await contract.methods.getOutstandingPairCount().call().then(async (r) => {
+            console.log("THIS MANY PAIRS for ", ticker, r);
             if (r > 5 ){
                 // Scrub the bath
                 var txData = await contract.methods.bathScrub().encodeABI();
@@ -248,8 +250,8 @@ async function checkForScrub(ticker){
                 await contract.methods.bathScrub().estimateGas(tx, (async function(r, d) {
                     if (d > 0) { 
                     await sendTx(tx, "\n<* I have successfully scrubbed the " + ticker + " bath, Master *>\n", ticker + " bath Scrub!");
-                    } else{
-                        throw("gas estimation in bathScrub failed");
+                    } else {
+                        // throw("gas estimation in bathScrub failed");
                     }
                 }));
             }
@@ -367,7 +369,7 @@ async function startBot(token, spread) {
             // Sends executeTransaction()
             await marketMake(await currentAsk, await currentBid, await token, await IMfactor, await spread);
         });
-        // console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
+        console.log('\n⚔⚔⚔ Strategist Bot Market Makes with Diligence and Valor ⚔⚔⚔\n');
 
       // Again
       startBot(token, spread);
@@ -388,13 +390,15 @@ const assets = [
     "ETH"
 ];
 
-// Start bots
-for (let index = 0; index < assets.length; index++) {
-    const element = assets[index];
-    startBot(element, 0.02);
-    // startBot(element, 0.04);
-    // startBot(element, 0.07);
-}
+// // Start bots
+// for (let index = 0; index < assets.length; index++) {
+//     const element = assets[index];
+//     startBot(element, 0.02);
+//     // startBot(element, 0.04);
+//     // startBot(element, 0.07);
+// }
+
+startBot("ETH", 0.02);
 
 
 

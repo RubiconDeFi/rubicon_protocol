@@ -91,7 +91,7 @@ contract DaiWithFaucet is LibNote, ERC20 {
         address admin,
         string memory _name,
         string memory _symbol
-    ) public ERC20(_name, _symbol) {
+    ) ERC20(_name, _symbol) {
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
