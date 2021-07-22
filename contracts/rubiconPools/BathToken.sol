@@ -137,7 +137,9 @@ contract BathToken {
     }
 
     function removeElement(uint256 index) internal {
-        if (index == 0) { return; }
+        if (index == 0) {
+            return;
+        }
         outstandingIDs[index] = outstandingIDs[outstandingIDs.length - 1];
         outstandingIDs.pop();
     }

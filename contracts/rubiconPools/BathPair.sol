@@ -335,65 +335,61 @@ contract BathPair {
     }
 
     function cancelPartialFills() internal {
-        uint timeDelay = BathHouse(bathHouse).timeDelay();
+        uint256 timeDelay = BathHouse(bathHouse).timeDelay();
         for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
-                if (
-                    outstandingPairIDs[x][2] <
-                    (block.timestamp - timeDelay)
-                ) {
-                    // If both filled fully
-                    // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
-                    order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-                    order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+            if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
+                // If both filled fully
+                // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
+                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
+                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
 
-                    // If Yield: 
-                    // getOfferInfo will make no yield recognizable on an empty offer
-                    if (offer1.pay_amt == 0 && offer2.pay_amt == 0) { //both non-zero
-                        logFill(outstandingPairIDs[x][0], true);
-                        logFill(outstandingPairIDs[x][1], false);
+                // If Yield:
+                // getOfferInfo will make no yield recognizable on an empty offer
+                if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
+                    //both non-zero
+                    logFill(outstandingPairIDs[x][0], true);
+                    logFill(outstandingPairIDs[x][1], false);
+                } else if (offer1.pay_amt == 0) {
+                    // ask is non-zerp
+                    logFill(outstandingPairIDs[x][0], true);
+                } else if (offer1.pay_amt == 0) {
+                    logFill(outstandingPairIDs[x][1], false);
+                }
 
-                    } else if (offer1.pay_amt == 0) {
-                        // ask is non-zerp
-                        logFill(outstandingPairIDs[x][0], true);
-                    } else if (offer1.pay_amt == 0) {
-                        logFill(outstandingPairIDs[x][1], false); 
-                    }
-
-                    // If non-zero real order, cancel
-                    if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
-                        BathToken(bathAssetAddress).cancel(
-                         outstandingPairIDs[x][0]
-                        );
-                    }
-                    if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
-                        BathToken(bathQuoteAddress).cancel(
+                // If non-zero real order, cancel
+                if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
+                    BathToken(bathAssetAddress).cancel(
+                        outstandingPairIDs[x][0]
+                    );
+                }
+                if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
+                    BathToken(bathQuoteAddress).cancel(
                         outstandingPairIDs[x][1]
                     );
-                    }
-                    removeElement(x);
-                    x--;
-              }
+                }
+                removeElement(x);
+                x--;
+            }
         }
     }
-                        //   cancel both
 
-
+    //   cancel both
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
         if (id == 0) {
             order memory offerInfo = order(420, ERC20(0), 69, ERC20(0));
             return offerInfo;
-        } else {        
+        } else {
             (
-            uint256 ask_amt,
-            ERC20 ask_gem,
-            uint256 bid_amt,
-            ERC20 bid_gem
-        ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
-        order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
-        return offerInfo;}
-
+                uint256 ask_amt,
+                ERC20 ask_gem,
+                uint256 bid_amt,
+                ERC20 bid_gem
+            ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+            order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
+            return offerInfo;
+        }
     }
 
     function getOutstandingPairCount() external view returns (uint256) {
