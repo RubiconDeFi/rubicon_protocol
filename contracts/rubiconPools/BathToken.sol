@@ -144,6 +144,10 @@ contract BathToken {
         outstandingIDs.pop();
     }
 
+    function removeFilledTrade(uint id) external onlyPair {
+        removeElement(id2Ind[id]);
+    }
+
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {

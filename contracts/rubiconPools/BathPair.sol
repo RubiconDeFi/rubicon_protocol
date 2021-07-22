@@ -344,16 +344,28 @@ contract BathPair {
                 order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
 
                 // If Yield:
-                // getOfferInfo will make no yield recognizable on an empty offer
+                // getOfferInfo will make no yield recognizable on an empty offer by assigning pay_amt = 420;
                 if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
                     //both non-zero
                     logFill(outstandingPairIDs[x][0], true);
                     logFill(outstandingPairIDs[x][1], false);
+                    BathToken(bathAssetAddress).removeFilledTrade(
+                        outstandingPairIDs[x][0]
+                    );
+                    BathToken(bathQuoteAddress).removeFilledTrade(
+                        outstandingPairIDs[x][1]
+                    );
                 } else if (offer1.pay_amt == 0) {
                     // ask is non-zerp
                     logFill(outstandingPairIDs[x][0], true);
+                                        BathToken(bathAssetAddress).removeFilledTrade(
+                        outstandingPairIDs[x][0]
+                    );
                 } else if (offer1.pay_amt == 0) {
                     logFill(outstandingPairIDs[x][1], false);
+                                        BathToken(bathQuoteAddress).removeFilledTrade(
+                        outstandingPairIDs[x][1]
+                    );
                 }
 
                 // If non-zero real order, cancel
@@ -518,7 +530,7 @@ contract BathPair {
         require(
             outstandingPairIDs.length <
                 BathHouse(bathHouse).maxOutstandingPairCount(),
-            "too many outstanding pairs"
+            "too many outstanding pairs, please call bathScrub() first"
         );
 
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price

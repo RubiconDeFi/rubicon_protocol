@@ -67,34 +67,34 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             assert.equal(await bathPairInstance.bathAssetAddress(), bathAssetInstance.address);
             assert.equal(await bathPairInstance.bathQuoteAddress(), bathQuoteInstance.address);
         });
-        // it("bath tokens have the right name", async function() {
-        //     assert.equal(await bathAssetInstance.symbol(), "bathWETH");
-        //     assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
-        // });
-        // it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
-        //     await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
-        //     await WETHInstance.approve(bathAssetInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});
-        //     await bathAssetInstance.deposit(web3.utils.toWei((1).toString()), {from: accounts[1]});
-        //     assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((1).toString()));            
-        // });
-        // it("User can deposit quote funds with custom weights and receive bathTokens", async function() {
-        //     await DAIInstance.faucet({from: accounts[2]});
-        //     await DAIInstance.approve(bathQuoteInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
-        //     await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
-        //     assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
-        // });
-        // it("Withdraw asset funds by sending in bathTokens", async function() {
-        //     await bathAssetInstance.withdraw(web3.utils.toWei((1).toString()), {from: accounts[1]});
-        //     assert.equal(await WETHInstance.balanceOf(accounts[1]), web3.utils.toWei((1).toString()));
-        // });
-        // it("Withdraw quote funds by sending in bathTokens", async function() {
-        //     await bathQuoteInstance.withdraw(web3.utils.toWei((100).toString()), {from: accounts[2]});
-        //     assert.equal((await DAIInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei("1000").toString());
-        // });
-        // it("both users have no bath Tokens post withdraw", async function() {
-        //     assert.equal("0", await bathAssetInstance.balanceOf(accounts[1]));
-        //     assert.equal("0", await bathQuoteInstance.balanceOf(accounts[2]));
-        // });
+        it("bath tokens have the right name", async function() {
+            assert.equal(await bathAssetInstance.symbol(), "bathWETH");
+            assert.equal(await bathQuoteInstance.symbol(), "bathDAI");
+        });
+        it("User can deposit asset funds with custom weights and receive bathTokens", async function() {
+            await WETHInstance.deposit({from: accounts[1], value: web3.utils.toWei((1).toString())})
+            await WETHInstance.approve(bathAssetInstance.address, web3.utils.toWei((1).toString()), {from: accounts[1]});
+            await bathAssetInstance.deposit(web3.utils.toWei((1).toString()), {from: accounts[1]});
+            assert.equal((await bathAssetInstance.balanceOf(accounts[1])).toString(), web3.utils.toWei((1).toString()));            
+        });
+        it("User can deposit quote funds with custom weights and receive bathTokens", async function() {
+            await DAIInstance.faucet({from: accounts[2]});
+            await DAIInstance.approve(bathQuoteInstance.address, web3.utils.toWei((100).toString()), {from: accounts[2]});
+            await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {from: accounts[2]});
+            assert.equal((await bathQuoteInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei((100).toString()));            
+        });
+        it("Withdraw asset funds by sending in bathTokens", async function() {
+            await bathAssetInstance.withdraw(web3.utils.toWei((1).toString()), {from: accounts[1]});
+            assert.equal(await WETHInstance.balanceOf(accounts[1]), web3.utils.toWei((1).toString()));
+        });
+        it("Withdraw quote funds by sending in bathTokens", async function() {
+            await bathQuoteInstance.withdraw(web3.utils.toWei((100).toString()), {from: accounts[2]});
+            assert.equal((await DAIInstance.balanceOf(accounts[2])).toString(), web3.utils.toWei("1000").toString());
+        });
+        it("both users have no bath Tokens post withdraw", async function() {
+            assert.equal("0", await bathAssetInstance.balanceOf(accounts[1]));
+            assert.equal("0", await bathQuoteInstance.balanceOf(accounts[2]));
+        });
     });
 
     // Test Market making functionality:
