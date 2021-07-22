@@ -33,7 +33,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
 
         it("Bath House is deployed and initialized", async function() {
             // Call initialize on Bath house
-            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 1, 10);
+            return await bathHouseInstance.initialize(rubiconMarketInstance.address, 80, 10, 10);
         });
         it("Bath Token for asset is deployed and initialized", async function() {
             return await BathToken.new().then(async function(instance) {
@@ -160,7 +160,7 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
         });
         it("Strategist can cancel an order they made", async function () {
             
-            await bathPairInstance.removeLiquidity(8);
+            await bathPairInstance.removeLiquidity(7);
             // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
         });
         it("New strategist can be added to pools ", async function () {
@@ -168,23 +168,23 @@ contract("Rubicon Exchange and Pools Test", async function(accounts) {
             await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator, {from: accounts[6]});
             // await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
         });
-        for (let i = 1; i < 10; i++) {
-            it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-                await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-                // TODO: log gas while looping through multiple bathScrub calls
-                // See how it scales and if a solution is available to make it more gas efficient
-                // --> why in the OVM is bathScrub failing? This is the goal...
+        // for (let i = 1; i < 10; i++) {
+        //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+        //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+        //         // TODO: log gas while looping through multiple bathScrub calls
+        //         // See how it scales and if a solution is available to make it more gas efficient
+        //         // --> why in the OVM is bathScrub failing? This is the goal...
                 
-                await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-                // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-                // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-                let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
-                if (outstandingPairs > 5) {
-                    await bathPairInstance.bathScrub();
-                }
-                // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-            });
-        }
+        //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+        //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+        //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+        //         let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
+        //         if (outstandingPairs > 5) {
+        //             await bathPairInstance.bathScrub();
+        //         }
+        //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+        //     });
+        // }
         it("Funds are correctly returned to bathTokens", async function () {
             await bathPairInstance.bathScrub();
             assert.equal((await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),"0");

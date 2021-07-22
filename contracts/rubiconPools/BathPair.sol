@@ -345,28 +345,39 @@ contract BathPair {
                     // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
                     order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
                     order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
-                    BathToken(bathQuoteAddress).cancel(
-                        outstandingPairIDs[x][1]
-                    );
-                    BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][0]
-                    );
 
                     // If Yield: 
                     // getOfferInfo will make no yield recognizable on an empty offer
-                    if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
+                    if (offer1.pay_amt == 0 && offer2.pay_amt == 0) { //both non-zero
                         logFill(outstandingPairIDs[x][0], true);
                         logFill(outstandingPairIDs[x][1], false);
+
                     } else if (offer1.pay_amt == 0) {
+                        // ask is non-zerp
                         logFill(outstandingPairIDs[x][0], true);
                     } else if (offer1.pay_amt == 0) {
                         logFill(outstandingPairIDs[x][1], false); 
                     }
 
-                    removeElement(x);
+                    // If non-zero real order, cancel
+                    if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
+                        BathToken(bathAssetAddress).cancel(
+                         outstandingPairIDs[x][0]
+                        );
                     }
+                    if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
+                        BathToken(bathQuoteAddress).cancel(
+                        outstandingPairIDs[x][1]
+                    );
+                    }
+                    removeElement(x);
+                    x--;
+              }
         }
     }
+                        //   cancel both
+
+
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {

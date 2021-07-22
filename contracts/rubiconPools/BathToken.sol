@@ -137,6 +137,7 @@ contract BathToken {
     }
 
     function removeElement(uint256 index) internal {
+        if (index == 0) { return; }
         outstandingIDs[index] = outstandingIDs[outstandingIDs.length - 1];
         outstandingIDs.pop();
     }
@@ -144,7 +145,8 @@ contract BathToken {
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
-        if(id == 0) {return;}
+        emit LogInit(id);
+        emit LogInit(id2Ind[id]);
         RubiconMarket(RubiconMarketAddress).cancel(id);
         removeElement(id2Ind[id]);
     }
