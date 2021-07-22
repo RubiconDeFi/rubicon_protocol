@@ -59,6 +59,7 @@ var bathPairContractKovan = new web3.eth.Contract(abi, bathPairKovanAddr);
 var sender = process.env.OP_KOVAN_ADMIN;
 var key = process.env.OP_KOVAN_ADMIN_KEY;
 
+// TODO: make this work at scale
 // *** Nonce Manager ***
 // https://ethereum.stackexchange.com/questions/39790/concurrency-patterns-for-account-nonce
 let nonceOffset = 0;
@@ -398,7 +399,7 @@ const assets = [
 //     // startBot(element, 0.07);
 // }
 
-startBot("ETH", 0.02);
+// startBot("ETH", 0.02);
 
 
 
