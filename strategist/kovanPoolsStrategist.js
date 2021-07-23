@@ -399,7 +399,7 @@ const assets = [
 //     // startBot(element, 0.07);
 // }
 
-// startBot("ETH", 0.02);
+startBot("WBTC", 0.02);
 
 
 
