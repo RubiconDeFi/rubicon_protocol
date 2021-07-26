@@ -37,8 +37,8 @@ var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 //  ** Inputs **
 
-const assetsBT = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "USDC"];
-const assetsBP = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH"]; //assets with no quotes
+const assetsBT = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "USDC", "OHM", "COMP", "AAVE"];
+const assetsBP = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "OHM", "COMP", "AAVE"]; //assets with no quotes
 const quotes = ["USDC"];
 
 const contractAdmin = process.env.OP_KOVAN_ADMIN;
@@ -56,7 +56,7 @@ async function getContractFromToken(ticker, contract) {
   } else if (contract == "BathPair") {
     var address = process.env["OP_KOVAN_3_BATH" + ticker + "USDC"];
   } else if (contract == "EquityToken") {
-    var address = process.env["OP_KOVAN_TC_" + ticker];
+    var address = process.env["OP_KOVAN_3_" + ticker];
   } else {
     throw "unhandled contract type";
   }
@@ -97,7 +97,7 @@ async function validate() {
       }
     });
   bathHouseContractKovan.methods
-    .getBathPair(process.env.OP_KOVAN_TC_WBTC, process.env.OP_KOVAN_TC_USDC)
+    .getBathPair(process.env.OP_KOVAN_3_WBTC, process.env.OP_KOVAN_3_USDC)
     .call()
     .then((r) => {
       // console.log(r);
@@ -166,7 +166,7 @@ async function validate() {
       .underlyingToken()
       .call()
       .then((r) => {
-        if (r == process.env["OP_KOVAN_TC_" + element]) {
+        if (r == process.env["OP_KOVAN_3_" + element]) {
           console.log("bath" + element + " underlyingToken CORRECT");
         } else {
           console.log("bath" + element + " underlyingToken ** ERROR **");
@@ -198,7 +198,7 @@ async function validate() {
 
   // Market
   RubiconMarketContractKovan.methods
-    .getMinSell(process.env.OP_KOVAN_TC_WBTC)
+    .getMinSell(process.env.OP_KOVAN_3_WBTC)
     .call()
     .then((r) => {
       if (r == 0) {
@@ -270,7 +270,7 @@ async function validate() {
         .underlyingAsset()
         .call()
         .then((r) => {
-          if (r == process.env["OP_KOVAN_TC_" + element]) {
+          if (r == process.env["OP_KOVAN_3_" + element]) {
             console.log("bath" + element + q + " underlyingAsset CORRECT");
           } else {
             console.log(
@@ -283,7 +283,7 @@ async function validate() {
         .underlyingQuote()
         .call()
         .then((r) => {
-          if (r == process.env.OP_KOVAN_TC_USDC) {
+          if (r == process.env.OP_KOVAN_3_USDC) {
             console.log("bath" + element + q + " underlyingQuote CORRECT");
           } else {
             console.log(
