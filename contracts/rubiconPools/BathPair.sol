@@ -262,7 +262,7 @@ contract BathPair {
         uint256 bathQuoteYield = ERC20(underlyingAsset).balanceOf(
             bathQuoteAddress
         );
-        uint8 stratReward = BathHouse(bathHouse).getPropToStrats(address(this));
+        uint16 stratReward = BathHouse(bathHouse).getBPSToStrats(address(this));
         if (bathAssetYield > 0) {
             BathToken(bathAssetAddress).rebalance(
                 bathQuoteAddress,

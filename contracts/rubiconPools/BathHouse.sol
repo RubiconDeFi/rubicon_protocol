@@ -279,7 +279,7 @@ contract BathHouse {
         return quoteToBathQuote[quote];
     }
 
-    function getPropToStrats(address pair) external view returns (uint8) {
+    function getBPSToStrats(address pair) external view returns (uint8) {
         return propToStrategists[pair];
     }
 }
