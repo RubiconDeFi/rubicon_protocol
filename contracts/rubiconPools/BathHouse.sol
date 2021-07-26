@@ -11,7 +11,6 @@ import "./BathPair.sol";
 contract BathHouse {
     string public name;
 
-    address[] public allBathPairs;
     mapping(address => mapping(address => address)) public getPair;
 
     address public admin;
@@ -77,7 +76,6 @@ contract BathHouse {
 
         // Ensure the pair doesn't exist and approved
         require(!isApprovedPair(getPair[asset][quote]));
-        allBathPairs.push(address(pair));
         propToStrategists[pair] = _propToStrategists;
 
         getPair[asset][quote] = address(pair);

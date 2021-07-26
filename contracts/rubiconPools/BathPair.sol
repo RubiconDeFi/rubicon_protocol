@@ -39,10 +39,14 @@ contract BathPair {
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
-    event LogTrade(uint256, ERC20, uint256, ERC20);
-    event LogNote(string, uint256);
-    event LogNoteI(string, int128);
-    event LogOffer(string, order);
+    event LogStrategistTrades(
+        uint256 idAsk,
+        address askAsset,
+        uint256 idBid,
+        address bidAsset,
+        address strategist,
+        uint256 timestamp
+    );
 
     // Maps a trade ID to each of their strategists for rewards purposes
     mapping(uint256 => address) public IDs2strategist;
@@ -319,11 +323,9 @@ contract BathPair {
         if (isAssetFill) {
             strategist2FillsAsset[strategist] += 1;
             totalAssetFills += 1;
-            // emit LogNote("logFill asset", totalAssetFills);
         } else {
             strategist2FillsQuote[strategist] += 1;
             totalQuoteFills += 1;
-            // emit LogNote("logFill quote", totalQuoteFills);
         }
     }
 
@@ -475,10 +477,7 @@ contract BathPair {
     }
 
     // Used to map a strategist to their orders
-    function newTradeIDs(address strategist)
-        internal
-    // returns (uint256[3] memory)
-    {
+    function newTradeIDs(address strategist) internal {
         require(
             outstandingPairIDs[outstandingPairIDs.length - 1][2] ==
                 block.timestamp
@@ -489,7 +488,6 @@ contract BathPair {
         IDs2strategist[
             outstandingPairIDs[outstandingPairIDs.length - 1][1]
         ] = strategist;
-        // return outstandingPairIDs[outstandingPairIDs.length - 1];
     }
 
     function getLastTradeIDs() external view returns (uint256[3] memory) {
@@ -556,6 +554,15 @@ contract BathPair {
         // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         newTradeIDs(msg.sender);
+
+        emit LogStrategistTrades(
+            outstandingPairIDs[outstandingPairIDs.length - 1][0],
+            underlyingAsset,
+            outstandingPairIDs[outstandingPairIDs.length - 1][1],
+            underlyingQuote,
+            msg.sender,
+            block.timestamp
+        );
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens

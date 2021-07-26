@@ -34,6 +34,10 @@ contract WETH9 {
         deposit();
     }
 
+    receive() external payable {
+        deposit();
+    }
+
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
@@ -47,7 +51,7 @@ contract WETH9 {
     }
 
     function totalSupply() public view returns (uint256) {
-        // return address(this).balance;
+        return address(this).balance;
     }
 
     function approve(address guy, uint256 wad) public returns (bool) {

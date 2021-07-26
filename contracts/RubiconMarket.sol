@@ -251,8 +251,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
             ERC20
         )
     {
-        OfferInfo memory offer = offers[id];
-        return (offer.pay_amt, offer.pay_gem, offer.buy_amt, offer.buy_gem);
+        OfferInfo memory _offer = offers[id];
+        return (_offer.pay_amt, _offer.pay_gem, _offer.buy_amt, _offer.buy_gem);
     }
 
     /// @notice Below are the main public entrypoints
@@ -280,8 +280,8 @@ contract SimpleMarket is EventfulMarket, DSMath {
         synchronized
         returns (bool)
     {
-        OfferInfo memory offer = offers[id];
-        uint256 spend = mul(quantity, offer.buy_amt) / offer.pay_amt;
+        OfferInfo memory _offer = offers[id];
+        uint256 spend = mul(quantity, _offer.buy_amt) / _offer.pay_amt;
 
         require(uint128(spend) == spend, "spend is not an int");
         require(uint128(quantity) == quantity, "quantity is not an int");
@@ -290,36 +290,36 @@ contract SimpleMarket is EventfulMarket, DSMath {
         if (
             quantity == 0 ||
             spend == 0 ||
-            quantity > offer.pay_amt ||
-            spend > offer.buy_amt
+            quantity > _offer.pay_amt ||
+            spend > _offer.buy_amt
         ) {
             return false;
         }
 
         uint256 fee = mul(spend, feeBPS) / 10000;
         require(
-            offer.buy_gem.transferFrom(msg.sender, feeTo, fee),
+            _offer.buy_gem.transferFrom(msg.sender, feeTo, fee),
             "Insufficient funds to cover fee"
         );
 
-        offers[id].pay_amt = sub(offer.pay_amt, quantity);
-        offers[id].buy_amt = sub(offer.buy_amt, spend);
+        offers[id].pay_amt = sub(_offer.pay_amt, quantity);
+        offers[id].buy_amt = sub(_offer.buy_amt, spend);
         require(
-            offer.buy_gem.transferFrom(msg.sender, offer.owner, spend),
-            "offer.buy_gem.transferFrom(msg.sender, offer.owner, spend) failed - check that you can pay the fee"
+            _offer.buy_gem.transferFrom(msg.sender, _offer.owner, spend),
+            "_offer.buy_gem.transferFrom(msg.sender, _offer.owner, spend) failed - check that you can pay the fee"
         );
         require(
-            offer.pay_gem.transfer(msg.sender, quantity),
-            "offer.pay_gem.transfer(msg.sender, quantity) failed"
+            _offer.pay_gem.transfer(msg.sender, quantity),
+            "_offer.pay_gem.transfer(msg.sender, quantity) failed"
         );
 
         emit LogItemUpdate(id);
         emit LogTake(
             bytes32(id),
-            keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
-            offer.owner,
-            offer.pay_gem,
-            offer.buy_gem,
+            keccak256(abi.encodePacked(_offer.pay_gem, _offer.buy_gem)),
+            _offer.owner,
+            _offer.pay_gem,
+            _offer.buy_gem,
             msg.sender,
             uint128(quantity),
             uint128(spend),
@@ -327,10 +327,10 @@ contract SimpleMarket is EventfulMarket, DSMath {
         );
         emit FeeTake(
             bytes32(id),
-            keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
-            offer.owner,
-            offer.pay_gem,
-            offer.buy_gem,
+            keccak256(abi.encodePacked(_offer.pay_gem, _offer.buy_gem)),
+            _offer.owner,
+            _offer.pay_gem,
+            _offer.buy_gem,
             msg.sender,
             uint128(quantity),
             uint128(spend),
@@ -340,9 +340,9 @@ contract SimpleMarket is EventfulMarket, DSMath {
         );
         emit LogTrade(
             quantity,
-            address(offer.pay_gem),
+            address(_offer.pay_gem),
             spend,
-            address(offer.buy_gem)
+            address(_offer.buy_gem)
         );
 
         if (offers[id].pay_amt == 0) {
@@ -362,20 +362,20 @@ contract SimpleMarket is EventfulMarket, DSMath {
         synchronized
         returns (bool success)
     {
-        OfferInfo memory offer = offers[id];
+        OfferInfo memory _offer = offers[id];
         delete offers[id];
 
-        require(offer.pay_gem.transfer(offer.owner, offer.pay_amt));
+        require(_offer.pay_gem.transfer(_offer.owner, _offer.pay_amt));
 
         emit LogItemUpdate(id);
         emit LogKill(
             bytes32(id),
-            keccak256(abi.encodePacked(offer.pay_gem, offer.buy_gem)),
-            offer.owner,
-            offer.pay_gem,
-            offer.buy_gem,
-            uint128(offer.pay_amt),
-            uint128(offer.buy_amt),
+            keccak256(abi.encodePacked(_offer.pay_gem, _offer.buy_gem)),
+            _offer.owner,
+            _offer.pay_gem,
+            _offer.buy_gem,
+            uint128(_offer.pay_amt),
+            uint128(_offer.buy_amt),
             uint64(block.timestamp)
         );
 
