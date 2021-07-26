@@ -6,7 +6,7 @@ var BathToken = artifacts.require("./contracts/rubiconPoolsv0/BathToken.sol");
 var BidAskUtil = artifacts.require("./contracts/BidAskUtil.sol");
 
 var WETH = artifacts.require("./contracts/WETH9.sol");
-var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
+var DAI = artifacts.require("./contracts/peripheral_contracts/USDCWithFaucet.sol");
 
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const { deploy } = require('@openzeppelin/truffle-upgrades/dist/utils');

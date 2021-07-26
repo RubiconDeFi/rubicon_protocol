@@ -51,7 +51,7 @@ var WAYNEKovanAddr = process.env.OP_KOVAN_3_WBTC;
 var WAYNEContractKovan = new web3.eth.Contract(abi, WAYNEKovanAddr);
 
 // Load in Dai Contract
-var { abi } = require("../build/contracts/DaiWithFaucet.json");
+var { abi } = require("../build/contracts/USDCWithFaucet.json");
 var USDC_OP_KOVAN = process.env.OP_KOVAN_3_USDC;
 var DAIContractKovan = new web3.eth.Contract(abi, USDC_OP_KOVAN);
 

@@ -2,7 +2,7 @@ const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
 const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
-const DAI = artifacts.require("DaiWithFaucet");
+const DAI = artifacts.require("USDCWithFaucet");
 const WETH = artifacts.require("WETH9");
 const BidAskUtil = artifacts.require("BidAskUtil");
 
