@@ -1,5 +1,5 @@
 var WETH = artifacts.require("./contracts/WETH9.sol");
-var DAI = artifacts.require("./contracts/peripheral_contracts/DaiWithFaucet.sol");
+var DAI = artifacts.require("./contracts/peripheral_contracts/USDCWithFaucet.sol");
 var WAYNE = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
 var STARK = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol");
 

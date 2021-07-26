@@ -50,10 +50,10 @@ contract LibNote {
 
 /* import "./lib.sol"; */
 
-contract DaiWithFaucet is LibNote, ERC20 {
+contract USDCWithFaucet is LibNote, ERC20 {
     // --- Auth ---
     mapping(address => uint256) public wards;
-
+    address public admin;
     function rely(address guy) external auth {
         wards[guy] = 1;
     }
@@ -88,7 +88,7 @@ contract DaiWithFaucet is LibNote, ERC20 {
 
     constructor(
         uint256 chainId_,
-        address admin,
+        address _admin,
         string memory _name,
         string memory _symbol
     ) ERC20(_name, _symbol) {
@@ -104,6 +104,7 @@ contract DaiWithFaucet is LibNote, ERC20 {
                 address(this)
             )
         );
+        admin = _admin;
         _mint(admin, 1000000e18);
     }
 
@@ -115,6 +116,11 @@ contract DaiWithFaucet is LibNote, ERC20 {
         _mint(msg.sender, 1000e18);
         faucetCheck[msg.sender] = block.timestamp;
         return true;
+    }
+
+    function adminMint() external {
+        require(admin == msg.sender);
+        _mint(msg.sender, 10000e18);
     }
 
     // --- Alias ---

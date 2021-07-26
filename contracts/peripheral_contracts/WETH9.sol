@@ -1,3 +1,5 @@
+// @unsupported: ovm
+
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Copyright (C) 2015, 2016, 2017 Dapphub
@@ -34,6 +36,10 @@ contract WETH9 {
         deposit();
     }
 
+    receive() external payable {
+        deposit();
+    }
+
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
@@ -47,7 +53,7 @@ contract WETH9 {
     }
 
     function totalSupply() public view returns (uint256) {
-        // return address(this).balance;
+        return address(this).balance;
     }
 
     function approve(address guy, uint256 wad) public returns (bool) {

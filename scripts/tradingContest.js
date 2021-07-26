@@ -3,7 +3,7 @@ const Web3 = require('web3');
 
 let web3 = new Web3("https://optimism-kovan.infura.io/v3/" + process.env.INFURA_API_KEY);
 
-var { abi } = require("../build/contracts/DaiWithFaucet.json");
+var { abi } = require("../build/contracts/USDCWithFaucet.json");
 var DAIKovanAddr = process.env.OP_KOVAN_TC_USDC;
 var USDCContractKovan = new web3.eth.Contract(abi, DAIKovanAddr);
 

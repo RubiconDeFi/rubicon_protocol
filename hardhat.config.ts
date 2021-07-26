@@ -53,7 +53,7 @@ module.exports = {
         ovm: true,
         gasPrice: 15000000,
         chainId: 69,
-        accounts: [process.env.OP_KOVAN_ADMIN_KEY],
+        accounts: [process.env.OP_KOVAN_ADMIN_KEY, process.env.OP_KOVAN_PROXY_ADMIN_KEY],
         gasLimit: 18547064,
         timeout: 40000
       }
@@ -66,6 +66,9 @@ module.exports = {
   namedAccounts: {
     deployer: {
       default: 0,
+    },
+    proxyAdmin: {
+      default: 1
     }
   }
 };

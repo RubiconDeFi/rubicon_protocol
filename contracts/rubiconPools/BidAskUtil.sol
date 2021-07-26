@@ -24,10 +24,6 @@ contract BidAskUtil {
     address public RubiconMarketAddress;
 
     event LogTrade(uint256, ERC20, uint256, ERC20);
-    event LogNote(string, uint256);
-    event LogAddress(string, ERC20);
-    event LogNote128(string, int128);
-    event BothFilled();
 
     struct order {
         uint256 pay_amt;
