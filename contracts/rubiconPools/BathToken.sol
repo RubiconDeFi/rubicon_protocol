@@ -28,6 +28,7 @@ contract BathToken {
     uint256 public feeBPS;
 
     uint256 public totalSupply;
+    uint256 public outstandingAmount; // quantity of underlyingToken that is in the orderbook and still in pools
     uint256[] outstandingIDs;
     mapping(uint256 => uint256) id2Ind;
 
@@ -85,15 +86,17 @@ contract BathToken {
         name = "BathToken v1";
         decimals = 18;
 
+        require(
+            RubiconMarket(RubiconMarketAddress).initialized() &&
+                BathHouse(bathHouse).initialized()
+        );
+
         // Add infinite approval of Rubicon Market for this asset
 
         IERC20(address(token)).approve(RubiconMarketAddress, 2**256 - 1);
         emit LogInit(block.timestamp);
 
-        require(
-            RubiconMarket(RubiconMarketAddress).initialized() &&
-                BathHouse(bathHouse).initialized()
-        );
+
         feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
         feeBPS = 0; //Fee set to zero
 
@@ -136,25 +139,18 @@ contract BathToken {
         feeTo = _feeTo;
     }
 
-    function removeElement(uint256 index) internal {
-        if (index == 0) {
-            return;
-        }
-        outstandingIDs[index] = outstandingIDs[outstandingIDs.length - 1];
-        outstandingIDs.pop();
-    }
-
-    function removeFilledTrade(uint id) external onlyPair {
-        removeElement(id2Ind[id]);
-    }
-
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
-        emit LogInit(id);
-        emit LogInit(id2Ind[id]);
+        (uint256 pay_amt, IERC20 pay_gem, , ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+        outstandingAmount = outstandingAmount.sub(pay_amt);
+
         RubiconMarket(RubiconMarketAddress).cancel(id);
-        removeElement(id2Ind[id]);
+    }
+
+    function removeFilledTrade(uint id) external onlyPair {
+        (uint256 pay_amt, IERC20 pay_gem, , ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+        outstandingAmount = outstandingAmount.sub(pay_amt);
     }
 
     // function that places a bid/ask in the orderbook for a given pair
@@ -175,8 +171,7 @@ contract BathToken {
             0,
             false
         );
-        outstandingIDs.push(id);
-        id2Ind[id] = outstandingIDs.length - 1;
+        outstandingAmount = outstandingAmount.add(pay_amt);
         return (id);
     }
 
@@ -191,26 +186,13 @@ contract BathToken {
         require(initialized, "BathToken not initialized");
 
         uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
-        uint256 _OBvalue;
-        for (uint256 index = 0; index < outstandingIDs.length; index++) {
-            if (outstandingIDs[index] == 0) {
-                continue;
-            } else {
-                (uint256 pay, IERC20 pay_gem, , ) = RubiconMarket(
-                    RubiconMarketAddress
-                ).getOffer(outstandingIDs[index]);
-                require(pay_gem == underlyingToken);
-                _OBvalue += pay;
-            }
-        }
-        return _pool.add(_OBvalue);
+        return _pool.add(outstandingAmount);
     }
 
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) external {
         uint256 _pool = underlyingBalance();
         uint256 _before = underlyingToken.balanceOf(address(this));
-        // uint256 _pool = _before + outstandingTokens;
 
         underlyingToken.transferFrom(msg.sender, address(this), _amount);
         uint256 _after = underlyingToken.balanceOf(address(this));
