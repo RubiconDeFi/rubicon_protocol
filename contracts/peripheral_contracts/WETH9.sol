@@ -1,3 +1,5 @@
+// @unsupported: ovm
+
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Copyright (C) 2015, 2016, 2017 Dapphub

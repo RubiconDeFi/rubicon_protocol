@@ -60,7 +60,8 @@ contract BathToken {
         string memory bathName,
         IERC20 token,
         address market,
-        address _bathHouse
+        address _bathHouse,
+        address _feeTo
     ) external {
         require(!initialized);
         symbol = bathName;
@@ -96,7 +97,7 @@ contract BathToken {
         IERC20(address(token)).approve(RubiconMarketAddress, 2**256 - 1);
         emit LogInit(block.timestamp);
 
-        feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
+        feeTo = _feeTo; //BathHouse admin is initial recipient
         feeBPS = 0; //Fee set to zero
 
         initialized = true;

@@ -44,6 +44,7 @@ const quotes = ["USDC"];
 const contractAdmin = process.env.OP_KOVAN_ADMIN;
 const proxyAdmin = process.env.OP_KOVAN_PROXY_ADMIN;
 const feeRecipient = process.env.OP_KOVAN_TC_FEE_RECIPIENT;
+const strategist = contractAdmin;
 
 //  ** Helper Functions **
 
@@ -189,9 +190,9 @@ async function validate() {
     .call()
     .then((r) => {
       if (r == true) {
-        console.log("BH isApprovedStrat CORRECT");
+        console.log("BIDASKUTIL isApprovedStrat on BH CORRECT");
       } else {
-        console.log("BH isApprovedStrat ** ERROR **");
+        console.log("BIDASKUTIL isApprovedStrat on BH ** ERROR **");
       }
     });
 
@@ -264,6 +265,7 @@ async function validate() {
     for (let index = 0; index < assetsBP.length; index++) {
       const element = assetsBP[index];
       let contract = await getContractFromToken(element, "BathPair");
+
       contract.methods
         .underlyingAsset()
         .call()
@@ -324,14 +326,14 @@ async function validate() {
         .bathQuoteAddress()
         .call()
         .then((r) => {
-          if (r == process.env["OP_KOVAN_TC_BATH" + q]) {
+          if (r == process.env["OP_KOVAN_3_BATH" + q]) {
             console.log("bath" + element + q + " bathQuoteAddress CORRECT");
           } else {
             console.log("bath" + element + q + " bathQuoteAddress ** ERROR **");
           }
         });
       bathHouseContractKovan.methods
-        .isApprovedPair(process.env["OP_KOVAN_TC_BATH" + element + q])
+        .isApprovedPair(process.env["OP_KOVAN_3_BATH" + element + q])
         .call()
         .then((r) => {
           if (r == true) {
@@ -346,6 +348,18 @@ async function validate() {
         });
     }
   }
+
+  // Check strategist
+  bathHouseContractKovan.methods
+    .isApprovedStrategist(strategist)
+    .call()
+    .then((r) => {
+      if (r == true) {
+        console.log("BathHouse isApprovedStrategist CORRECT");
+      } else {
+        console.log("BathHouse isApprovedStrategist ** ERROR **");
+      }
+    });
 }
 
 validate();

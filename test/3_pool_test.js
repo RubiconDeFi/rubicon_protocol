@@ -45,7 +45,8 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
           "bathWETH",
           WETHInstance.address,
           rubiconMarketInstance.address,
-          bathHouseInstance.address
+          bathHouseInstance.address,
+          accounts[0]
         );
         bathAssetInstance = await instance;
       });
@@ -56,7 +57,8 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
           "bathDAI",
           DAIInstance.address,
           rubiconMarketInstance.address,
-          bathHouseInstance.address
+          bathHouseInstance.address,
+          accounts[0]
         );
         bathQuoteInstance = await instance;
       });
