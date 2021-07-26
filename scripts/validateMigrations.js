@@ -163,3 +163,6 @@ bathPairContractKovan.methods.bathAssetAddress().call().then((r) =>{
 bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
     if (r == process.env.OP_KOVAN_TC_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
 });
+bathPairContractKovan.methods.bathQuoteAddress().call().then((r) =>{
+    if (r == process.env.OP_KOVAN_TC_BATHUSDC) {console.log("BP bathUSDC CORRECT")} else {console.log("BP bathUSDC ** ERROR **")}
+});

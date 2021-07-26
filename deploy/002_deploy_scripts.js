@@ -104,25 +104,25 @@ const func = async (hre) => {
 //   // 4. Deploy BathPairs
 //     const assetsToDeploy = [
 //     "WBTC",
-//     "MKR",
-//     "SNX",
-//     "REP",
-//     "RGT",
-//     "ETH"
+//     // "MKR",
+//     // "SNX",
+//     // "REP",
+//     // "RGT",
+//     // "ETH"
 //     // "USDC" - USDC excluded as base
 //   ];
 //     for (let index = 0; index < assetsToDeploy.length; index++) {
 //     const asset = assetsToDeploy[index];
 //     const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
 //     const newBathPair = await bathPairFactory.deploy({nonce: getNonce()}).then(async function(r) {
-//         await deployProxy(await r.address, "bath" + asset+"USDC").then(async (proxyWrapped) =>  {
+//         // await deployProxy(await r.address, "bath" + asset+"USDC").then(async (proxyWrapped) =>  {
             
 //             console.log("bath" + asset +  "-USDC deployed at " + await r.address);
-//             const btUInst = await bathPairFactory.attach(proxyWrapped);
+//             const btUInst = await bathPairFactory.attach(await r.address);
 //             await btUInst.estimateGas.initialize(process.env['OP_KOVAN_2_BATH'+asset], process.env.OP_KOVAN_2_BATHUSDC, process.env.OP_KOVAN_2_BATHHOUSE, 75, -5, {gasLimit: 8999999}) .then(async function (g) {
 //               await btUInst.initialize(process.env['OP_KOVAN_2_BATH'+asset], process.env.OP_KOVAN_2_BATHUSDC, process.env.OP_KOVAN_2_BATHHOUSE, 75, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
 //           });
-//         });
+//         // });
 //   });
 // }
 
