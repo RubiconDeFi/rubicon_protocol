@@ -358,12 +358,12 @@ contract BathPair {
                 } else if (offer1.pay_amt == 0) {
                     // ask is non-zerp
                     logFill(outstandingPairIDs[x][0], true);
-                                        BathToken(bathAssetAddress).removeFilledTrade(
+                    BathToken(bathAssetAddress).removeFilledTrade(
                         outstandingPairIDs[x][0]
                     );
                 } else if (offer1.pay_amt == 0) {
                     logFill(outstandingPairIDs[x][1], false);
-                                        BathToken(bathQuoteAddress).removeFilledTrade(
+                    BathToken(bathQuoteAddress).removeFilledTrade(
                         outstandingPairIDs[x][1]
                     );
                 }

@@ -96,7 +96,6 @@ contract BathToken {
         IERC20(address(token)).approve(RubiconMarketAddress, 2**256 - 1);
         emit LogInit(block.timestamp);
 
-
         feeTo = BathHouse(bathHouse).admin(); //BathHouse admin is initial recipient
         feeBPS = 0; //Fee set to zero
 
@@ -142,14 +141,18 @@ contract BathToken {
     // Rubicon Market Functions:
 
     function cancel(uint256 id) external onlyPair {
-        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(
+            id
+        );
         outstandingAmount = outstandingAmount.sub(pay_amt);
 
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 
-    function removeFilledTrade(uint id) external onlyPair {
-        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+    function removeFilledTrade(uint256 id) external onlyPair {
+        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(
+            id
+        );
         outstandingAmount = outstandingAmount.sub(pay_amt);
     }
 
@@ -222,10 +225,10 @@ contract BathToken {
     function rebalance(
         address sisterBath,
         address underlyingAsset, /* sister asset */
-        uint stratProportion
+        uint256 stratProportion
     ) external onlyPair {
         require(stratProportion > 0 && stratProportion < 50 && initialized);
-        uint stratReward = (
+        uint256 stratReward = (
             stratProportion.mul(
                 IERC20(underlyingAsset).balanceOf(address(this))
             )
