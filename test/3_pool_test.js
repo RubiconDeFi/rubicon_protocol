@@ -280,88 +280,123 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       });
     });
     it("bathScrub can be called by anyone at any time", async function () {
+        // await bathPairInstance.executeStrategy(
+        //     strategyInstance.address,
+        //     askNumerator,
+        //     askDenominator,
+        //     bidNumerator,
+        //     bidDenominator
+        //   );
+        //   await bathPairInstance.executeStrategy(
+        //     strategyInstance.address,
+        //     askNumerator,
+        //     askDenominator,
+        //     bidNumerator,
+        //     bidDenominator
+        //   );
+        //   await bathPairInstance.executeStrategy(
+        //     strategyInstance.address,
+        //     askNumerator,
+        //     askDenominator,
+        //     bidNumerator,
+        //     bidDenominator
+        //   );
+        //   await bathPairInstance.executeStrategy(
+        //     strategyInstance.address,
+        //     askNumerator,
+        //     askDenominator,
+        //     bidNumerator,
+        //     bidDenominator
+        //   );
+        //   await bathPairInstance.executeStrategy(
+        //     strategyInstance.address,
+        //     askNumerator,
+        //     askDenominator,
+        //     bidNumerator,
+        //     bidDenominator
+        //   );
       logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
       await bathPairInstance.bathScrub();
     });
-    // it("Partial fill is correctly cancelled and replaced", async function () {
-    //   await bathPairInstance.bathScrub();
+    it("Partial fill is correctly cancelled and replaced", async function () {
+      await bathPairInstance.bathScrub();
 
-    //   await bathPairInstance.executeStrategy(
-    //     strategyInstance.address,
-    //     askNumerator,
-    //     askDenominator,
-    //     bidNumerator,
-    //     bidDenominator
-    //   );
-    // });
-    // it("Zero order can be placed - bid or ask", async function () {
-    //   await bathPairInstance.executeStrategy(
-    //     strategyInstance.address,
-    //     0,
-    //     0,
-    //     bidNumerator,
-    //     bidDenominator
-    //   );
-    //   await bathPairInstance.executeStrategy(
-    //     strategyInstance.address,
-    //     askNumerator,
-    //     askDenominator,
-    //     0,
-    //     0
-    //   );
-    //   await bathPairInstance.bathScrub();
-    // });
-    // it("Strategist can cancel an order they made", async function () {
-    //   await bathPairInstance.removeLiquidity(7);
-    //   // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
-    // });
-    // it("New strategist can be added to pools ", async function () {
-    //   await bathHouseInstance.approveStrategist(accounts[6]);
-    //   await bathPairInstance.executeStrategy(
-    //     strategyInstance.address,
-    //     askNumerator,
-    //     askDenominator,
-    //     bidNumerator,
-    //     bidDenominator,
-    //     { from: accounts[6] }
-    //   );
-    //   // await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
-    // });
-    // // for (let i = 1; i < 10; i++) {
-    // //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-    // //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
-    // //         // TODO: log gas while looping through multiple bathScrub calls
-    // //         // See how it scales and if a solution is available to make it more gas efficient
-    // //         // --> why in the OVM is bathScrub failing? This is the goal...
+      await bathPairInstance.executeStrategy(
+        strategyInstance.address,
+        askNumerator,
+        askDenominator,
+        bidNumerator,
+        bidDenominator
+      );
+    });
+    it("Zero order can be placed - bid or ask", async function () {
+      await bathPairInstance.executeStrategy(
+        strategyInstance.address,
+        0,
+        0,
+        bidNumerator,
+        bidDenominator
+      );
+      await bathPairInstance.executeStrategy(
+        strategyInstance.address,
+        askNumerator,
+        askDenominator,
+        0,
+        0
+      );
+      await bathPairInstance.bathScrub();
+    });
+    it("Strategist can cancel an order they made", async function () {
+      await bathPairInstance.removeLiquidity(7);
+      // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
+    });
+    it("New strategist can be added to pools ", async function () {
+      await bathHouseInstance.approveStrategist(accounts[6]);
+      await bathPairInstance.executeStrategy(
+        strategyInstance.address,
+        askNumerator,
+        askDenominator,
+        bidNumerator,
+        bidDenominator,
+        { from: accounts[6] }
+      );
+      // await bathPairInstance.removeLiquidity(10, {from: accounts[6]});
+    });
+    // for (let i = 1; i < 10; i++) {
+    //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
+    //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+    //         // TODO: log gas while looping through multiple bathScrub calls
+    //         // See how it scales and if a solution is available to make it more gas efficient
+    //         // --> why in the OVM is bathScrub failing? This is the goal...
 
-    // //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-    // //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
-    // //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
-    // //         let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
-    // //         if (outstandingPairs > 5) {
-    // //             await bathPairInstance.bathScrub();
-    // //         }
-    // //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
-    // //     });
-    // // }
-    // it("Funds are correctly returned to bathTokens", async function () {
-    //   await bathPairInstance.bathScrub();
-    //   assert.equal(
-    //     (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),
-    //     "0"
-    //   );
-    //   assert.equal(
-    //     (await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),
-    //     "0"
-    //   );
-    // });
-    // it("Strategist can claim funds", async function () {
-    //   await bathPairInstance.strategistBootyClaim();
-    //   // TODO: validate this is correct
-    //   assert.equal(
-    //     (await WETHInstance.balanceOf(accounts[0])).toString(),
-    //     "20000000000000"
-    //   );
-    // });
+    //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
+    //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+    //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
+    //         let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
+    //         if (outstandingPairs > 5) {
+    //             await bathPairInstance.bathScrub();
+    //         }
+    //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
+    //     });
+    // }
+    it("Funds are correctly returned to bathTokens", async function () {
+      await bathPairInstance.bathScrub();
+      assert.equal(
+        (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),
+        "0"
+      );
+      assert.equal(
+        (await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),
+        "0"
+      );
+    });
+    it("Strategist can claim funds", async function () {
+      await bathPairInstance.strategistBootyClaim();
+      // TODO: validate this is correct
+      assert.equal(
+        (await WETHInstance.balanceOf(accounts[0])).toString(),
+        "20000000000000"
+      );
+    });
   });
 });

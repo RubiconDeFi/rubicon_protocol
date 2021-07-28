@@ -319,12 +319,11 @@ contract BathPair {
     // isAssetFill are *quotes* that result in asset yield
     function logFill(uint256 orderID, bool isAssetFill) internal {
         // Goal is to map a fill to a strategist
-        address strategist = IDs2strategist[orderID];
         if (isAssetFill) {
-            strategist2FillsAsset[strategist] += 1;
+            strategist2FillsAsset[IDs2strategist[orderID]] += 1;
             totalAssetFills += 1;
         } else {
-            strategist2FillsQuote[strategist] += 1;
+            strategist2FillsQuote[IDs2strategist[orderID]] += 1;
             totalQuoteFills += 1;
         }
     }
@@ -338,12 +337,11 @@ contract BathPair {
 
     function cancelPartialFills() internal {
         uint256 timeDelay = BathHouse(bathHouse).timeDelay();
-        for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+        uint len = outstandingPairIDs.length;
+        for (uint256 x = 0; x < len; x++) {
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
-                // If both filled fully
-                // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
-                uint askId =  outstandingPairIDs[x][0];
-                uint bidId =  outstandingPairIDs[x][1];
+                uint askId = outstandingPairIDs[x][0];
+                uint bidId = outstandingPairIDs[x][1];
                 order memory offer1 = getOfferInfo(askId);
                 order memory offer2 = getOfferInfo(bidId);
 
@@ -385,6 +383,7 @@ contract BathPair {
                 }
                 removeElement(x);
                 x--;
+                len--;
             }
         }
     }
@@ -565,6 +564,9 @@ contract BathPair {
             msg.sender,
             block.timestamp
         );
+
+        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
+        rebalancePair();
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
@@ -573,7 +575,7 @@ contract BathPair {
         cancelPartialFills();
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool
-        rebalancePair();
+        // rebalancePair();
     }
 
     // This function allows a strategist to remove Pools liquidity from the order book
