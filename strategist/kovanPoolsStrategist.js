@@ -1,4 +1,5 @@
 const Web3 = require("web3");
+const noncemanager = require("./nonceManager/noncemanager.js");
 // var Contract = require('web3-eth-contract');
 var fs = require("fs");
 require("dotenv").config();
@@ -67,14 +68,43 @@ var key = process.env.OP_KOVAN_ADMIN_KEY;
 // TODO: make this work at scale
 // *** Nonce Manager ***
 // https://ethereum.stackexchange.com/questions/39790/concurrency-patterns-for-account-nonce
-let nonceOffset = 0;
-baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN, "pending");
+// let nonceOffset = 0;
+baseNonce = web3.eth.getTransactionCount(
+  process.env.OP_KOVAN_ADMIN //, "pending"
+);
+// async function getNonce() {
+//   return await baseNonce.then((nonce) => nonce + nonceOffset++);
+// }
+
+var nonceFunctionWeb3 = () => {
+  return new Promise(async (resolve, reject) => {
+    // console.log("asking web3 for current nonce..");
+    const updatedNonce =
+      (await web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN)) - 1;
+    setTimeout(resolve, 2000, updatedNonce);
+  });
+};
+
+// returns the next Nonce
 async function getNonce() {
-  return await baseNonce.then((nonce) => nonce + nonceOffset++);
+  return await noncemanager
+    .getInstance()
+    .getTransactionPermission()
+    .then(() => {
+      const next = noncemanager.getInstance().getNextNonce();
+      //   console.log("Next nonce", next);
+      return next;
+    });
+}
+
+async function initNonceManager() {
+  //   console.log("base", await baseNonce);
+  noncemanager.getInstance((await baseNonce) - 1, nonceFunctionWeb3);
 }
 
 async function sendTx(tx, msg, ticker) {
   tx.nonce = await getNonce();
+  console.log("got a new nonce", tx.nonce);
   tx.gasPrice = 15000000;
   tx.gasLimit = 13000000;
   tx.gas = 13000000;
@@ -277,8 +307,8 @@ async function checkForScrub(ticker) {
     .getOutstandingPairCount()
     .call()
     .then(async (r) => {
-      console.log("THIS MANY PAIRS for ", ticker, r);
-      if (r > 2) {
+      console.log("THIS MANY PAIRS for", ticker + ":", r);
+      if (r > -1) {
         // Scrub the bath
         var txData = await contract.methods.bathScrub().encodeABI();
         var tx = {
@@ -288,21 +318,26 @@ async function checkForScrub(ticker) {
           to: process.env["OP_KOVAN_3_BATH" + ticker + "USDC"],
           gasPrice: web3.utils.toWei("0.015", "Gwei"),
         };
-        await contract.methods
-          .bathScrub()
-          .estimateGas(tx, async function (r, d) {
-            if (d > 0) {
-              await sendTx(
-                tx,
-                "\n<* I have successfully scrubbed the " +
-                  ticker +
-                  " bath, Master *>\n",
-                ticker + " bath Scrub!"
-              );
-            } else {
-              throw ("gas estimation in bathScrub failed for", ticker);
-            }
-          });
+        try {
+          await contract.methods
+            .bathScrub()
+            .estimateGas(tx, async function (r, d) {
+                console.log("R!", r);
+              if (d > 0) {
+                await sendTx(
+                  tx,
+                  "\n<* I have successfully scrubbed the " +
+                    ticker +
+                    " bath, Master *>\n",
+                  ticker + " bath Scrub!"
+                );
+              } else {
+                throw ("gas estimation in bathScrub failed for", ticker);
+              }
+            }); //.catch((e) => {console.log("failed to estimate gas for " + ticker + "bathScrub")})
+        } catch (error) {
+          console.log("failed to estimate gas for " + ticker + "bathScrub");
+        }
       }
     });
 }
@@ -334,8 +369,8 @@ async function marketMake(a, b, t, im, spread, tM) {
     oldMidpoint[ticker] = midPoint;
     targetMidpoint[ticker] = midPoint;
   }
-  console.log("midPoint", midPoint);
-  console.log("target midPoint", tM);
+  //   console.log("midPoint", midPoint);
+  //   console.log("target midPoint", tM);
 
   await checkForScrub(t);
 
@@ -343,22 +378,24 @@ async function marketMake(a, b, t, im, spread, tM) {
   var newAskPrice = new BigNumber(parseFloat(midPoint * (1 + targetSpread)));
 
   // getMaxOrderSize from contract for bid and ask
-  const maxAskSize = new BigNumber(
-    await contract.methods
-      .getMaxOrderSize(
-        process.env["OP_KOVAN_3_" + (await ticker)],
-        process.env["OP_KOVAN_3_BATH" + (await ticker)]
-      )
-      .call()
-  );
-  const maxBidSize = new BigNumber(
-    await contract.methods
-      .getMaxOrderSize(
-        process.env.OP_KOVAN_3_USDC,
-        process.env.OP_KOVAN_3_BATHUSDC
-      )
-      .call()
-  );
+  //   const maxAskSize = new BigNumber(
+  //     await contract.methods
+  //       .getMaxOrderSize(
+  //         process.env["OP_KOVAN_3_" + (await ticker)],
+  //         process.env["OP_KOVAN_3_BATH" + (await ticker)]
+  //       )
+  //       .call()
+  //   );
+  //   const maxBidSize = new BigNumber(
+  //     await contract.methods
+  //       .getMaxOrderSize(
+  //         process.env.OP_KOVAN_3_USDC,
+  //         process.env.OP_KOVAN_3_BATHUSDC
+  //       )
+  //       .call()
+  //   );
+  const maxAskSize = new BigNumber(420);
+  const maxBidSize = new BigNumber(69);
 
   // in wei
   const askNum = maxAskSize.dividedBy(scaleBack);
@@ -472,7 +509,7 @@ async function startBot(token, spread, tM) {
     startBot(token, spread, tM);
 
     // Every 2.5 sec
-  }, 2500);
+  }, 3000);
 }
 
 console.log("\n<* Strategist Bot Begins its Service to Rubicon *>\n");
@@ -490,6 +527,13 @@ const assets = [
   "AAVE",
 ];
 
+initNonceManager().then(async () => {
+  //   startBot("RGT", 0.02, 5);
+       startBot("WBTC", 0.02, 5);        
+
+  //   console.log("got a nonce", await getNonce());
+});
+
 // // Start bots
 // for (let index = 0; index < assets.length; index++) {
 //     const element = assets[index];
@@ -499,5 +543,3 @@ const assets = [
 // }
 
 // startBot("WBTC", 0.02, 40000);
-startBot("RGT", 0.02, 5);
-
