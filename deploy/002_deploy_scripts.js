@@ -257,7 +257,7 @@ const func = async (hre) => {
   //   "OHM",
   //   "COMP",
   //   "AAVE"
-  // ];
+  // ]; 
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
   //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
