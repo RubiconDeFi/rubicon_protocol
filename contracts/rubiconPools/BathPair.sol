@@ -342,43 +342,45 @@ contract BathPair {
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
                 // If both filled fully
                 // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
-                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+                uint askId =  outstandingPairIDs[x][0];
+                uint bidId =  outstandingPairIDs[x][1];
+                order memory offer1 = getOfferInfo(askId);
+                order memory offer2 = getOfferInfo(bidId);
 
                 // If Yield:
                 // getOfferInfo will make no yield recognizable on an empty offer by assigning pay_amt = 420;
                 if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
                     //both non-zero
-                    logFill(outstandingPairIDs[x][0], true);
-                    logFill(outstandingPairIDs[x][1], false);
+                    logFill(askId, true);
+                    logFill(bidId, false);
                     BathToken(bathAssetAddress).removeFilledTrade(
-                        outstandingPairIDs[x][0]
+                        askId
                     );
                     BathToken(bathQuoteAddress).removeFilledTrade(
-                        outstandingPairIDs[x][1]
+                        bidId
                     );
                 } else if (offer1.pay_amt == 0) {
                     // ask is non-zerp
-                    logFill(outstandingPairIDs[x][0], true);
+                    logFill(askId, true);
                     BathToken(bathAssetAddress).removeFilledTrade(
-                        outstandingPairIDs[x][0]
+                        askId
                     );
                 } else if (offer1.pay_amt == 0) {
-                    logFill(outstandingPairIDs[x][1], false);
+                    logFill(bidId, false);
                     BathToken(bathQuoteAddress).removeFilledTrade(
-                        outstandingPairIDs[x][1]
+                        bidId
                     );
                 }
 
                 // If non-zero real order, cancel
                 if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
                     BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][0]
+                        askId
                     );
                 }
                 if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
                     BathToken(bathQuoteAddress).cancel(
-                        outstandingPairIDs[x][1]
+                        bidId
                     );
                 }
                 removeElement(x);
