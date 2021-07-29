@@ -6,18 +6,26 @@ const func = async (hre) => {
   const { deploy } = deployments;
   const { deployer, proxyAdmin } = await getNamedAccounts();
 
-  const targetProxyAddress = process.env.OP_KOVAN_2_BATHWBTCUSDC;
-  const newImp = process.env.OP_KOVAN_2_BATHWBTCUSDC_2_NOINIT;
+  const targetProxyAddress = process.env.OP_KOVAN_3_BATHWBTCUSDC;
+  const newImp = process.env.OP_KOVAN_3_BATHWBTCUSDC_NEWIMP;
+
 
   const proxyFactory = await hre.ethers.getContractFactory(
     "TransparentUpgradeableProxy"
   );
+  const bathPairFactory = await hre.ethers.getContractFactory(
+    "BathPair"
+  );
   const targetProxy = await proxyFactory.attach(targetProxyAddress);
+  // const bpProxy = await bathPairFactory.attach(targetProxyAddress);
+
   const signers = hre.ethers.getSigners();
 
   //   ** Perform actions **
-  //   await upgradeProxy(targetProxy, newImp, "WBTC");
-  // const current = await getCurrentImplementation(targetProxy, "WBTC");
+  // await upgradeProxy(targetProxy, newImp, "WBTC");
+  // await getCurrentImplementation(targetProxy, "WBTC");
+  // console.log(await current);
+
 
   async function upgradeProxy(contract, newImp, msg) {
     return contract
@@ -29,7 +37,7 @@ const func = async (hre) => {
           .upgradeTo(await newImp, { from: proxyAdmin, gasLimit: g._hex })
           .then(async (g) => {
             console.log(
-              "success changing implementation from ",
+              "success changing implementation on ",
               targetProxyAddress,
               " to * newIMP * for ",
               await msg
@@ -38,8 +46,14 @@ const func = async (hre) => {
       });
   }
 
+  // TODO: make this work
   async function getCurrentImplementation(contract, msg) {
-    return await contract.connect(signers[1]).implementation();
+    await contract
+      .connect(signers[1])
+      .implementation({ from: proxyAdmin })
+      .then((r) => {
+        console.log(r);
+      });
   }
   // return the address of the proxy that wraps `address`
   async function deployProxy(address, msg) {

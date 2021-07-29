@@ -54,6 +54,7 @@ contract USDCWithFaucet is LibNote, ERC20 {
     // --- Auth ---
     mapping(address => uint256) public wards;
     address public admin;
+    
     function rely(address guy) external auth {
         wards[guy] = 1;
     }

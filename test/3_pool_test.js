@@ -279,6 +279,11 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         from: accounts[5],
       });
     });
+    it("bathScrub can be called by anyone at any time", async function () {
+    //   logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
+      await bathPairInstance.bathScrub();
+    });
+
     it("Partial fill is correctly cancelled and replaced", async function () {
       await bathPairInstance.bathScrub();
 

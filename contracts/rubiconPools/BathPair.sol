@@ -319,12 +319,11 @@ contract BathPair {
     // isAssetFill are *quotes* that result in asset yield
     function logFill(uint256 orderID, bool isAssetFill) internal {
         // Goal is to map a fill to a strategist
-        address strategist = IDs2strategist[orderID];
         if (isAssetFill) {
-            strategist2FillsAsset[strategist] += 1;
+            strategist2FillsAsset[IDs2strategist[orderID]] += 1;
             totalAssetFills += 1;
         } else {
-            strategist2FillsQuote[strategist] += 1;
+            strategist2FillsQuote[IDs2strategist[orderID]] += 1;
             totalQuoteFills += 1;
         }
     }
@@ -338,51 +337,56 @@ contract BathPair {
 
     function cancelPartialFills() internal {
         uint256 timeDelay = BathHouse(bathHouse).timeDelay();
-        for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+        uint256 len = outstandingPairIDs.length;
+        for (uint256 x = 0; x < len; x++) {
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
-                // If both filled fully
-                // if (outstandingPairIDs[x][0] != 0 && outstandingPairIDs[x][1] != 0) {
-                order memory offer1 = getOfferInfo(outstandingPairIDs[x][0]);
-                order memory offer2 = getOfferInfo(outstandingPairIDs[x][1]);
+                uint256 askId = outstandingPairIDs[x][0];
+                uint256 bidId = outstandingPairIDs[x][1];
+                order memory offer1 = getOfferInfo(askId);
+                order memory offer2 = getOfferInfo(bidId);
 
                 // If Yield:
                 // getOfferInfo will make no yield recognizable on an empty offer by assigning pay_amt = 420;
-                if (offer1.pay_amt == 0 && offer2.pay_amt == 0) {
-                    //both non-zero
-                    logFill(outstandingPairIDs[x][0], true);
-                    logFill(outstandingPairIDs[x][1], false);
-                    BathToken(bathAssetAddress).removeFilledTrade(
-                        outstandingPairIDs[x][0]
-                    );
-                    BathToken(bathQuoteAddress).removeFilledTrade(
-                        outstandingPairIDs[x][1]
-                    );
-                } else if (offer1.pay_amt == 0) {
-                    // ask is non-zerp
-                    logFill(outstandingPairIDs[x][0], true);
-                    BathToken(bathAssetAddress).removeFilledTrade(
-                        outstandingPairIDs[x][0]
-                    );
-                } else if (offer1.pay_amt == 0) {
-                    logFill(outstandingPairIDs[x][1], false);
-                    BathToken(bathQuoteAddress).removeFilledTrade(
-                        outstandingPairIDs[x][1]
-                    );
-                }
+                if (offer1.pay_amt == 0 || offer2.pay_amt == 0) {
+                    //either is non zero
+                    //ask fills => check bid and handle
+                    if (offer1.pay_amt == 0) {
+                        logFill(askId, true);
+                        BathToken(bathAssetAddress).removeFilledTrade(askId);
 
-                // If non-zero real order, cancel
-                if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
-                    BathToken(bathAssetAddress).cancel(
-                        outstandingPairIDs[x][0]
-                    );
+                        // if other order is non-zero, cancel
+                        if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
+                            BathToken(bathQuoteAddress).cancel(bidId);
+                            removeElement(x);
+                            x--;
+                            len--;
+                            continue;
+                        }
+                    } else {
+                        logFill(bidId, false);
+                        BathToken(bathQuoteAddress).removeFilledTrade(bidId);
+
+                        // if other order is non-zero, cancel
+                        if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
+                            BathToken(bathAssetAddress).cancel(askId);
+                            removeElement(x);
+                            x--;
+                            len--;
+                            continue;
+                        }
+                    }
+                } else {
+                    // If non-zero real order, cancel
+                    if (offer1.pay_amt != 0 && offer1.pay_amt != 420) {
+                        BathToken(bathAssetAddress).cancel(askId);
+                    }
+                    if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
+                        BathToken(bathQuoteAddress).cancel(bidId);
+                    }
+                    removeElement(x);
+                    x--;
+                    len--;
                 }
-                if (offer2.pay_amt != 0 && offer2.pay_amt != 420) {
-                    BathToken(bathQuoteAddress).cancel(
-                        outstandingPairIDs[x][1]
-                    );
-                }
-                removeElement(x);
-                x--;
             }
         }
     }
@@ -563,15 +567,15 @@ contract BathPair {
             msg.sender,
             block.timestamp
         );
+
+        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
+        rebalancePair();
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
     function bathScrub() external {
         // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
-
-        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
-        rebalancePair();
     }
 
     // This function allows a strategist to remove Pools liquidity from the order book
