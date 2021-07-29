@@ -576,9 +576,6 @@ contract BathPair {
     function bathScrub() external {
         // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
-
-        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
-        // rebalancePair();
     }
 
     // This function allows a strategist to remove Pools liquidity from the order book
