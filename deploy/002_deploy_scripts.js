@@ -125,7 +125,17 @@ const func = async (hre) => {
   // }
 
   // // 4. Deploy BathPairs - init is failing!
-  // const assetsToDeploy = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "OHM", "COMP", "AAVE"];
+  // const assetsToDeploy = [
+  //   "WBTC",
+  //   "MKR",
+  //   "SNX",
+  //   "REP",
+  //   "RGT",
+  //   "ETH",
+  //   "OHM",
+  //   "COMP",
+  //   "AAVE",
+  // ];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
   //   const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
@@ -164,10 +174,11 @@ const func = async (hre) => {
   //         }
   //       );
   //     });
+  //     break;
   // }
 
   // **Make sure env is updated for the below if want to init after deploy seperately
-  // // 4b - IF NEEDED - Init each Bath Pair
+  // 4b - IF NEEDED - Init each Bath Pair
   // const assetsToDeploy = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "OHM", "COMP", "AAVE"];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
@@ -256,15 +267,32 @@ const func = async (hre) => {
   //   "ETH",
   //   "OHM",
   //   "COMP",
-  //   "AAVE"
-  // ]; 
+  //   "AAVE",
+  // ];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
   //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
   //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
-  //   // await bh.estimateGas.initBathPair(process.env['OP_KOVAN_3_'+asset], process.env.OP_KOVAN_3_USDC, process.env['OP_KOVAN_3_BATH'+asset+'USDC'], 1).then(async function(g) {
-  //             await bh.initBathPair(process.env['OP_KOVAN_3_'+asset], process.env.OP_KOVAN_3_USDC, process.env['OP_KOVAN_3_BATH'+asset+'USDC'], 1, {gasLimit: 9000000, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success on BH"));
-  //         // });
+  //   // await bh.estimateGas
+  //   //   .initBathPair(
+  //   //     process.env["OP_KOVAN_3_" + asset],
+  //   //     process.env.OP_KOVAN_3_USDC,
+  //   //     process.env["OP_KOVAN_3_BATH" + asset + "USDC"],
+  //   //     1
+  //   //   )
+  //   //   .then(async function (g) {
+  //       await bh
+  //         .initBathPair(
+  //           process.env["OP_KOVAN_3_" + asset],
+  //           process.env.OP_KOVAN_3_USDC,
+  //           process.env["OP_KOVAN_3_BATH" + asset + "USDC"],
+  //           1,
+  //           { gasLimit: 9000000, nonce: getNonce() }
+  //         )
+  //         .then((r) =>
+  //           console.log("init of bath" + asset + "-USDC success on BH", r)
+  //         );
+  //     // });
   // }
 
   // // 7. Approve Strategist
@@ -330,16 +358,16 @@ const func = async (hre) => {
 
   // }
 
-  //   // remove BathPairs on BathHouse
-  //   for (let index = 0; index < assetsToDeploy.length; index++) {
-  //   const asset = assetsToDeploy[index];
-  //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
-  //   await bh.estimateGas.removePair(process.env['OP_KOVAN_3_BATH'+asset+'USDC']).then(async function(g) {
-  //             await bh.removePair(process.env['OP_KOVAN_3_BATH'+asset+'USDC'], {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("remove of bath" + asset+ "-USDC success on BH"));
-  //         });
+  // remove BathPairs on BathHouse
+  // for (let index = 0; index < assetsToDeploy.length; index++) {
+  // const asset = assetsToDeploy[index];
+  // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
+  // await bh.estimateGas.removePair(process.env['OP_KOVAN_3_BATH'+asset+'USDC']).then(async function(g) {
+  //           await bh.removePair(process.env['OP_KOVAN_3_BATH'+asset+'USDC'], {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("remove of bath" + asset+ "-USDC success on BH"));
+  //       });
 
-  // }
+  //  }
 
   // // // Deploy BathToken for USDC
   //    const bathTokenFactoryUSDC = await hre.ethers.getContractFactory('BathToken');

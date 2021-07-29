@@ -306,7 +306,7 @@ async function checkForScrub(ticker) {
     .getOutstandingPairCount()
     .call()
     .then(async (r) => {
-    //   console.log("THIS MANY PAIRS for", ticker + ":", r);
+      //   console.log("THIS MANY PAIRS for", ticker + ":", r);
       if (r > -1) {
         // Scrub the bath
         var txData = await contract.methods.bathScrub().encodeABI();
@@ -321,7 +321,12 @@ async function checkForScrub(ticker) {
           await contract.methods
             .bathScrub()
             .estimateGas(tx, async function (r, d) {
-                console.log("R!", r);
+              if (r != null) {
+                console.log(
+                  "Got a problem estimating bathScrub for " + ticker,
+                  r
+                );
+              }
               if (d > 0) {
                 await sendTx(
                   tx,
@@ -360,7 +365,7 @@ async function marketMake(a, b, t, im, spread, tM) {
     return;
   } else if (midPoint == 0 || isNaN(midPoint)) {
     if (targetMidpoint[ticker] == undefined) {
-    //   console.log("new target", tM);
+      //   console.log("new target", tM);
       targetMidpoint[ticker] = tM;
     }
     midPoint = targetMidpoint[ticker];
@@ -527,11 +532,11 @@ const assets = [
 ];
 
 initNonceManager().then(async () => {
-    startBot("RGT", 0.02, 5);
-    startBot("MKR", 0.02, 5);
-    // await startBot("REP", 0.02, 5);
+  // startBot("RGT", 0.02, 5);
+  // startBot("MKR", 0.02, 5);
+  // await startBot("REP", 0.02, 5);
 
-    //    startBot("WBTC", 0.02, 5);        
+  startBot("WBTC", 0.02, 5);
 
   //   console.log("got a nonce", await getNonce());
 });
