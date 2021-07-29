@@ -280,42 +280,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       });
     });
     it("bathScrub can be called by anyone at any time", async function () {
-        // await bathPairInstance.executeStrategy(
-        //     strategyInstance.address,
-        //     askNumerator,
-        //     askDenominator,
-        //     bidNumerator,
-        //     bidDenominator
-        //   );
-        //   await bathPairInstance.executeStrategy(
-        //     strategyInstance.address,
-        //     askNumerator,
-        //     askDenominator,
-        //     bidNumerator,
-        //     bidDenominator
-        //   );
-        //   await bathPairInstance.executeStrategy(
-        //     strategyInstance.address,
-        //     askNumerator,
-        //     askDenominator,
-        //     bidNumerator,
-        //     bidDenominator
-        //   );
-        //   await bathPairInstance.executeStrategy(
-        //     strategyInstance.address,
-        //     askNumerator,
-        //     askDenominator,
-        //     bidNumerator,
-        //     bidDenominator
-        //   );
-        //   await bathPairInstance.executeStrategy(
-        //     strategyInstance.address,
-        //     askNumerator,
-        //     askDenominator,
-        //     bidNumerator,
-        //     bidDenominator
-        //   );
-      logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
+    //   logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
       await bathPairInstance.bathScrub();
     });
     it("Partial fill is correctly cancelled and replaced", async function () {
