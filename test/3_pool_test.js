@@ -283,6 +283,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     //   logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
       await bathPairInstance.bathScrub();
     });
+
     it("Partial fill is correctly cancelled and replaced", async function () {
       await bathPairInstance.bathScrub();
 

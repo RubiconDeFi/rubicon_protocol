@@ -9,6 +9,7 @@ const func = async (hre) => {
   const targetProxyAddress = process.env.OP_KOVAN_3_BATHWBTCUSDC;
   const newImp = process.env.OP_KOVAN_3_BATHWBTCUSDC_NEWIMP;
 
+
   const proxyFactory = await hre.ethers.getContractFactory(
     "TransparentUpgradeableProxy"
   );
@@ -24,6 +25,7 @@ const func = async (hre) => {
   // await upgradeProxy(targetProxy, newImp, "WBTC");
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
+
 
   async function upgradeProxy(contract, newImp, msg) {
     return contract

@@ -136,6 +136,7 @@ const func = async (hre) => {
   //   "COMP",
   //   "AAVE",
   // ];
+
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
   //   const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
@@ -178,7 +179,7 @@ const func = async (hre) => {
   // }
 
   // **Make sure env is updated for the below if want to init after deploy seperately
-  // 4b - IF NEEDED - Init each Bath Pair
+  // // 4b - IF NEEDED - Init each Bath Pair
   // const assetsToDeploy = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "OHM", "COMP", "AAVE"];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
@@ -267,7 +268,7 @@ const func = async (hre) => {
   //   "ETH",
   //   "OHM",
   //   "COMP",
-  //   "AAVE",
+  //   "AAVE"
   // ];
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const asset = assetsToDeploy[index];
@@ -293,6 +294,7 @@ const func = async (hre) => {
   //           console.log("init of bath" + asset + "-USDC success on BH", r)
   //         );
   //     // });
+
   // }
 
   // // 7. Approve Strategist
@@ -368,6 +370,7 @@ const func = async (hre) => {
   //       });
 
   //  }
+
 
   // // // Deploy BathToken for USDC
   //    const bathTokenFactoryUSDC = await hre.ethers.getContractFactory('BathToken');

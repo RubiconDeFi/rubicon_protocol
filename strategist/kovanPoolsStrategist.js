@@ -1,5 +1,6 @@
 const Web3 = require("web3");
 const noncemanager = require("./nonceManager/noncemanager.js");
+
 // var Contract = require('web3-eth-contract');
 var fs = require("fs");
 require("dotenv").config();
@@ -104,6 +105,7 @@ async function initNonceManager() {
 
 async function sendTx(tx, msg, ticker) {
   tx.nonce = getNonce();
+
   tx.gasPrice = 15000000;
   tx.gasLimit = 13000000;
   tx.gas = 13000000;
@@ -308,6 +310,7 @@ async function checkForScrub(ticker) {
     .then(async (r) => {
       //   console.log("THIS MANY PAIRS for", ticker + ":", r);
       if (r > -1) {
+
         // Scrub the bath
         var txData = await contract.methods.bathScrub().encodeABI();
         var tx = {
@@ -342,6 +345,7 @@ async function checkForScrub(ticker) {
         } catch (error) {
           console.log("failed to estimate gas for " + ticker + "bathScrub");
         }
+
       }
     });
 }
@@ -349,6 +353,7 @@ async function checkForScrub(ticker) {
 let oldMidpoint = [];
 let targetMidpoint = [];
 async function marketMake(a, b, t, im, spread, tM) {
+
   const ticker = await t;
   const contract = await getContractFromToken(await ticker, "BathPair");
   // ***Market Maker Inputs***
@@ -357,7 +362,6 @@ async function marketMake(a, b, t, im, spread, tM) {
   // *************************
   // Check if midpoint is unchanged before market making
   var midPoint = ((await a) + (await b)) / 2;
-
   if (midPoint == oldMidpoint[ticker]) {
     console.log(
       "\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n"
@@ -375,6 +379,7 @@ async function marketMake(a, b, t, im, spread, tM) {
   }
   //   console.log("midPoint", midPoint);
   //   console.log("target midPoint", tM);
+
 
   await checkForScrub(t);
 
@@ -401,6 +406,7 @@ async function marketMake(a, b, t, im, spread, tM) {
   const maxAskSize = new BigNumber(420);
   const maxBidSize = new BigNumber(69);
 
+
   // in wei
   const askNum = maxAskSize.dividedBy(scaleBack);
   const askDen = askNum.multipliedBy(newAskPrice);
@@ -409,6 +415,7 @@ async function marketMake(a, b, t, im, spread, tM) {
   const bidDen = bidNum.dividedBy(newBidPrice);
 
   //   await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
+
 
   var txData = contract.methods
     .executeStrategy(
@@ -445,6 +452,7 @@ async function marketMake(a, b, t, im, spread, tM) {
   //   // if error, we want to change the midpoint so we try again
   //   oldMidpoint[ticker] = 0;
   // }
+
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -489,6 +497,7 @@ async function startBot(token, spread, tM) {
   setTimeout(async function () {
     // Returns best bid and ask price
     stoikov(token).then(async function (data) {
+
       var currentAsk = data[0];
       var currentBid = data[1];
 
@@ -503,6 +512,7 @@ async function startBot(token, spread, tM) {
         await IMfactor,
         await spread,
         await tM
+
       );
     });
     console.log(
@@ -514,6 +524,7 @@ async function startBot(token, spread, tM) {
 
     // Every 2.5 sec
   }, 3000);
+
 }
 
 console.log("\n<* Strategist Bot Begins its Service to Rubicon *>\n");
@@ -531,12 +542,13 @@ const assets = [
   "AAVE",
 ];
 
+
 initNonceManager().then(async () => {
   // startBot("RGT", 0.02, 5);
   // startBot("MKR", 0.02, 5);
   // await startBot("REP", 0.02, 5);
 
-  startBot("WBTC", 0.02, 5);
+  // startBot("WBTC", 0.02, 5);
 
   //   console.log("got a nonce", await getNonce());
 });
@@ -550,3 +562,4 @@ initNonceManager().then(async () => {
 // }
 
 // startBot("WBTC", 0.02, 40000);
+
