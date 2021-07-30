@@ -105,7 +105,6 @@ async function initNonceManager() {
 
 async function sendTx(tx, msg, ticker) {
   tx.nonce = getNonce();
-
   tx.gasPrice = 15000000;
   tx.gasLimit = 13000000;
   tx.gas = 13000000;
@@ -310,7 +309,6 @@ async function checkForScrub(ticker) {
     .then(async (r) => {
       //   console.log("THIS MANY PAIRS for", ticker + ":", r);
       if (r > -1) {
-
         // Scrub the bath
         var txData = await contract.methods.bathScrub().encodeABI();
         var tx = {
@@ -345,15 +343,14 @@ async function checkForScrub(ticker) {
         } catch (error) {
           console.log("failed to estimate gas for " + ticker + "bathScrub");
         }
-
       }
     });
 }
 
 let oldMidpoint = [];
 let targetMidpoint = [];
+let midPoint =[];
 async function marketMake(a, b, t, im, spread, tM) {
-
   const ticker = await t;
   const contract = await getContractFromToken(await ticker, "BathPair");
   // ***Market Maker Inputs***
@@ -361,51 +358,48 @@ async function marketMake(a, b, t, im, spread, tM) {
   const scaleBack = new BigNumber(10); // used to scale back maxOrderSize
   // *************************
   // Check if midpoint is unchanged before market making
-  var midPoint = ((await a) + (await b)) / 2;
-  if (midPoint == oldMidpoint[ticker]) {
+  midPoint[ticker] = ((await a) + (await b)) / 2;
+
+  if (midPoint[ticker] == oldMidpoint[ticker]) {
     console.log(
       "\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n"
     );
     return;
-  } else if (midPoint == 0 || isNaN(midPoint)) {
+  } else if (midPoint[ticker] == 0 || isNaN(midPoint[ticker])) {
     if (targetMidpoint[ticker] == undefined) {
       //   console.log("new target", tM);
       targetMidpoint[ticker] = tM;
     }
-    midPoint = targetMidpoint[ticker];
+    midPoint[ticker] = targetMidpoint[ticker];
   } else {
-    oldMidpoint[ticker] = midPoint;
-    targetMidpoint[ticker] = midPoint;
+    oldMidpoint[ticker] = midPoint[ticker];
+    targetMidpoint[ticker] = midPoint[ticker];
   }
   //   console.log("midPoint", midPoint);
   //   console.log("target midPoint", tM);
 
-
   await checkForScrub(t);
 
-  var newBidPrice = new BigNumber(parseFloat(midPoint * (1 - targetSpread)));
-  var newAskPrice = new BigNumber(parseFloat(midPoint * (1 + targetSpread)));
+  var newBidPrice = new BigNumber(parseFloat(midPoint[ticker] * (1 - targetSpread)));
+  var newAskPrice = new BigNumber(parseFloat(midPoint[ticker] * (1 + targetSpread)));
 
-  // getMaxOrderSize from contract for bid and ask
-  //   const maxAskSize = new BigNumber(
-  //     await contract.methods
-  //       .getMaxOrderSize(
-  //         process.env["OP_KOVAN_3_" + (await ticker)],
-  //         process.env["OP_KOVAN_3_BATH" + (await ticker)]
-  //       )
-  //       .call()
-  //   );
-  //   const maxBidSize = new BigNumber(
-  //     await contract.methods
-  //       .getMaxOrderSize(
-  //         process.env.OP_KOVAN_3_USDC,
-  //         process.env.OP_KOVAN_3_BATHUSDC
-  //       )
-  //       .call()
-  //   );
-  const maxAskSize = new BigNumber(420);
-  const maxBidSize = new BigNumber(69);
-
+  //   getMaxOrderSize from contract for bid and ask
+  const maxAskSize = new BigNumber(
+    await contract.methods
+      .getMaxOrderSize(
+        process.env["OP_KOVAN_3_" + (await ticker)],
+        process.env["OP_KOVAN_3_BATH" + (await ticker)]
+      )
+      .call()
+  );
+  const maxBidSize = new BigNumber(
+    await contract.methods
+      .getMaxOrderSize(
+        process.env.OP_KOVAN_3_USDC,
+        process.env.OP_KOVAN_3_BATHUSDC
+      )
+      .call()
+  );
 
   // in wei
   const askNum = maxAskSize.dividedBy(scaleBack);
@@ -415,7 +409,6 @@ async function marketMake(a, b, t, im, spread, tM) {
   const bidDen = bidNum.dividedBy(newBidPrice);
 
   //   await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
-
 
   var txData = contract.methods
     .executeStrategy(
@@ -433,26 +426,31 @@ async function marketMake(a, b, t, im, spread, tM) {
     to: process.env["OP_KOVAN_3_BATH" + (await ticker) + "USDC"],
     gasPrice: web3.utils.toWei("0", "Gwei"),
   };
-  //   console.log('New ' + ticker + ' trades placed at [bid]: ' + newBidPrice.toString() + '$ and [ask]: ' + newAskPrice.toString()+'$' + '\n');
-  // let result = await sendTx(
-  //   tx,
-  //   "New " +
-  //     (await ticker) +
-  //     " trades placed at [bid]: " +
-  //     newBidPrice.toString() +
-  //     "$ and [ask]: " +
-  //     newAskPrice.toString() +
-  //     "$" +
-  //     "\n",
-  //   ticker
-  // );
-  // if (result == true) {
-  //   return;
-  // } else {
-  //   // if error, we want to change the midpoint so we try again
-  //   oldMidpoint[ticker] = 0;
-  // }
+  //   console.log(
+  //     "New " +
+  //       ticker +
+  //       " trades placed at [bid]: " +
+  //       newBidPrice.toString() +
+  //       "$ and [ask]: " +
+  //       newAskPrice.toString() +
+  //       "$" +
+  //       "\n"
+  //   );
+  // let result = true;
+  let result = await sendTx(
+    tx,
+    "New " +
+      (await ticker) +
+      " trades placed at [bid]: " +
+      newBidPrice.toString() +
+      "$ and [ask]: " +
+      newAskPrice.toString() +
+      "$" +
+      "\n",
+    ticker
+  );
 
+  oldMidpoint[ticker] = midPoint[ticker];
 }
 
 // This function should return a positive or negative number reflecting the balance.
@@ -497,7 +495,6 @@ async function startBot(token, spread, tM) {
   setTimeout(async function () {
     // Returns best bid and ask price
     stoikov(token).then(async function (data) {
-
       var currentAsk = data[0];
       var currentBid = data[1];
 
@@ -512,7 +509,6 @@ async function startBot(token, spread, tM) {
         await IMfactor,
         await spread,
         await tM
-
       );
     });
     console.log(
@@ -524,7 +520,6 @@ async function startBot(token, spread, tM) {
 
     // Every 2.5 sec
   }, 3000);
-
 }
 
 console.log("\n<* Strategist Bot Begins its Service to Rubicon *>\n");
@@ -542,13 +537,11 @@ const assets = [
   "AAVE",
 ];
 
-
 initNonceManager().then(async () => {
-  // startBot("RGT", 0.02, 5);
-  // startBot("MKR", 0.02, 5);
+  startBot("AAVE", 0.02, 50);
+  startBot("MKR", 0.02, 357);
   // await startBot("REP", 0.02, 5);
-
-  // startBot("WBTC", 0.02, 5);
+  //   startBot("WBTC", 0.02, 40290);
 
   //   console.log("got a nonce", await getNonce());
 });
@@ -562,4 +555,3 @@ initNonceManager().then(async () => {
 // }
 
 // startBot("WBTC", 0.02, 40000);
-
