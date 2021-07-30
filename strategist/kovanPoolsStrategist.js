@@ -106,8 +106,8 @@ async function initNonceManager() {
 async function sendTx(tx, msg, ticker) {
   tx.nonce = getNonce();
   tx.gasPrice = 15000000;
-  tx.gasLimit = 13000000;
-  tx.gas = 13000000;
+  tx.gasLimit = 9530000;
+  tx.gas = 9530000;
   // console.log('outgoing transaction: ', tx);
   return web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
     web3.eth
@@ -361,9 +361,9 @@ async function marketMake(a, b, t, im, spread, tM) {
   midPoint[ticker] = ((await a) + (await b)) / 2;
 
   if (midPoint[ticker] == oldMidpoint[ticker]) {
-    console.log(
-      "\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n"
-    );
+    // console.log(
+    //   "\n<* Midpoint is Unchanged, Therefore I Continue My Watch*>\n"
+    // );
     return;
   } else if (midPoint[ticker] == 0 || isNaN(midPoint[ticker])) {
     if (targetMidpoint[ticker] == undefined) {
@@ -538,8 +538,8 @@ const assets = [
 ];
 
 initNonceManager().then(async () => {
-  startBot("AAVE", 0.02, 50);
-  startBot("MKR", 0.02, 357);
+  // startBot("RGT", 0.02, 5);
+  startBot("WBTC", 0.02, 357);
   // await startBot("REP", 0.02, 5);
   //   startBot("WBTC", 0.02, 40290);
 
