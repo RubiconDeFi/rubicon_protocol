@@ -103,11 +103,12 @@ async function initNonceManager() {
   noncemanager.getInstance((await baseNonce) - 1, nonceFunctionWeb3);
 }
 
+
 async function sendTx(tx, msg, ticker) {
   tx.nonce = getNonce();
   tx.gasPrice = 15000000;
-  tx.gasLimit = 9530000;
-  tx.gas = 9530000;
+  tx.gasLimit = 9000000;
+    // tx.gas = 945432;
   // console.log('outgoing transaction: ', tx);
   return web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
     web3.eth
@@ -319,16 +320,16 @@ async function checkForScrub(ticker) {
           gasPrice: web3.utils.toWei("0.015", "Gwei"),
         };
         try {
-          await contract.methods
-            .bathScrub()
-            .estimateGas(tx, async function (r, d) {
-              if (r != null) {
-                console.log(
-                  "Got a problem estimating bathScrub for " + ticker,
-                  r
-                );
-              }
-              if (d > 0) {
+        //   await contract.methods
+        //     .bathScrub()
+        //     .estimateGas(tx, async function (r, d) {
+        //       if (r != null) {
+        //         console.log(
+        //           "Got a problem estimating bathScrub for " + ticker,
+        //           r
+        //         );
+        //       }
+        //       if (d > 0) {
                 await sendTx(
                   tx,
                   "\n<* I have successfully scrubbed the " +
@@ -336,10 +337,10 @@ async function checkForScrub(ticker) {
                     " bath, Master *>\n",
                   ticker + " bath Scrub!"
                 );
-              } else {
-                throw ("gas estimation in bathScrub failed for", ticker);
-              }
-            }); //.catch((e) => {console.log("failed to estimate gas for " + ticker + "bathScrub")})
+            //   } else {
+            //     throw ("gas estimation in bathScrub failed for", ticker);
+            //   }
+            // }); //.catch((e) => {console.log("failed to estimate gas for " + ticker + "bathScrub")})
         } catch (error) {
           console.log("failed to estimate gas for " + ticker + "bathScrub");
         }
@@ -539,7 +540,7 @@ const assets = [
 
 initNonceManager().then(async () => {
   // startBot("RGT", 0.02, 5);
-  startBot("WBTC", 0.02, 357);
+//   startBot("WBTC", 0.02, 357);
   // await startBot("REP", 0.02, 5);
   //   startBot("WBTC", 0.02, 40290);
 
