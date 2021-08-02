@@ -40,7 +40,7 @@ contract BathPair {
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
-    event LogNote(string,uint, uint);
+    event LogNote(string, uint256, uint256);
     event LogStrategistTrades(
         uint256 idAsk,
         address askAsset,
@@ -342,27 +342,19 @@ contract BathPair {
         uint256 timeDelay = BathHouse(bathHouse).timeDelay();
         uint256 len = outstandingPairIDs.length;
         uint256 _start = start;
+
         uint256 searchRadius = 4;
-        // start = 0 - storage;
-        // for (x + start  < x + start + searchRadius) {
-        //  loops 5 times...
-        // }
-        // if (start + searchRadius > len) {
-        // start over from beggining
-        // start = 0;
-        // } else {
-        // start = start + searchRadius;
-        // }
         if (_start + searchRadius >= len) {
             // start over from beggining
-            _start = 0;
             if (searchRadius >= len) {
+                _start = 0;
                 searchRadius = len;
+            } else {
+                searchRadius = len - _start;
             }
         }
 
         for (uint256 x = _start; x < _start + searchRadius; x++) {
-            emit LogNote("Range:",_start,_start + searchRadius);
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
                 uint256 askId = outstandingPairIDs[x][0];
                 uint256 bidId = outstandingPairIDs[x][1];
@@ -412,11 +404,16 @@ contract BathPair {
                     removeElement(x);
                     x--;
                     // len--;
-                    searchRadius--;        
+                    searchRadius--;
                 }
 
-                start = _start + searchRadius;
+                /// @dev the below hardcoded int should equal searchRaduis
             }
+        }
+        if (_start + 4 >= len) {
+            start = 0;
+        } else {
+            start = _start + 4;
         }
     }
 
