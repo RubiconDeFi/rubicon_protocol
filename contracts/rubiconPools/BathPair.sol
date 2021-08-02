@@ -32,12 +32,15 @@ contract BathPair {
 
     int128 internal shapeCoefNum;
     uint256 public maxOrderSizeBPS;
+
+    /// @dev Internal variables for localalized searching in bathScrub
     uint256 internal start;
+    uint256 internal searchRadius;
 
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
 
-    // askID, bidID, timestamp
+    /// @dev askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
     event LogNote(string, uint256, uint256);
@@ -50,7 +53,7 @@ contract BathPair {
         uint256 timestamp
     );
 
-    // Maps a trade ID to each of their strategists for rewards purposes
+    /// @dev Maps a trade ID to each of their strategists for rewards purposes
     mapping(uint256 => address) public IDs2strategist;
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
@@ -96,6 +99,7 @@ contract BathPair {
         maxOrderSizeBPS = _maxOrderSizeBPS;
         shapeCoefNum = _shapeCoefNum;
         start = 0;
+        searchRadius = 4;
         initialized = true;
     }
 
@@ -162,6 +166,10 @@ contract BathPair {
 
     function setShapeCoefNum(int128 val) external onlyBathHouse {
         shapeCoefNum = val;
+    }
+
+    function setSearchRadius(uint val) external onlyBathHouse {
+        searchRadius = val;
     }
 
     function getMidpointPrice() internal view returns (int128) {
@@ -343,18 +351,18 @@ contract BathPair {
         uint256 len = outstandingPairIDs.length;
         uint256 _start = start;
 
-        uint256 searchRadius = 4;
-        if (_start + searchRadius >= len) {
+        uint256 _searchRadius = searchRadius;
+        if (_start + _searchRadius >= len) {
             // start over from beggining
-            if (searchRadius >= len) {
+            if (_searchRadius >= len) {
                 _start = 0;
-                searchRadius = len;
+                _searchRadius = len;
             } else {
-                searchRadius = len - _start;
+                _searchRadius = len - _start;
             }
         }
 
-        for (uint256 x = _start; x < _start + searchRadius; x++) {
+        for (uint256 x = _start; x < _start + _searchRadius; x++) {
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
                 uint256 askId = outstandingPairIDs[x][0];
                 uint256 bidId = outstandingPairIDs[x][1];
@@ -376,7 +384,7 @@ contract BathPair {
                             removeElement(x);
                             x--;
                             // len--;
-                            searchRadius--;
+                            _searchRadius--;
                             continue;
                         }
                     } else {
@@ -389,7 +397,7 @@ contract BathPair {
                             removeElement(x);
                             x--;
                             // len--;
-                            searchRadius--;
+                            _searchRadius--;
                             continue;
                         }
                     }
@@ -404,20 +412,16 @@ contract BathPair {
                     removeElement(x);
                     x--;
                     // len--;
-                    searchRadius--;
+                    _searchRadius--;
                 }
-
-                /// @dev the below hardcoded int should equal searchRaduis
             }
         }
-        if (_start + 4 >= len) {
+        if (_start + searchRadius >= len) {
             start = 0;
         } else {
-            start = _start + 4;
+            start = _start + searchRadius;
         }
     }
-
-    //   cancel both
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
@@ -438,6 +442,10 @@ contract BathPair {
 
     function getOutstandingPairCount() external view returns (uint256) {
         return outstandingPairIDs.length;
+    }
+        
+    function getSearchRadius() external view returns (uint256) {
+        return searchRadius;
     }
 
     // this throws on a zero value ofliquidity
