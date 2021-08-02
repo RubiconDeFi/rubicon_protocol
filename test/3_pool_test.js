@@ -6,6 +6,8 @@ const DAI = artifacts.require("USDCWithFaucet");
 const WETH = artifacts.require("WETH9");
 const BidAskUtil = artifacts.require("BidAskUtil");
 
+const helper = require("./testHelpers/timeHelper.js");
+
 function logIndented(...args) {
   console.log("       ", ...args);
 }
@@ -36,7 +38,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         rubiconMarketInstance.address,
         80,
         10,
-        10
+        20
       );
     });
     it("Bath Token for asset is deployed and initialized", async function () {
@@ -280,8 +282,24 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       });
     });
     it("bathScrub can be called by anyone at any time", async function () {
-    //   logIndented("cost of bathScrub", await bathPairInstance.bathScrub.estimateGas());
+      let target = 6;
+      for (let index = 0; index < target; index++) {
+        await bathPairInstance.executeStrategy(
+          strategyInstance.address,
+          askNumerator,
+          askDenominator,
+          bidNumerator,
+          bidDenominator
+        );
+      }
+      // helper.advanceTimeAndBlock(20);
+      // logIndented("cost of bathScrub:", await bathPairInstance.bathScrub.estimateGas());
       await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      // Idea here is that the start of the local search rolls over after indexs 4-6 are checked in seconds call
+      // assert.equal(await bathPairInstance.start().toString(), "0");
     });
 
     it("Partial fill is correctly cancelled and replaced", async function () {
