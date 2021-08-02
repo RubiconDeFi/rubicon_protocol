@@ -32,6 +32,7 @@ contract BathPair {
 
     int128 internal shapeCoefNum;
     uint256 public maxOrderSizeBPS;
+    uint256 internal start;
 
     uint256 internal totalAssetFills;
     uint256 internal totalQuoteFills;
@@ -39,6 +40,7 @@ contract BathPair {
     // askID, bidID, timestamp
     uint256[3][] public outstandingPairIDs;
 
+    event LogNote(string,uint, uint);
     event LogStrategistTrades(
         uint256 idAsk,
         address askAsset,
@@ -93,6 +95,7 @@ contract BathPair {
 
         maxOrderSizeBPS = _maxOrderSizeBPS;
         shapeCoefNum = _shapeCoefNum;
+        start = 0;
         initialized = true;
     }
 
@@ -338,7 +341,28 @@ contract BathPair {
     function cancelPartialFills() internal {
         uint256 timeDelay = BathHouse(bathHouse).timeDelay();
         uint256 len = outstandingPairIDs.length;
-        for (uint256 x = 0; x < len; x++) {
+        uint256 _start = start;
+        uint256 searchRadius = 4;
+        // start = 0 - storage;
+        // for (x + start  < x + start + searchRadius) {
+        //  loops 5 times...
+        // }
+        // if (start + searchRadius > len) {
+        // start over from beggining
+        // start = 0;
+        // } else {
+        // start = start + searchRadius;
+        // }
+        if (_start + searchRadius >= len) {
+            // start over from beggining
+            _start = 0;
+            if (searchRadius >= len) {
+                searchRadius = len;
+            }
+        }
+
+        for (uint256 x = _start; x < _start + searchRadius; x++) {
+            emit LogNote("Range:",_start,_start + searchRadius);
             if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
                 uint256 askId = outstandingPairIDs[x][0];
                 uint256 bidId = outstandingPairIDs[x][1];
@@ -359,7 +383,8 @@ contract BathPair {
                             BathToken(bathQuoteAddress).cancel(bidId);
                             removeElement(x);
                             x--;
-                            len--;
+                            // len--;
+                            searchRadius--;
                             continue;
                         }
                     } else {
@@ -371,7 +396,8 @@ contract BathPair {
                             BathToken(bathAssetAddress).cancel(askId);
                             removeElement(x);
                             x--;
-                            len--;
+                            // len--;
+                            searchRadius--;
                             continue;
                         }
                     }
@@ -385,8 +411,11 @@ contract BathPair {
                     }
                     removeElement(x);
                     x--;
-                    len--;
+                    // len--;
+                    searchRadius--;        
                 }
+
+                start = _start + searchRadius;
             }
         }
     }
