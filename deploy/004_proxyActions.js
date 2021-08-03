@@ -6,8 +6,8 @@ const func = async (hre) => {
   const { deploy } = deployments;
   const { deployer, proxyAdmin } = await getNamedAccounts();
 
-  const targetProxyAddress = process.env.OP_KOVAN_3_BATHWBTCUSDC;
-  const newImp = process.env.OP_KOVAN_3_BATHWBTCUSDC_NEWIMP;
+  const targetProxyAddress = process.env.OP_KOVAN_3_BATHHOUSE;
+  const newImp = process.env.OP_KOVAN_3_BATHHOUSE_NEWIMP;
 
 
   const proxyFactory = await hre.ethers.getContractFactory(
@@ -21,8 +21,8 @@ const func = async (hre) => {
 
   const signers = hre.ethers.getSigners();
 
-  //   ** Perform actions **
-  // await upgradeProxy(targetProxy, newImp, "WBTC");
+  //   ***** Perform actions *****
+  await upgradeProxy(targetProxy, newImp, "BathHouse");
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
 

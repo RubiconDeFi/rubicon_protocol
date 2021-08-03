@@ -107,8 +107,8 @@ async function initNonceManager() {
 async function sendTx(tx, msg, ticker) {
   tx.nonce = getNonce();
   tx.gasPrice = 15000000;
-  tx.gasLimit = 9000000;
-    // tx.gas = 945432;
+  // tx.gasLimit = 874432;
+    tx.gas = 700000;
   // console.log('outgoing transaction: ', tx);
   return web3.eth.accounts.signTransaction(tx, key).then((signedTx) => {
     web3.eth
@@ -438,18 +438,18 @@ async function marketMake(a, b, t, im, spread, tM) {
   //       "\n"
   //   );
   // let result = true;
-  let result = await sendTx(
-    tx,
-    "New " +
-      (await ticker) +
-      " trades placed at [bid]: " +
-      newBidPrice.toString() +
-      "$ and [ask]: " +
-      newAskPrice.toString() +
-      "$" +
-      "\n",
-    ticker
-  );
+  // let result = await sendTx(
+  //   tx,
+  //   "New " +
+  //     (await ticker) +
+  //     " trades placed at [bid]: " +
+  //     newBidPrice.toString() +
+  //     "$ and [ask]: " +
+  //     newAskPrice.toString() +
+  //     "$" +
+  //     "\n",
+  //   ticker
+  // );
 
   oldMidpoint[ticker] = midPoint[ticker];
 }
@@ -540,7 +540,7 @@ const assets = [
 
 initNonceManager().then(async () => {
   // startBot("RGT", 0.02, 5);
-//   startBot("WBTC", 0.02, 357);
+  startBot("SNX", 0.02, 357);
   // await startBot("REP", 0.02, 5);
   //   startBot("WBTC", 0.02, 40290);
 

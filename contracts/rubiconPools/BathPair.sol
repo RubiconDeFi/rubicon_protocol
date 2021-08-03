@@ -99,7 +99,7 @@ contract BathPair {
         maxOrderSizeBPS = _maxOrderSizeBPS;
         shapeCoefNum = _shapeCoefNum;
         start = 0;
-        searchRadius = 4;
+        searchRadius = 3;
         initialized = true;
     }
 
