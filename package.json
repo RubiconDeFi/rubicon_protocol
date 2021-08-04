@@ -44,6 +44,7 @@
     "test": "truffle test",
     "clean": "npx prettier --write 'contracts/**/*.sol'",
     "poolsBot": "node ./strategist/kovanPoolsStrategist.js",
-    "validate": "node ./scripts/validateMigrations.js"
+    "validate": "node ./scripts/validateMigrations.js",
+    "deployKovan": "npx hardhat deploy --network optimismKovan"
   }
 }

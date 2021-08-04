@@ -37,8 +37,29 @@ var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 //  ** Inputs **
 
-const assetsBT = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "USDC", "OHM", "COMP", "AAVE"];
-const assetsBP = ["WBTC", "MKR", "SNX", "REP", "RGT", "ETH", "OHM", "COMP", "AAVE"]; //assets with no quotes
+const assetsBT = [
+  "WBTC",
+  "MKR",
+  "SNX",
+  "REP",
+  "RGT",
+  "ETH",
+  "USDC",
+  "OHM",
+  "COMP",
+  "AAVE",
+];
+const assetsBP = [
+  "WBTC",
+  "MKR",
+  "SNX",
+  "REP",
+  "RGT",
+  "ETH",
+  "OHM",
+  "COMP",
+  "AAVE",
+]; //assets with no quotes
 const quotes = ["USDC"];
 
 const contractAdmin = process.env.OP_KOVAN_ADMIN;
@@ -275,6 +296,19 @@ async function validate() {
           } else {
             console.log(
               "bath" + element + q + " underlyingAsset ** ERROR **",
+              r
+            );
+          }
+        });
+      contract.methods
+        .getSearchRadius()
+        .call()
+        .then((r) => {
+          if (r == 3) {
+            console.log("bath" + element + q + " searchRadius CORRECT");
+          } else {
+            console.log(
+              "bath" + element + q + " searchRadius ** ERROR **",
               r
             );
           }

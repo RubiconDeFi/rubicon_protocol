@@ -430,13 +430,30 @@ const func = async (hre) => {
   // });
 
   // // set BathHouse Variable - Set search radius
-  // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
-  // // await bh.estimateGas.setBathPairSearchRadius(process.env.OP_KOVAN_3_BATHWBTCUSDC, 3).then(async function (g) {
-  //   await bh
-  //     .setBathPairSearchRadius(process.env.OP_KOVAN_3_BATHWBTCUSDC, 3, { gasLimit: 900000 , nonce: getNonce() })
-  //     .then((r) => console.log("set search radius", r));
-  // // });
+  //   const assetsToDeploy = [
+  //   // "WBTC",
+  //   "MKR",
+  //   "SNX",
+  //   "REP",
+  //   "RGT",
+  //   "OHM",
+  //   "COMP",
+  //   "AAVE",
+  //   "ETH",
+  //   //"USDC" //*
+  // ];
+
+  // for (let index = 0; index < assetsToDeploy.length; index++) {
+  //   const asset = assetsToDeploy[index];
+  //   const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
+  //   const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
+  //   // await bh.estimateGas.setBathPairSearchRadius(process.env.OP_KOVAN_3_BATHWBTCUSDC, 3).then(async function (g) {
+  //     await bh
+  //       .setBathPairSearchRadius(process.env["OP_KOVAN_3_BATH" + asset + "USDC"], 3, { gasLimit: 900000 , nonce: getNonce() })
+  //       .then((r) => console.log("set search radius for " + "bath" + asset + "USDC"));
+  //   // });
+  // }
+
 
   // // set BathHouse Variable - MOPC
   // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");

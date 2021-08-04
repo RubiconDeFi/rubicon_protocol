@@ -9,23 +9,48 @@ const func = async (hre) => {
   const targetProxyAddress = process.env.OP_KOVAN_3_BATHHOUSE;
   const newImp = process.env.OP_KOVAN_3_BATHHOUSE_NEWIMP;
 
+  const assetsToDeploy = [
+    // "WBTC",
+    "MKR",
+    "SNX",
+    "REP",
+    "RGT",
+    "OHM",
+    "COMP",
+    "AAVE",
+    "ETH",
+    //"USDC" //*
+  ];
+
+  // *** Nonce Manager ***
+  let baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_PROXY_ADMIN);
+  let nonceOffset = 0;
+  function getNonce() {
+    return baseNonce.then((nonce) => nonce + nonceOffset++);
+  }
 
   const proxyFactory = await hre.ethers.getContractFactory(
     "TransparentUpgradeableProxy"
   );
-  const bathPairFactory = await hre.ethers.getContractFactory(
-    "BathPair"
-  );
+  const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
   const targetProxy = await proxyFactory.attach(targetProxyAddress);
   // const bpProxy = await bathPairFactory.attach(targetProxyAddress);
 
   const signers = hre.ethers.getSigners();
 
   //   ***** Perform actions *****
-  await upgradeProxy(targetProxy, newImp, "BathHouse");
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
-
+  // for (let index = 0; index < assetsToDeploy.length; index++) {
+  //   const element = await assetsToDeploy[index];
+  //   await upgradeProxy(
+  //     await proxyFactory.attach(
+  //       process.env["OP_KOVAN_3_BATH" + (await element) + "USDC"]
+  //     ),
+  //     process.env["OP_KOVAN_3_BATH" + element + "USDC_NEWIMP"],
+  //     "bath" + element + "USDC"
+  //   );
+  // }
 
   async function upgradeProxy(contract, newImp, msg) {
     return contract
@@ -34,7 +59,11 @@ const func = async (hre) => {
       .then(async (g) => {
         await contract
           .connect(signers[1])
-          .upgradeTo(await newImp, { from: proxyAdmin, gasLimit: g._hex })
+          .upgradeTo(await newImp, {
+            from: proxyAdmin,
+            gasLimit: g._hex,
+            nonce: getNonce(),
+          })
           .then(async (g) => {
             console.log(
               "success changing implementation on ",
