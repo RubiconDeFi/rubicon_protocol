@@ -320,10 +320,14 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       await bathPairInstance.bathScrub();
       await bathPairInstance.bathScrub();
 
-      logIndented("bathAsset amount", (await bathAssetInstance.outstandingAmount()).toString());
-      logIndented("bathquote amount", web3.utils.fromWei((await bathQuoteInstance.outstandingAmount()).toString()));
-      // assert.equal(await bathAssetInstance().outstandingAmount(), "0");
-
+      assert.equal(
+        (await bathAssetInstance.outstandingAmount()).toString(),
+        "0"
+      );
+      assert.equal(
+        (await bathQuoteInstance.outstandingAmount()).toString(),
+        "0"
+      );
     });
     it("Partial fill is correctly cancelled and replaced", async function () {
       await bathPairInstance.bathScrub();
