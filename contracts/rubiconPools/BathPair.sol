@@ -40,15 +40,17 @@ contract BathPair {
   uint256 internal totalAssetFills;
   uint256 internal totalQuoteFills;
 
-  /// @dev askID, bidID, timestamp
-  uint256[3][] public outstandingPairIDs;
+  /// @dev [askID, ask.pay_amt, bidID, bid.pay_amt, timestamp]
+  uint256[5][] public outstandingPairIDs;
 
   event LogNote(string, uint256, uint256);
   event LogStrategistTrades(
     uint256 idAsk,
     address askAsset,
+    uint256 askAmt,
     uint256 idBid,
     address bidAsset,
+    uint256 bidAmt,
     address strategist,
     uint256 timestamp
   );
@@ -311,25 +313,29 @@ contract BathPair {
     }
   }
 
-  function addOutstandingPair(uint256[3] calldata IDPair)
+  function addOutstandingPair(uint256[5] calldata IDPair)
     external
     onlyApprovedStrategy(msg.sender)
   {
-    require(IDPair.length == 3);
+    require(IDPair.length == 5);
     outstandingPairIDs.push(IDPair);
   }
 
   // orderID of the fill
   // only log fills for each strategist - needs to be asset specific
   // isAssetFill are *quotes* that result in asset yield
-  function logFill(uint256 orderID, bool isAssetFill) internal {
+  function logFill(
+    uint256 amt,
+    uint256 orderID,
+    bool isAssetFill
+  ) internal {
     // Goal is to map a fill to a strategist
     if (isAssetFill) {
-      strategist2FillsAsset[IDs2strategist[orderID]] += 1;
-      totalAssetFills += 1;
+      strategist2FillsAsset[IDs2strategist[orderID]] += amt;
+      totalAssetFills += amt;
     } else {
-      strategist2FillsQuote[IDs2strategist[orderID]] += 1;
-      totalQuoteFills += 1;
+      strategist2FillsQuote[IDs2strategist[orderID]] += amt;
+      totalQuoteFills += amt;
     }
   }
 
@@ -357,37 +363,50 @@ contract BathPair {
     }
 
     for (uint256 x = _start; x < _start + _searchRadius; x++) {
-      if (outstandingPairIDs[x][2] < (block.timestamp - timeDelay)) {
+      if (outstandingPairIDs[x][4] < (block.timestamp - timeDelay)) {
         uint256 askId = outstandingPairIDs[x][0];
-        uint256 bidId = outstandingPairIDs[x][1];
-        order memory offer1 = getOfferInfo(askId);
-        order memory offer2 = getOfferInfo(bidId);
+        uint256 askAmt = outstandingPairIDs[x][1];
+        uint256 bidId = outstandingPairIDs[x][2];
+        uint256 bidAmt = outstandingPairIDs[x][3];
+        order memory offer1 = getOfferInfo(askId); //ask
+        order memory offer2 = getOfferInfo(bidId); //bid
+        uint256 askDelta = askAmt - offer1.pay_amt;
+        uint256 bidDelta = bidAmt - offer2.pay_amt;
 
         // if real
         if (askId != 0) {
-          // if filled
-          if (offer1.pay_amt == 0) {
-            logFill(askId, true);
-            BathToken(bathAssetAddress).removeFilledTrade(askId);
+          // if delta > 0 - delta is fill => handle any amount of fill here
+          if (askDelta > 0) {
+            logFill(askDelta, askId, true); //todo make this accept an amount
+            BathToken(bathAssetAddress).removeFilledTradeAmount(askDelta);
+            // not a full fill
+            if (askDelta != askAmt) {
+              BathToken(bathAssetAddress).cancel(askId, askAmt);
+            }
           }
-          // otherwise didn't fill so cancel and handle a partial fill
+          // otherwise didn't fill so cancel
           else {
-            BathToken(bathAssetAddress).cancel(askId);
+            BathToken(bathAssetAddress).cancel(askId, askAmt); // pas amount too
           }
         }
 
         // if real
         if (bidId != 0) {
-          // if filled
-          if (offer2.pay_amt == 0) {
-            logFill(bidId, false);
-            BathToken(bathQuoteAddress).removeFilledTrade(bidId);
+          // if delta > 0 - delta is fill => handle any amount of fill here
+          if (bidDelta > 0) {
+            logFill(bidDelta, bidId, false); //todo make this accept an amount
+            BathToken(bathQuoteAddress).removeFilledTradeAmount(bidDelta);
+            // not a full fill
+            if (bidDelta != bidAmt) {
+              BathToken(bathQuoteAddress).cancel(bidId, bidAmt);
+            }
           }
-          // otherwise didn't fill so cancel and handle a partial fill
+          // otherwise didn't fill so cancel
           else {
-            BathToken(bathQuoteAddress).cancel(bidId);
+            BathToken(bathQuoteAddress).cancel(bidId, bidAmt); // pas amount too
           }
         }
+
         removeElement(x);
         x--;
         _searchRadius--;
@@ -486,17 +505,17 @@ contract BathPair {
   // Used to map a strategist to their orders
   function newTradeIDs(address strategist) internal {
     require(
-      outstandingPairIDs[outstandingPairIDs.length - 1][2] == block.timestamp
+      outstandingPairIDs[outstandingPairIDs.length - 1][4] == block.timestamp
     );
     IDs2strategist[
       outstandingPairIDs[outstandingPairIDs.length - 1][0]
     ] = strategist;
     IDs2strategist[
-      outstandingPairIDs[outstandingPairIDs.length - 1][1]
+      outstandingPairIDs[outstandingPairIDs.length - 1][2]
     ] = strategist;
   }
 
-  function getLastTradeIDs() external view returns (uint256[3] memory) {
+  function getLastTradeIDs() external view returns (uint256[5] memory) {
     return outstandingPairIDs[outstandingPairIDs.length - 1];
   }
 
@@ -560,7 +579,9 @@ contract BathPair {
       outstandingPairIDs[outstandingPairIDs.length - 1][0],
       underlyingAsset,
       outstandingPairIDs[outstandingPairIDs.length - 1][1],
+      outstandingPairIDs[outstandingPairIDs.length - 1][2],
       underlyingQuote,
+      outstandingPairIDs[outstandingPairIDs.length - 1][3],
       msg.sender,
       block.timestamp
     );
@@ -581,9 +602,10 @@ contract BathPair {
       IDs2strategist[id] == msg.sender,
       "only strategist can cancel their orders"
     );
+    // todo check for gas optimization
     order memory ord = getOfferInfo(id);
     if (ord.pay_gem == ERC20(underlyingAsset)) {
-      BathToken(bathAssetAddress).cancel(id);
+      BathToken(bathAssetAddress).cancel(id, 0);
       for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
         if (outstandingPairIDs[x][0] == id) {
           removeElement(x);
@@ -591,9 +613,9 @@ contract BathPair {
         }
       }
     } else if (ord.pay_gem == ERC20(underlyingQuote)) {
-      BathToken(bathQuoteAddress).cancel(id);
+      BathToken(bathQuoteAddress).cancel(id, 0);
       for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
-        if (outstandingPairIDs[x][1] == id) {
+        if (outstandingPairIDs[x][2] == id) {
           removeElement(x);
           break;
         }
