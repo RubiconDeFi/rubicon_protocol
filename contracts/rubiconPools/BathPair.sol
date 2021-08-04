@@ -168,7 +168,7 @@ contract BathPair {
         shapeCoefNum = val;
     }
 
-    function setSearchRadius(uint val) external onlyBathHouse {
+    function setSearchRadius(uint256 val) external onlyBathHouse {
         searchRadius = val;
     }
 
@@ -443,7 +443,7 @@ contract BathPair {
     function getOutstandingPairCount() external view returns (uint256) {
         return outstandingPairIDs.length;
     }
-        
+
     function getSearchRadius() external view returns (uint256) {
         return searchRadius;
     }

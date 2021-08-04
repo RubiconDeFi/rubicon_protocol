@@ -385,22 +385,24 @@ async function marketMake(a, b, t, im, spread, tM) {
   var newAskPrice = new BigNumber(parseFloat(midPoint[ticker] * (1 + targetSpread)));
 
   //   getMaxOrderSize from contract for bid and ask
-  const maxAskSize = new BigNumber(
-    await contract.methods
-      .getMaxOrderSize(
-        process.env["OP_KOVAN_3_" + (await ticker)],
-        process.env["OP_KOVAN_3_BATH" + (await ticker)]
-      )
-      .call()
-  );
-  const maxBidSize = new BigNumber(
-    await contract.methods
-      .getMaxOrderSize(
-        process.env.OP_KOVAN_3_USDC,
-        process.env.OP_KOVAN_3_BATHUSDC
-      )
-      .call()
-  );
+  // const maxAskSize = new BigNumber(
+  //   await contract.methods
+  //     .getMaxOrderSize(
+  //       process.env["OP_KOVAN_3_" + (await ticker)],
+  //       process.env["OP_KOVAN_3_BATH" + (await ticker)]
+  //     )
+  //     .call()
+  // );
+  // const maxBidSize = new BigNumber(
+  //   await contract.methods
+  //     .getMaxOrderSize(
+  //       process.env.OP_KOVAN_3_USDC,
+  //       process.env.OP_KOVAN_3_BATHUSDC
+  //     )
+  //     .call()
+  // );
+  const maxAskSize = new BigNumber(1);
+  const maxBidSize = new BigNumber(1);
 
   // in wei
   const askNum = maxAskSize.dividedBy(scaleBack);
@@ -539,8 +541,13 @@ const assets = [
 ];
 
 initNonceManager().then(async () => {
-  // startBot("RGT", 0.02, 5);
-  startBot("SNX", 0.02, 357);
+  // startBot("OHM", 0.02, 5);
+  // startBot("AAVE", 0.02, 5);
+  // startBot("COMP", 0.02, 5);
+// for (let index = 0; index < assets.length; index++) {
+//   startBot("REP", 0.02, 5);
+// }
+  // startBot("SNX", 0.02, 357);
   // await startBot("REP", 0.02, 5);
   //   startBot("WBTC", 0.02, 40290);
 

@@ -151,7 +151,7 @@ contract BathHouse {
         BathPair(bathPair).setMaxOrderSizeBPS(mosbps);
     }
 
-    function setBathPairSearchRadius(address bathPair, uint sr)
+    function setBathPairSearchRadius(address bathPair, uint256 sr)
         external
         onlyAdmin
     {

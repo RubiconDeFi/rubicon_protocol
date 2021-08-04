@@ -100,29 +100,62 @@ async function validate() {
       console.log("Current Pools Max Orders:", r);
     });
 
-  // //  BATH TOKENS
-  // for (let index = 0; index < assetsBT.length; index++) {
-  //   const element = assetsBT[index];
-  //   let contract = await getContractFromToken(element, "BathToken");
-  //   contract.methods
-  //     .totalSupply()
-  //     .call()
-  //     .then(async (r) => {
-  //       let und = await getContractFromToken(element, "EquityToken");
-  //       und.methods
-  //         .balanceOf()
-  //         .call()
-  //         .then((b) => {
-  //           console.log(
-  //             "**" + element + "**",
-  //             "Total Supply:",
-  //             r,
-  //             "Underlying Balance:",
-  //             b
-  //           );
-  //         });
-  //     });
-  // }
+  //  BATH TOKENS
+  for (let index = 0; index < assetsBT.length; index++) {
+    const element = assetsBT[index];
+    let contract = await getContractFromToken(element, "BathToken");
+    contract.methods
+      .totalSupply()
+      .call()
+      .then(async (r) => {
+        let und = await getContractFromToken(element, "EquityToken");
+        und.methods
+          .balanceOf(process.env["OP_KOVAN_3_BATH" + element])
+          .call()
+          .then((b) => {
+            console.log(
+              "**" + element + "**",
+              "Total Supply:",
+              r,
+              "Underlying Balance:",
+              b,
+              "Gross ROA",
+              b / r
+            );
+          });
+      });
+  }
+
+  //  BATH TOKENS
+  for (let index = 0; index < assetsBT.length; index++) {
+    const element = assetsBT[index];
+    let contract = await getContractFromToken(element, "BathToken");
+    contract.methods
+      .totalSupply()
+      .call()
+      .then(async (r) => {
+        contract.methods
+          .underlyingBalance()
+          .call()
+          .then((b) => {
+            console.log(
+              "**" + element + "**",
+              "Total Supply:",
+              r,
+              "Underlying Balance ** Modified:",
+              b,
+              "Gross ROA",
+              b / r
+            );
+          });
+        await contract.methods
+          .outstandingAmount()
+          .call()
+          .then((r) => {
+            console.log("outstandingAmount for " + element + " " + web3.utils.fromWei(r));
+          });
+      });
+  }
 }
 
 validate();

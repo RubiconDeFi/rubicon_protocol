@@ -300,6 +300,12 @@ async function validate() {
             );
           }
         });
+      // contract.methods
+      //   .getOutstandingPairCount()
+      //   .call()
+      //   .then((r) => {
+      //       console.log("bath" + element + q + " MOPC " + r);
+      //   });
       contract.methods
         .getSearchRadius()
         .call()
@@ -307,10 +313,7 @@ async function validate() {
           if (r == 3) {
             console.log("bath" + element + q + " searchRadius CORRECT");
           } else {
-            console.log(
-              "bath" + element + q + " searchRadius ** ERROR **",
-              r
-            );
+            console.log("bath" + element + q + " searchRadius ** ERROR **", r);
           }
         });
       contract.methods
