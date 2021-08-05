@@ -301,7 +301,34 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       // Idea here is that the start of the local search rolls over after indexs 4-6 are checked in seconds call
       // assert.equal(await bathPairInstance.start().toString(), "0");
     });
+    it("bathTokens are correctly loggin outstandingAmount", async function () {
+      let target = 6;
+      for (let index = 0; index < target; index++) {
+        await bathPairInstance.executeStrategy(
+          strategyInstance.address,
+          askNumerator,
+          askDenominator,
+          bidNumerator,
+          bidDenominator
+        );
+      }
+      helper.advanceTimeAndBlock(100);
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
+      await bathPairInstance.bathScrub();
 
+      assert.equal(
+        (await bathAssetInstance.outstandingAmount()).toString(),
+        "0"
+      );
+      assert.equal(
+        (await bathQuoteInstance.outstandingAmount()).toString(),
+        "0"
+      );
+    });
     it("Partial fill is correctly cancelled and replaced", async function () {
       await bathPairInstance.bathScrub();
 

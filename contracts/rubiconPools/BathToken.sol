@@ -140,21 +140,20 @@ contract BathToken {
     }
 
     // Rubicon Market Functions:
-
-    function cancel(uint256 id) external onlyPair {
-        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(
-            id
-        );
-        outstandingAmount = outstandingAmount.sub(pay_amt);
-
+    // pass initAmt as zero if unsure
+    function cancel(uint256 id, uint256 initAmt) external onlyPair {
+        if (initAmt == 0) {
+            (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress)
+            .getOffer(id);
+            outstandingAmount = outstandingAmount.sub(pay_amt);
+        } else {
+            outstandingAmount = outstandingAmount.sub(initAmt);
+        }
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 
-    function removeFilledTrade(uint256 id) external onlyPair {
-        (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress).getOffer(
-            id
-        );
-        outstandingAmount = outstandingAmount.sub(pay_amt);
+    function removeFilledTradeAmount(uint256 amt) external onlyPair {
+        outstandingAmount = outstandingAmount.sub(amt);
     }
 
     // function that places a bid/ask in the orderbook for a given pair
