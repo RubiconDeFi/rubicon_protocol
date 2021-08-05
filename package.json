@@ -29,12 +29,15 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "3.4",
+    "bindings": "^1.5.0",
     "cachedown": "^1.0.0",
     "dotenv": "^8.2.0",
     "heap": "^0.2.6",
     "level-sublevel": "^6.6.5",
+    "libxmljs": "^0.19.7",
     "node-gyp": "^8.1.0",
     "truffle-hdwallet-provider": "^1.0.17",
+    "usb": "^1.7.1",
     "web3-provider-engine": "^16.0.1"
   },
   "scripts": {
