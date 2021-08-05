@@ -63,11 +63,11 @@ const func = async (hre) => {
   const contractFactory = await bh.connect(HD_deployer);
   await contractFactory.deploy({ nonce: getNonce() }).then(async function (r) {
     console.log("Rubicon market deployed at: " + (await r.address));
-    await deployProxy(r.address, "Rubicon Market").then(
-      async (proxyWrapped) => {
-        console.log("proxywrapped", proxyWrapped);
-      }
-    );
+    // await deployProxy(r.address, "Rubicon Market").then(
+    //   async (proxyWrapped) => {
+    //     console.log("proxywrapped", proxyWrapped);
+    //   }
+    // );
   });
   //     const BHI = await bh.attach(proxyWrapped);
   //     await BHI.estimateGas
