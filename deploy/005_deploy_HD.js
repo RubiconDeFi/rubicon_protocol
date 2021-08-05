@@ -5,7 +5,7 @@ require("dotenv").config();
 
 // *** Nonce Manager ***
 let baseNonce = web3.eth.getTransactionCount(
-  "0x3204AC6F848e05557c6c7876E09059882e07962F"
+  process.env.CORP_HD_ACCOUNT_0 //deployer
 ); //HD deployer
 let nonceOffset = 0;
 function getNonce() {
@@ -33,6 +33,10 @@ const func = async (hre) => {
   const path_1 = `m/44'/60'/0'/0/1`;
   const path_2 = `m/44'/60'/0'/0/2`;
 
+  const feeRecipient = process.env.CORP_HD_ACCOUNT_2;
+  const deployerAddress = process.env.CORP_HD_ACCOUNT_0;
+  const proxyAddress = process.env.CORP_HD_ACCOUNT_1;
+
   // Note: can only have one at a time
   const HD_deployer = new LedgerSigner(provider, type, path_0);
   // const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
@@ -47,43 +51,24 @@ const func = async (hre) => {
 
   // ********************************
   //1. Deploy and init Rubicon Market
-  // const deployResultBH = await deploy("RubiconMarket", {
-  //   from: deployer,
-  //   log: true,
-  //   gasLimit: 37250000,
-  //   nonce: getNonce(),
-  // }).then(async function (d) {
-  //   const newBHAddr = await d.address;
-  //   console.log(`Market is at ${newBHAddr}`);
-  //   if (await d.newlyDeployed) {
-  //     console.log(`contract RubiconMarket deployed at ${newBHAddr}`);
-
-  //     // Init BathHouse
   const bh = await hre.ethers.getContractFactory("RubiconMarket");
   const contractFactory = await bh.connect(HD_deployer);
-  await contractFactory.deploy({ nonce: getNonce() }).then(async function (r) {
+  await contractFactory.deploy({ nonce: await getNonce() }).then(async function (r) {
     console.log("Rubicon market deployed at: " + (await r.address));
-    // await deployProxy(r.address, "Rubicon Market").then(
-    //   async (proxyWrapped) => {
-    //     console.log("proxywrapped", proxyWrapped);
-    //   }
-    // );
+    await deployProxy(await r.address, "Rubicon Market").then(
+      async (proxyWrapped) => {
+        console.log("proxywrapped", proxyWrapped);
+        const BHI = await bh.attach(proxyWrapped);
+        await BHI.estimateGas
+          .initialize(false, feeRecipient)
+          .then(async function (g) {
+            await BHI.connect(HD_deployer).initialize(false, feeRecipient, {
+              gasLimit: g._hex,
+            }).then((r) => console.log("Market Init Call sent!\n"));
+          });
+      }
+    );
   });
-  //     const BHI = await bh.attach(proxyWrapped);
-  //     await BHI.estimateGas
-  //       .initialize(false, process.env.OP_KOVAN_3_FEE_RECIPIENT)
-  //       .then(async function (g) {
-  //         await BHI.initialize(
-  //           false,
-  //           process.env.OP_KOVAN_3_FEE_RECIPIENT,
-  //           { gasLimit: g._hex, nonce: getNonce() }
-  //         ).then((r) => console.log("Market Init Call sent!\n"));
-  //         return newBHAddr;
-  //       }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
-  //   }
-  // );
-  //   }
-  // });
 
   // //2. Deploy and init BathHouse
   // const deployResultBH = await deploy("BathHouse", {
@@ -522,23 +507,43 @@ const func = async (hre) => {
   // Deploy TransparentUpgradeableProxy
   // return the address of the proxy that wraps `address`
   async function deployProxy(address, msg) {
-    return await deploy("TransparentUpgradeableProxy", {
-      from: deployer,
-      log: true,
-      gasLimit: 82410000,
-      args: [address, process.env.OP_KOVAN_PROXY_ADMIN, "0x"],
-      nonce: getNonce(),
-    }).then(async function (d) {
-      console.log(
-        "Transparent Upgradeable Proxy deployed at: " +
-          (await d.address) +
-          " for " +
-          msg +
-          " " +
-          address
-      );
-      return await d.address;
-    });
+    //   return await deploy("TransparentUpgradeableProxy", {
+    //     from: deployer,
+    //     log: true,
+    //     gasLimit: 82410000,
+    //     args: [address, process.env.OP_KOVAN_PROXY_ADMIN, "0x"],
+    //     nonce: getNonce(),
+    //   }).then(async function (d) {
+    //     console.log(
+    //       "Transparent Upgradeable Proxy deployed at: " +
+    //         (await d.address) +
+    //         " for " +
+    //         msg +
+    //         " " +
+    //         address
+    //     );
+    //     return await d.address;
+    //   });
+    // }
+    const proxyFactory = await hre.ethers.getContractFactory(
+      "TransparentUpgradeableProxy"
+    );
+    const contractFactory = await proxyFactory.connect(HD_deployer);
+    return await contractFactory
+      .deploy(await address, process.env.CORP_HD_ACCOUNT_1, "0x", {
+        nonce: await getNonce(), gasLimit: 9220000
+      })
+      .then(async function (r) {
+        console.log(
+          "Transparent Upgradeable Proxy deployed at: " +
+            (await r.address) +
+            " for " +
+            msg +
+            " " +
+            address
+        );
+        return await r.address;
+      });
   }
 };
 
