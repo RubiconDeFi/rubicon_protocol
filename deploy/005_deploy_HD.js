@@ -3,18 +3,20 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 
 require("dotenv").config();
 
+// *** Nonce Manager ***
+let baseNonce = web3.eth.getTransactionCount(
+  "0x3204AC6F848e05557c6c7876E09059882e07962F"
+); //HD deployer
+let nonceOffset = 0;
+function getNonce() {
+  return baseNonce.then((nonce) => nonce + nonceOffset++);
+}
+
 // Deploy test assets for Kovan OP testnet
 const func = async (hre) => {
   const { deployments, getNamedAccounts, web3 } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-
-  // *** Nonce Manager ***
-  let baseNonce = web3.eth.getTransactionCount(process.env.OP_KOVAN_ADMIN);
-  let nonceOffset = 0;
-  function getNonce() {
-    return baseNonce.then((nonce) => nonce + nonceOffset++);
-  }
 
   // HD WALLET EXAMPLE
   // const ledger = await new LedgerSigner(
@@ -23,48 +25,65 @@ const func = async (hre) => {
   //   "m/44'/60'/0'/0"
   // );
   // contractFactory = await contractFactory.connect(ledger);
-  const provider = new hre.ethers.providers.JsonRpcProvider('https://optimism-kovan.infura.io/v3/' + process.env.INFURA_API_KEY);
+  const provider = new hre.ethers.providers.JsonRpcProvider(
+    "https://optimism-kovan.infura.io/v3/" + process.env.INFURA_API_KEY
+  );
   const type = "hid";
-  const path = `m/44'/60'/0'/0/0`;
-  const signer = new LedgerSigner(provider, type, path);
+  const path_0 = `m/44'/60'/0'/0/0`;
+  const path_1 = `m/44'/60'/0'/0/1`;
+  const path_2 = `m/44'/60'/0'/0/2`;
 
-  const address = await signer.getAddress();
-  console.log("addr", address);
+  // Note: can only have one at a time
+  const HD_deployer = new LedgerSigner(provider, type, path_0);
+  // const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
+  // const HD_feeTo = new LedgerSigner(provider, type, path_2);
+
+  const HD_deployer_Addr = await HD_deployer.getAddress();
+  console.log("HD Deployer Address:", HD_deployer_Addr);
+  // const HD_proxyAdmin_Addr = await HD_proxyAdmin.getAddress();
+  // console.log("HD Deployer Address:", HD_proxyAdmin_Addr);
+  // const HD_feeTo_Addr = await HD_feeTo.getAddress();
+  // console.log("HD Deployer Address:", HD_feeTo_Addr);
 
   // ********************************
   //1. Deploy and init Rubicon Market
-  const deployResultBH = await deploy("RubiconMarket", {
-    from: deployer,
-    log: true,
-    gasLimit: 337220000,
-    nonce: getNonce(),
-  }).then(async function (d) {
-    const newBHAddr = await d.address;
-    console.log(`Market is at ${newBHAddr}`);
-    if (await d.newlyDeployed) {
-      console.log(`contract RubiconMarket deployed at ${newBHAddr}`);
+  // const deployResultBH = await deploy("RubiconMarket", {
+  //   from: deployer,
+  //   log: true,
+  //   gasLimit: 37250000,
+  //   nonce: getNonce(),
+  // }).then(async function (d) {
+  //   const newBHAddr = await d.address;
+  //   console.log(`Market is at ${newBHAddr}`);
+  //   if (await d.newlyDeployed) {
+  //     console.log(`contract RubiconMarket deployed at ${newBHAddr}`);
 
-      await deployProxy(newBHAddr, "Rubicon Market").then(
-        async (proxyWrapped) => {
-          console.log("proxywrapped", proxyWrapped);
-
-          // Init BathHouse
-          const bh = await hre.ethers.getContractFactory("RubiconMarket");
-          const BHI = await bh.attach(proxyWrapped);
-          await BHI.estimateGas
-            .initialize(false, process.env.OP_KOVAN_3_FEE_RECIPIENT)
-            .then(async function (g) {
-              await BHI.initialize(
-                false,
-                process.env.OP_KOVAN_3_FEE_RECIPIENT,
-                { gasLimit: g._hex, nonce: getNonce() }
-              ).then((r) => console.log("Market Init Call sent!\n"));
-              return newBHAddr;
-            }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
-        }
-      );
-    }
+  //     // Init BathHouse
+  const bh = await hre.ethers.getContractFactory("RubiconMarket");
+  const contractFactory = await bh.connect(HD_deployer);
+  await contractFactory.deploy({ nonce: getNonce() }).then(async function (r) {
+    console.log("Rubicon market deployed at: " + (await r.address));
+    await deployProxy(r.address, "Rubicon Market").then(
+      async (proxyWrapped) => {
+        console.log("proxywrapped", proxyWrapped);
+      }
+    );
   });
+  //     const BHI = await bh.attach(proxyWrapped);
+  //     await BHI.estimateGas
+  //       .initialize(false, process.env.OP_KOVAN_3_FEE_RECIPIENT)
+  //       .then(async function (g) {
+  //         await BHI.initialize(
+  //           false,
+  //           process.env.OP_KOVAN_3_FEE_RECIPIENT,
+  //           { gasLimit: g._hex, nonce: getNonce() }
+  //         ).then((r) => console.log("Market Init Call sent!\n"));
+  //         return newBHAddr;
+  //       }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
+  //   }
+  // );
+  //   }
+  // });
 
   // //2. Deploy and init BathHouse
   // const deployResultBH = await deploy("BathHouse", {
