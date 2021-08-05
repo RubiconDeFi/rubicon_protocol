@@ -107,11 +107,12 @@ contract USDCWithFaucet is LibNote, ERC20 {
         );
         admin = _admin;
         _mint(admin, 1000000e18);
+        timeDelay = 8 days;
     }
 
     // --- Token ---
     function faucet() external returns (bool) {
-        if (block.timestamp < faucetCheck[msg.sender] + 5 days) {
+        if (block.timestamp < faucetCheck[msg.sender] + timeDelay) {
             return false;
         }
         _mint(msg.sender, 1000e18);
@@ -123,7 +124,10 @@ contract USDCWithFaucet is LibNote, ERC20 {
         require(admin == msg.sender);
         _mint(msg.sender, 10000e18);
     }
-
+    function setTimeDelay(uint _timeDelay) external {
+        require(admin == msg.sender);
+        timeDelay = _timeDelay;
+    }
     // --- Alias ---
     function push(address usr, uint256 wad) external {
         transferFrom(msg.sender, usr, wad);
