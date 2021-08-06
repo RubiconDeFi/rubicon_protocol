@@ -86,7 +86,7 @@ contract USDCWithFaucet is LibNote, ERC20 {
     // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
     bytes32 public constant PERMIT_TYPEHASH =
         0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
-
+    uint public timeDelay;
     constructor(
         uint256 chainId_,
         address _admin,

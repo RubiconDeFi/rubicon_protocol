@@ -15,7 +15,7 @@ const func = async (hre) => {
     return baseNonce.then((nonce) => nonce + nonceOffset++);
   }
 
-  // // ********************************
+  // // // ********************************
   // //1. Deploy and init Rubicon Market
   // const deployResultBH = await deploy("RubiconMarket", {
   //   from: deployer,
@@ -36,11 +36,11 @@ const func = async (hre) => {
   //         const bh = await hre.ethers.getContractFactory("RubiconMarket");
   //         const BHI = await bh.attach(proxyWrapped);
   //         await BHI.estimateGas
-  //           .initialize(false, process.env.OP_KOVAN_3_FEE_RECIPIENT)
+  //           .initialize(false, process.env.OP_KOVAN_4_FEE_RECIPIENT)
   //           .then(async function (g) {
   //             await BHI.initialize(
   //               false,
-  //               process.env.OP_KOVAN_3_FEE_RECIPIENT,
+  //               process.env.OP_KOVAN_4_FEE_RECIPIENT,
   //               { gasLimit: g._hex, nonce: getNonce() }
   //             ).then((r) => console.log("Market Init Call sent!\n"));
   //             return newBHAddr;
@@ -310,9 +310,11 @@ const func = async (hre) => {
   // });
 
   // ****************************
+  // Deploy USDC
   // const USDCFactory = await hre.ethers.getContractFactory("USDCWithFaucet");
-  // await USDCFactory.deploy(69, process.env.OP_KOVAN_ADMIN, "USDC", "USDC", {gasLimit: 114380000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
+  // await USDCFactory.deploy(69, process.env.OP_KOVAN_ADMIN, "USDC", "USDC", {gasLimit: 13360000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
 
+  // Deploy assets
   // const assetsToDeploy = [
   //   "WBTC",
   //   "MKR",
@@ -322,7 +324,7 @@ const func = async (hre) => {
   //   "OHM",
   //   "COMP",
   //   "AAVE",
-  //   "ETH",
+  //   // "ETH",
   //   //"USDC" //*
   // ];
 
