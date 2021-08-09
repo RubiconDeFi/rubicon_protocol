@@ -626,20 +626,21 @@ contract BathPair {
             IDs2strategist[id] == msg.sender,
             "only strategist can cancel their orders"
         );
-        // todo check for gas optimization
         order memory ord = getOfferInfo(id);
         if (ord.pay_gem == ERC20(underlyingAsset)) {
-            BathToken(bathAssetAddress).cancel(id, 0);
-            for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+            uint len = outstandingPairIDs.length;
+            for (uint256 x = 0; x < len; x++) {
                 if (outstandingPairIDs[x][0] == id) {
+                    BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][1]);
                     removeElement(x);
                     break;
                 }
             }
         } else if (ord.pay_gem == ERC20(underlyingQuote)) {
-            BathToken(bathQuoteAddress).cancel(id, 0);
-            for (uint256 x = 0; x < outstandingPairIDs.length; x++) {
+            uint len = outstandingPairIDs.length;
+            for (uint256 x = 0; x < len; x++) {
                 if (outstandingPairIDs[x][2] == id) {
+                    BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][3]);
                     removeElement(x);
                     break;
                 }

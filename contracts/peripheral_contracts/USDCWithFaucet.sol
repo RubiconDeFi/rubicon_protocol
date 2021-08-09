@@ -86,7 +86,7 @@ contract USDCWithFaucet is LibNote, ERC20 {
     // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
     bytes32 public constant PERMIT_TYPEHASH =
         0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
-
+    uint public timeDelay;
     constructor(
         uint256 chainId_,
         address _admin,
@@ -107,11 +107,12 @@ contract USDCWithFaucet is LibNote, ERC20 {
         );
         admin = _admin;
         _mint(admin, 1000000e18);
+        timeDelay = 8 days;
     }
 
     // --- Token ---
     function faucet() external returns (bool) {
-        if (block.timestamp < faucetCheck[msg.sender] + 5 days) {
+        if (block.timestamp < faucetCheck[msg.sender] + timeDelay) {
             return false;
         }
         _mint(msg.sender, 1000e18);
@@ -123,7 +124,10 @@ contract USDCWithFaucet is LibNote, ERC20 {
         require(admin == msg.sender);
         _mint(msg.sender, 10000e18);
     }
-
+    function setTimeDelay(uint _timeDelay) external {
+        require(admin == msg.sender);
+        timeDelay = _timeDelay;
+    }
     // --- Alias ---
     function push(address usr, uint256 wad) external {
         transferFrom(msg.sender, usr, wad);

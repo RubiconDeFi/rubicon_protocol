@@ -18,6 +18,7 @@
     "ethers": "^5.3.1",
     "hardhat": "^2.0.10",
     "hardhat-deploy": "^0.7.6",
+    "node-gyp": "^8.1.0",
     "openzeppelin-solidity": "^2.5.1",
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.3",
@@ -29,12 +30,14 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "3.4",
+    "bindings": "^1.5.0",
     "cachedown": "^1.0.0",
     "dotenv": "^8.2.0",
     "heap": "^0.2.6",
     "level-sublevel": "^6.6.5",
-    "node-gyp": "^8.1.0",
+    "libxmljs": "^0.19.7",
     "truffle-hdwallet-provider": "^1.0.17",
+    "usb": "^1.7.1",
     "web3-provider-engine": "^16.0.1"
   },
   "scripts": {
@@ -45,6 +48,7 @@
     "clean": "npx prettier --write 'contracts/**/*.sol'",
     "poolsBot": "node ./strategist/kovanPoolsStrategist.js",
     "validate": "node ./scripts/validateMigrations.js",
-    "deployKovan": "npx hardhat deploy --network optimismKovan"
+    "deployKovan": "npx hardhat deploy --network optimismKovan",
+    "ganache": "ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000"
   }
 }

@@ -3,7 +3,7 @@ const noncemanager = require("./noncemanager.js");
 var nonceFunction = () => {
   return new Promise((resolve, reject) => {
     console.log("asking web3 for current nonce..");
-    setTimeout(resolve, 20000, Math.floor(Math.random() * 1000));
+    setTimeout(resolve, 2000);
   });
 };
 
