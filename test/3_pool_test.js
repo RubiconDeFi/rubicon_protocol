@@ -136,7 +136,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       );
       await bathQuoteInstance.deposit(web3.utils.toWei((100).toString()), {
         from: accounts[2],
-      }); 
+      });
       assert.equal(
         (await bathQuoteInstance.balanceOf(accounts[2])).toString(),
         web3.utils.toWei((100).toString())
