@@ -18,6 +18,7 @@
     "ethers": "^5.3.1",
     "hardhat": "^2.0.10",
     "hardhat-deploy": "^0.7.6",
+    "node-gyp": "^8.1.0",
     "openzeppelin-solidity": "^2.5.1",
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.3",
@@ -35,7 +36,6 @@
     "heap": "^0.2.6",
     "level-sublevel": "^6.6.5",
     "libxmljs": "^0.19.7",
-    "node-gyp": "^8.1.0",
     "truffle-hdwallet-provider": "^1.0.17",
     "usb": "^1.7.1",
     "web3-provider-engine": "^16.0.1"
