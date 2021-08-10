@@ -551,23 +551,4 @@ const assets = [
 
 initNonceManager().then(async () => {
   startBot("REP", 0.02, 5);
-  // startBot("COMP", 0.02, 5);
-  // startBot("RGT", 0.02, 5);
-  // for (let index = 0; index < assets.length; index++) {
-  //   startBot(await assets[index], 0.02, 5);
-  // }
-  // startBot("SNX", 0.02, 357);
-  // startBot("REP", 0.02, 5);
-  // startBot("WBTC", 0.02, 40290);
-  //   console.log("got a nonce", await getNonce());
 });
-
-// // Start bots
-// for (let index = 0; index < assets.length; index++) {
-//     const element = assets[index];
-//     startBot(element, 0.02);
-//     // startBot(element, 0.04);
-//     // startBot(element, 0.07);
-// }
-
-// startBot("WBTC", 0.02, 40000);

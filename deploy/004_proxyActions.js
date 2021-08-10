@@ -31,14 +31,14 @@ const func = async (hre) => {
 
   const proxyAddress = process.env.CORP_HD_ACCOUNT_1;
 
-  // Note: can only have one at a time
-  const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
-  const HD_proxyAdmin_Addr = await HD_proxyAdmin.getAddress();
-  if (HD_proxyAdmin_Addr == proxyAddress) {
-    // nothing 
-  } else {
-    console.log("HD Deployer, Proxy Admin Address is incorrect**");
-  }
+  // // Note: can only have one at a time
+  // const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
+  // const HD_proxyAdmin_Addr = await HD_proxyAdmin.getAddress();
+  // if (HD_proxyAdmin_Addr == proxyAddress) {
+  //   // nothing 
+  // } else {
+  //   console.log("HD Deployer, Proxy Admin Address is incorrect**");
+  // }
 
 
   const proxyFactory = await hre.ethers.getContractFactory(
@@ -51,7 +51,7 @@ const func = async (hre) => {
   // const signers = hre.ethers.getSigners();
 
   // *** Nonce Manager ***
-  let baseNonce = web3.eth.getTransactionCount(HD_proxyAdmin_Addr);
+  let baseNonce = web3.eth.getTransactionCount(proxyAddress);
   let nonceOffset = 0;
   function getNonce() {
     return baseNonce.then((nonce) => nonce + nonceOffset++);
@@ -63,9 +63,9 @@ const func = async (hre) => {
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
 
-  await upgradeProxy(await proxyFactory.attach(
-          process.env.OP_KOVAN_4_BATHREPUSDC
-        ), process.env.OP_KOVAN_4_BATHREPUSDC_NEWIMP, "bathREPUSDC");
+  // await upgradeProxy(await proxyFactory.attach(
+  //         process.env.OP_KOVAN_4_BATHREPUSDC
+  //       ), process.env.OP_KOVAN_4_BATHREPUSDC_NEWIMP, "bathREPUSDC");
 
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   //   const element = await assetsToDeploy[index];
