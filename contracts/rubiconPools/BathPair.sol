@@ -440,14 +440,14 @@ contract BathPair {
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
-            (
-                uint256 ask_amt,
-                ERC20 ask_gem,
-                uint256 bid_amt,
-                ERC20 bid_gem
-            ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
-            order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
-            return offerInfo;
+        (
+            uint256 ask_amt,
+            ERC20 ask_gem,
+            uint256 bid_amt,
+            ERC20 bid_gem
+        ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
+        order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
+        return offerInfo;
     }
 
     function getOutstandingPairCount() external view returns (uint256) {
@@ -570,11 +570,13 @@ contract BathPair {
 
         // Enforce dynamic ordersizing and inventory management
         require(
-            askNumerator <= getMaxOrderSize(_underlyingAsset, _bathAssetAddress),
+            askNumerator <=
+                getMaxOrderSize(_underlyingAsset, _bathAssetAddress),
             "ask too large"
         );
         require(
-            bidNumerator <= getMaxOrderSize(_underlyingQuote, _bathQuoteAddress),
+            bidNumerator <=
+                getMaxOrderSize(_underlyingQuote, _bathQuoteAddress),
             "bid too large"
         );
 
