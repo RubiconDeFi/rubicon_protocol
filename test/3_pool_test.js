@@ -291,6 +291,22 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
           bidNumerator,
           bidDenominator
         );
+        // await rubiconMarketInstance.buy(4 + (2 * (index + 1)), web3.utils.toWei((0.4).toString()), {
+        //   from: accounts[5],
+        // });
+        // logIndented(
+        //   "cost of executeStrategy:",
+        //   await bathPairInstance
+        //     .executeStrategy
+        //     .estimateGas(
+        //       strategyInstance.address,
+        //       askNumerator,
+        //       askDenominator,
+        //       bidNumerator,
+        //       bidDenominator
+        //     ),
+        //     index
+        // );
       }
       // helper.advanceTimeAndBlock(20);
       // logIndented("cost of bathScrub:", await bathPairInstance.bathScrub.estimateGas());
@@ -301,7 +317,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       // Idea here is that the start of the local search rolls over after indexs 4-6 are checked in seconds call
       // assert.equal(await bathPairInstance.start().toString(), "0");
     });
-    it("bathTokens are correctly loggin outstandingAmount", async function () {
+    it("bathTokens are correctly logging outstandingAmount", async function () {
       let target = 6;
       for (let index = 0; index < target; index++) {
         await bathPairInstance.executeStrategy(

@@ -6,7 +6,7 @@ var fs = require("fs");
 require("dotenv").config();
 const BigNumber = require("bignumber.js");
 BigNumber.config({ DECIMAL_PLACES: 18 });
-BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
+BigNumber.config({ ROUNDING_MODE: 4 });
 // ************ Rubicon Pools Kovan Setup ***************
 
 // Initialize Web3
@@ -417,6 +417,12 @@ async function marketMake(a, b, t, im, spread, tM) {
 
   //   await logInfo(a, b, askDen / askNum, bidNum / bidDen, await im);
 
+  // console.log(
+  //   // askNum.decimalPlaces(0).toString(),
+  //   // askDen.decimalPlaces(0).toString(),
+  //   bidNum.decimalPlaces(0).toString(),
+  //   bidDen.decimalPlaces(0).toString()
+  // );
   var txData = contract.methods
     .executeStrategy(
       process.env.OP_KOVAN_4_BIDASKUTIL,
@@ -433,17 +439,16 @@ async function marketMake(a, b, t, im, spread, tM) {
     to: process.env["OP_KOVAN_4_BATH" + (await ticker) + "USDC"],
     gasPrice: web3.utils.toWei("0", "Gwei"),
   };
-  //   console.log(
-  //     "New " +
-  //       ticker +
-  //       " trades placed at [bid]: " +
-  //       newBidPrice.toString() +
-  //       "$ and [ask]: " +
-  //       newAskPrice.toString() +
-  //       "$" +
-  //       "\n"
-  //   );
-  // let result = true;
+  console.log(
+    "ATTEMPTING " +
+      ticker +
+      " trades placed at [bid]: " +
+      newBidPrice.toString() +
+      "$ and [ask]: " +
+      newAskPrice.toString() +
+      "$" +
+      "\n"
+  );
   // let result = await sendTx(
   //   tx,
   //   "New " +
@@ -545,9 +550,9 @@ const assets = [
 ];
 
 initNonceManager().then(async () => {
-  // startBot("OHM", 0.02, 5);
-  // startBot("AAVE", 0.02, 5);
+  // startBot("REP", 0.02, 5);
   // startBot("COMP", 0.02, 5);
+  // startBot("RGT", 0.02, 5);
   // for (let index = 0; index < assets.length; index++) {
   //   startBot(await assets[index], 0.02, 5);
   // }

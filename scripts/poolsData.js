@@ -19,8 +19,8 @@ let web3 = new Web3(
 
 // Load the RubiconMarket contract
 var { abi } = require("../build/contracts/RubiconMarket.json");
-// var rubiconMarketKovanAddr = process.env.OP_KOVAN_3_MARKET;
-var rubiconMarketKovanAddr = process.env.OP_KOVAN_3_MARKET;
+// var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
+var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
 var RubiconMarketContractKovan = new web3.eth.Contract(
   abi,
   rubiconMarketKovanAddr
@@ -28,11 +28,11 @@ var RubiconMarketContractKovan = new web3.eth.Contract(
 
 // Load in Pools contract addresses on Kovan
 var { abi } = require("../build/contracts/BathHouse.json");
-var bathHouseKovanAddr = process.env.OP_KOVAN_3_BATHHOUSE;
+var bathHouseKovanAddr = process.env.OP_KOVAN_4_BATHHOUSE;
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
 var { abi } = require("../build/contracts/BidAskUtil.json");
-var strategyKovanAddr = process.env.OP_KOVAN_3_BIDASKUTIL;
+var strategyKovanAddr = process.env.OP_KOVAN_4_BIDASKUTIL;
 var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 //  ** Inputs **
@@ -73,11 +73,11 @@ async function getContractFromToken(ticker, contract) {
   // Load in Dai Contract
   var { abi } = require("../build/contracts/" + contract + ".json");
   if (contract == "BathToken") {
-    var address = process.env["OP_KOVAN_3_BATH" + ticker];
+    var address = process.env["OP_KOVAN_4_BATH" + ticker];
   } else if (contract == "BathPair") {
-    var address = process.env["OP_KOVAN_3_BATH" + ticker + "USDC"];
+    var address = process.env["OP_KOVAN_4_BATH" + ticker + "USDC"];
   } else if (contract == "EquityToken") {
-    var address = process.env["OP_KOVAN_3_" + ticker];
+    var address = process.env["OP_KOVAN_4_" + ticker];
   } else {
     throw "unhandled contract type";
   }
@@ -110,7 +110,7 @@ async function validate() {
       .then(async (r) => {
         let und = await getContractFromToken(element, "EquityToken");
         und.methods
-          .balanceOf(process.env["OP_KOVAN_3_BATH" + element])
+          .balanceOf(process.env["OP_KOVAN_4_BATH" + element])
           .call()
           .then((b) => {
             console.log(
@@ -124,36 +124,27 @@ async function validate() {
             );
           });
       });
-  }
-
-  //  BATH TOKENS
-  for (let index = 0; index < assetsBT.length; index++) {
-    const element = assetsBT[index];
-    let contract = await getContractFromToken(element, "BathToken");
     contract.methods
-      .totalSupply()
+      .outstandingAmount()
       .call()
       .then(async (r) => {
-        contract.methods
-          .underlyingBalance()
-          .call()
-          .then((b) => {
-            console.log(
-              "**" + element + "**",
-              "Total Supply:",
-              r,
-              "Underlying Balance ** Modified:",
-              b,
-              "Gross ROA",
-              b / r
-            );
-          });
-        await contract.methods
-          .outstandingAmount()
-          .call()
-          .then((r) => {
-            console.log("outstandingAmount for " + element + " " + web3.utils.fromWei(r));
-          });
+        console.log(
+          "**" + element + "**",
+          "OutstandingAmount",
+          web3.utils.fromWei(r)
+        );
+      });
+  }
+
+  //  BATH PAIRS
+  for (let index = 0; index < assetsBP.length; index++) {
+    const element = assetsBP[index];
+    var contract = await getContractFromToken(element, "BathPair");
+    contract.methods
+      .getOutstandingPairCount()
+      .call()
+      .then(async (r) => {
+        console.log("outstandingPairCount for " + element + " " + r);
       });
   }
 }

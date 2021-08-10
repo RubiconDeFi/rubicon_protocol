@@ -54,6 +54,12 @@ contract BathToken {
         ERC20 buy_gem
     );
     event LogInit(uint256 timeOfInit);
+    event Deposit(
+        uint256 depositedAmt,
+        IERC20 asset,
+        uint256 sharesReceived,
+        address depositor
+    );
 
     /// @dev Proxy-safe initialization of storage
     function initialize(
@@ -208,6 +214,7 @@ contract BathToken {
             shares = (_amount.mul(totalSupply)).div(_pool);
         }
         _mint(msg.sender, shares);
+        emit Deposit(_amount, underlyingToken, shares, msg.sender);
     }
 
     // No rebalance implementation for lower fees and faster swaps

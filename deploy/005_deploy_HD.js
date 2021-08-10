@@ -40,8 +40,8 @@ const func = async (hre) => {
   // const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
   // const HD_feeTo = new LedgerSigner(provider, type, path_2);
 
-  const HD_deployer_Addr = await HD_deployer.getAddress();
-  console.log("HD Deployer Address:", HD_deployer_Addr);
+  // const HD_deployer_Addr = await HD_deployer.getAddress();
+  // console.log("HD Deployer Address:", HD_deployer_Addr);
   // const HD_proxyAdmin_Addr = await HD_proxyAdmin.getAddress();
   // console.log("HD Deployer Address:", HD_proxyAdmin_Addr);
   // const HD_feeTo_Addr = await HD_feeTo.getAddress();

@@ -48,6 +48,7 @@
     "clean": "npx prettier --write 'contracts/**/*.sol'",
     "poolsBot": "node ./strategist/kovanPoolsStrategist.js",
     "validate": "node ./scripts/validateMigrations.js",
+    "poolsData": "node ./scripts/poolsData.js",
     "deployKovan": "npx hardhat deploy --network optimismKovan",
     "ganache": "ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000"
   }

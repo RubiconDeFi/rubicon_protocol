@@ -54,6 +54,12 @@ contract BathPair {
         address strategist,
         uint256 timestamp
     );
+    event StrategistRewardClaim(
+        address strategist,
+        address asset,
+        uint256 amountOfReward,
+        uint256 timestamp
+    );
 
     /// @dev Maps a trade ID to each of their strategists for rewards purposes
     mapping(uint256 => address) public IDs2strategist;
@@ -127,22 +133,6 @@ contract BathPair {
     }
 
     modifier enforceReserveRatio {
-        require(
-            (
-                BathToken(bathAssetAddress).totalSupply().mul(
-                    BathHouse(bathHouse).reserveRatio()
-                )
-            )
-            .div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
-        );
-        require(
-            (
-                BathToken(bathQuoteAddress).totalSupply().mul(
-                    BathHouse(bathHouse).reserveRatio()
-                )
-            )
-            .div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
-        );
         _;
         require(
             (
@@ -175,11 +165,12 @@ contract BathPair {
     }
 
     function getMidpointPrice() internal view returns (int128) {
-        uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
+        address _RubiconMarketAddress = RubiconMarketAddress;
+        uint256 bestAskID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
         );
-        uint256 bestBidID = RubiconMarket(RubiconMarketAddress).getBestOffer(
+        uint256 bestBidID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
@@ -213,12 +204,12 @@ contract BathPair {
             (askN > 0 && askD > 0) || (bidN > 0 && bidD > 0),
             "one order must be non-zero"
         );
-
-        uint256 bestAskID = RubiconMarket(RubiconMarketAddress).getBestOffer(
+        address _RubiconMarketAddress = RubiconMarketAddress;
+        uint256 bestAskID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
             ERC20(underlyingAsset),
             ERC20(underlyingQuote)
         );
-        uint256 bestBidID = RubiconMarket(RubiconMarketAddress).getBestOffer(
+        uint256 bestBidID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
             ERC20(underlyingQuote),
             ERC20(underlyingAsset)
         );
@@ -307,6 +298,12 @@ contract BathPair {
             )
             .div(totalAssetFills);
             IERC20(underlyingAsset).transfer(msg.sender, booty);
+            emit StrategistRewardClaim(
+                msg.sender,
+                underlyingAsset,
+                booty,
+                block.timestamp
+            );
             totalAssetFills -= fillCountA;
         }
         if (fillCountQ > 0) {
@@ -315,6 +312,12 @@ contract BathPair {
             )
             .div(totalQuoteFills);
             IERC20(underlyingQuote).transfer(msg.sender, booty);
+            emit StrategistRewardClaim(
+                msg.sender,
+                underlyingQuote,
+                booty,
+                block.timestamp
+            );
             totalQuoteFills -= fillCountQ;
         }
     }
@@ -389,7 +392,10 @@ contract BathPair {
                         );
                         // not a full fill
                         if (askDelta != askAmt) {
-                            BathToken(bathAssetAddress).cancel(askId, askAmt);
+                            BathToken(bathAssetAddress).cancel(
+                                askId,
+                                askAmt.sub(askDelta)
+                            );
                         }
                     }
                     // otherwise didn't fill so cancel
@@ -408,7 +414,10 @@ contract BathPair {
                         );
                         // not a full fill
                         if (bidDelta != bidAmt) {
-                            BathToken(bathQuoteAddress).cancel(bidId, bidAmt);
+                            BathToken(bathQuoteAddress).cancel(
+                                bidId,
+                                bidAmt.sub(bidDelta)
+                            );
                         }
                     }
                     // otherwise didn't fill so cancel
@@ -431,10 +440,6 @@ contract BathPair {
 
     // Get offer info from Rubicon Market
     function getOfferInfo(uint256 id) internal view returns (order memory) {
-        if (id == 0) {
-            order memory offerInfo = order(420, ERC20(0), 69, ERC20(0));
-            return offerInfo;
-        } else {
             (
                 uint256 ask_amt,
                 ERC20 ask_gem,
@@ -443,7 +448,6 @@ contract BathPair {
             ) = RubiconMarket(RubiconMarketAddress).getOffer(id);
             order memory offerInfo = order(ask_amt, ask_gem, bid_amt, bid_gem);
             return offerInfo;
-        }
     }
 
     function getOutstandingPairCount() external view returns (uint256) {
@@ -460,7 +464,9 @@ contract BathPair {
         view
         returns (uint256 maxOrderSize)
     {
-        require(asset == underlyingAsset || asset == underlyingQuote);
+        address _underlyingAsset = underlyingAsset;
+        address _underlyingQuote = underlyingQuote;
+        require(asset == _underlyingAsset || asset == _underlyingQuote);
         int128 shapeCoef = ABDKMath64x64.div(shapeCoefNum, 1000);
 
         uint256 underlyingBalance = IERC20(asset).balanceOf(bathTokenAddress);
@@ -470,10 +476,10 @@ contract BathPair {
         );
 
         // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
-        if (asset == underlyingAsset) {
+        if (asset == _underlyingAsset) {
             int128 ratio = ABDKMath64x64.divu(
                 underlyingBalance,
-                IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+                IERC20(_underlyingQuote).balanceOf(bathQuoteAddress)
             );
             if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
                 // bid at maxSize
@@ -494,10 +500,10 @@ contract BathPair {
                 uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
                 return dynamicSize;
             }
-        } else if (asset == underlyingQuote) {
+        } else if (asset == _underlyingQuote) {
             int128 ratio = ABDKMath64x64.divu(
                 underlyingBalance,
-                IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+                IERC20(_underlyingAsset).balanceOf(bathAssetAddress)
             );
             if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2**64)) {
                 return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
@@ -557,14 +563,18 @@ contract BathPair {
             (askNumerator > 0 && askDenominator > 0) ||
                 (bidNumerator > 0 && bidDenominator > 0)
         );
+        address _underlyingAsset = underlyingAsset;
+        address _underlyingQuote = underlyingQuote;
+        address _bathAssetAddress = bathAssetAddress;
+        address _bathQuoteAddress = bathQuoteAddress;
 
         // Enforce dynamic ordersizing and inventory management
         require(
-            askNumerator <= getMaxOrderSize(underlyingAsset, bathAssetAddress),
+            askNumerator <= getMaxOrderSize(_underlyingAsset, _bathAssetAddress),
             "ask too large"
         );
         require(
-            bidNumerator <= getMaxOrderSize(underlyingQuote, bathQuoteAddress),
+            bidNumerator <= getMaxOrderSize(_underlyingQuote, _bathQuoteAddress),
             "bid too large"
         );
 
@@ -585,10 +595,10 @@ contract BathPair {
 
         // 2. Strategist executes a pair trade
         IBidAskUtil(targetStrategy).execute(
-            underlyingAsset,
-            bathAssetAddress,
-            underlyingQuote,
-            bathQuoteAddress,
+            _underlyingAsset,
+            _bathAssetAddress,
+            _underlyingQuote,
+            _bathQuoteAddress,
             askNumerator, // ask pay_amt
             askDenominator, // ask buy_amt
             bidNumerator, // bid pay_amt
@@ -599,25 +609,25 @@ contract BathPair {
         // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
         newTradeIDs(msg.sender);
 
-        emit LogStrategistTrades(
-            outstandingPairIDs[outstandingPairIDs.length - 1][0],
-            underlyingAsset,
-            outstandingPairIDs[outstandingPairIDs.length - 1][1],
-            outstandingPairIDs[outstandingPairIDs.length - 1][2],
-            underlyingQuote,
-            outstandingPairIDs[outstandingPairIDs.length - 1][3],
-            msg.sender,
-            block.timestamp
-        );
-
-        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
-        rebalancePair();
+        // emit LogStrategistTrades(
+        //     outstandingPairIDs[outstandingPairIDs.length - 1][0],
+        //     underlyingAsset,
+        //     outstandingPairIDs[outstandingPairIDs.length - 1][1],
+        //     outstandingPairIDs[outstandingPairIDs.length - 1][2],
+        //     underlyingQuote,
+        //     outstandingPairIDs[outstandingPairIDs.length - 1][3],
+        //     msg.sender,
+        //     block.timestamp
+        // );
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
     function bathScrub() external {
         // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
+
+        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
+        rebalancePair();
     }
 
     // This function allows a strategist to remove Pools liquidity from the order book
@@ -628,19 +638,25 @@ contract BathPair {
         );
         order memory ord = getOfferInfo(id);
         if (ord.pay_gem == ERC20(underlyingAsset)) {
-            uint len = outstandingPairIDs.length;
+            uint256 len = outstandingPairIDs.length;
             for (uint256 x = 0; x < len; x++) {
                 if (outstandingPairIDs[x][0] == id) {
-                    BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][1]);
+                    BathToken(bathAssetAddress).cancel(
+                        id,
+                        outstandingPairIDs[x][1]
+                    );
                     removeElement(x);
                     break;
                 }
             }
         } else if (ord.pay_gem == ERC20(underlyingQuote)) {
-            uint len = outstandingPairIDs.length;
+            uint256 len = outstandingPairIDs.length;
             for (uint256 x = 0; x < len; x++) {
                 if (outstandingPairIDs[x][2] == id) {
-                    BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][3]);
+                    BathToken(bathAssetAddress).cancel(
+                        id,
+                        outstandingPairIDs[x][3]
+                    );
                     removeElement(x);
                     break;
                 }
