@@ -550,7 +550,7 @@ const assets = [
 ];
 
 initNonceManager().then(async () => {
-  // startBot("REP", 0.02, 5);
+  startBot("REP", 0.02, 5);
   // startBot("COMP", 0.02, 5);
   // startBot("RGT", 0.02, 5);
   // for (let index = 0; index < assets.length; index++) {

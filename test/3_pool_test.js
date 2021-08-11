@@ -294,22 +294,22 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         // await rubiconMarketInstance.buy(4 + (2 * (index + 1)), web3.utils.toWei((0.4).toString()), {
         //   from: accounts[5],
         // });
-        // logIndented(
-        //   "cost of executeStrategy:",
-        //   await bathPairInstance
-        //     .executeStrategy
-        //     .estimateGas(
-        //       strategyInstance.address,
-        //       askNumerator,
-        //       askDenominator,
-        //       bidNumerator,
-        //       bidDenominator
-        //     ),
-        //     index
-        // );
+
       }
-      // helper.advanceTimeAndBlock(20);
-      // logIndented("cost of bathScrub:", await bathPairInstance.bathScrub.estimateGas());
+      logIndented(
+        "cost of executeStrategy:",
+        await bathPairInstance
+          .executeStrategy
+          .estimateGas(
+            strategyInstance.address,
+            askNumerator,
+            askDenominator,
+            bidNumerator,
+            bidDenominator
+          )
+      );
+      helper.advanceTimeAndBlock(20);
+      logIndented("cost of bathScrub:", await bathPairInstance.bathScrub.estimateGas());
       await bathPairInstance.bathScrub();
       await bathPairInstance.bathScrub();
       await bathPairInstance.bathScrub();

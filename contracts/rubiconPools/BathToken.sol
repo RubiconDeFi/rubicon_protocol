@@ -147,14 +147,8 @@ contract BathToken {
 
     // Rubicon Market Functions:
     // pass initAmt as zero if unsure
-    function cancel(uint256 id, uint256 initAmt) external onlyPair {
-        if (initAmt == 0) {
-            (uint256 pay_amt, , , ) = RubiconMarket(RubiconMarketAddress)
-            .getOffer(id);
-            outstandingAmount = outstandingAmount.sub(pay_amt);
-        } else {
-            outstandingAmount = outstandingAmount.sub(initAmt);
-        }
+    function cancel(uint256 id, uint256 Amt) external onlyPair {
+        outstandingAmount = outstandingAmount.sub(Amt);
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 
