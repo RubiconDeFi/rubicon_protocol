@@ -10,7 +10,6 @@ pragma solidity =0.7.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../RubiconMarket.sol";
-import "./BidAskUtil.sol";
 import "./BathHouse.sol";
 
 contract BathToken {
@@ -117,14 +116,6 @@ contract BathToken {
         _;
     }
 
-    modifier onlyApprovedStrategy() {
-        require(
-            BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
-            "not an approved strategy - bathToken"
-        );
-        _;
-    }
-
     function setMarket(address newRubiconMarket) external {
         require(msg.sender == bathHouse && initialized);
         RubiconMarketAddress = newRubiconMarket;
@@ -162,10 +153,16 @@ contract BathToken {
         ERC20 pay_gem,
         uint256 buy_amt,
         ERC20 buy_gem
-    ) external onlyApprovedStrategy returns (uint256) {
+    ) external onlyPair returns (uint256) {
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
+        
+        // If incomplete offer return 0
+        if (pay_amt == 0 || pay_gem == ERC20(0) || buy_amt == 0 || buy_gem == ERC20(0)) {
+            return 0;
+        }
+
         uint256 id = RubiconMarket(RubiconMarketAddress).offer(
             pay_amt,
             pay_gem,

@@ -170,14 +170,10 @@ contract EventfulMarket {
     event FeeTake(
         bytes32 id,
         bytes32 indexed pair,
-        address indexed maker,
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20 asset,
         address indexed taker,
-        uint128 take_amt,
-        uint128 give_amt,
-        uint256 feeAmt,
         address feeTo,
+        uint256 feeAmt,
         uint64 timestamp
     );
 
@@ -328,14 +324,10 @@ contract SimpleMarket is EventfulMarket, DSMath {
         emit FeeTake(
             bytes32(id),
             keccak256(abi.encodePacked(_offer.pay_gem, _offer.buy_gem)),
-            _offer.owner,
-            _offer.pay_gem,
             _offer.buy_gem,
             msg.sender,
-            uint128(quantity),
-            uint128(spend),
-            fee,
             feeTo,
+            fee,
             uint64(block.timestamp)
         );
         emit LogTrade(
@@ -553,10 +545,10 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     uint256 public dustId; // id of the latest offer marked as dust
 
     /// @dev Proxy-safe initialization of storage
-    function initialize(bool RBCNDist, address _feeTo) public {
+    function initialize(bool _live, address _feeTo) public {
         // require(msg.sender == ___deployer____);
         require(!initialized, "contract is already initialized");
-        AqueductDistributionLive = RBCNDist;
+        AqueductDistributionLive = _live;
         feeTo = _feeTo;
 
         owner = msg.sender;
@@ -663,7 +655,7 @@ contract RubiconMarket is MatchingEvents, ExpiringMarket, DSNote {
     {
         require(!locked, "Reentrancy attempt");
 
-        //RBCN distribution on the trade
+        //Optional distribution on trade
         if (AqueductDistributionLive) {
             IAqueduct(AqueductAddress).distributeToMakerAndTaker(
                 getOwner(id),

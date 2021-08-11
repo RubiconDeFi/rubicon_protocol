@@ -187,18 +187,6 @@ contract BathHouse {
         return getPair[asset][quote];
     }
 
-    function isApprovedStrat(address strategy) external view returns (bool) {
-        if (approvedStrategies[strategy] == true) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function approveStrategy(address strategy) external onlyAdmin {
-        approvedStrategies[strategy] = true;
-    }
-
     function isApprovedBathToken(address bathToken)
         external
         view
