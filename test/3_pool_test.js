@@ -4,7 +4,6 @@ const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("USDCWithFaucet");
 const WETH = artifacts.require("WETH9");
-const BidAskUtil = artifacts.require("BidAskUtil");
 
 const helper = require("./testHelpers/timeHelper.js");
 
@@ -245,15 +244,8 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         { from: accounts[4], gas: 0x1ffffff }
       );
     });
-    it("Can initialize an approved strategy", async function () {
-      strategyInstance = await BidAskUtil.deployed();
-
-      await bathHouseInstance.approveStrategy(strategyInstance.address);
-      assert.equal(await strategyInstance.initialized(), true);
-    });
     it("Any user can call executeStrategy() on bath Pairs", async function () {
       await bathPairInstance.executeStrategy(
-        strategyInstance.address,
         askNumerator,
         askDenominator,
         bidNumerator,
@@ -285,7 +277,6 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       let target = 6;
       for (let index = 0; index < target; index++) {
         await bathPairInstance.executeStrategy(
-          strategyInstance.address,
           askNumerator,
           askDenominator,
           bidNumerator,
@@ -296,12 +287,12 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         // });
 
       }
+      // logIndented("cost to deploy bathPair", await BathPair.new().estimateGas())
       logIndented(
         "cost of executeStrategy:",
         await bathPairInstance
           .executeStrategy
           .estimateGas(
-            strategyInstance.address,
             askNumerator,
             askDenominator,
             bidNumerator,
@@ -321,7 +312,6 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       let target = 6;
       for (let index = 0; index < target; index++) {
         await bathPairInstance.executeStrategy(
-          strategyInstance.address,
           askNumerator,
           askDenominator,
           bidNumerator,
@@ -349,7 +339,6 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       await bathPairInstance.bathScrub();
 
       await bathPairInstance.executeStrategy(
-        strategyInstance.address,
         askNumerator,
         askDenominator,
         bidNumerator,
@@ -358,14 +347,12 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     });
     it("Zero order can be placed - bid or ask", async function () {
       await bathPairInstance.executeStrategy(
-        strategyInstance.address,
         0,
         0,
         bidNumerator,
         bidDenominator
       );
       await bathPairInstance.executeStrategy(
-        strategyInstance.address,
         askNumerator,
         askDenominator,
         0,
@@ -374,13 +361,16 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       await bathPairInstance.bathScrub();
     });
     it("Strategist can cancel an order they made", async function () {
+      logIndented(
+        "cost of remove liqudity:",
+        await bathPairInstance.removeLiquidity.estimateGas(7)
+      );
       await bathPairInstance.removeLiquidity(7);
       // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
     });
     it("New strategist can be added to pools ", async function () {
       await bathHouseInstance.approveStrategist(accounts[6]);
       await bathPairInstance.executeStrategy(
-        strategyInstance.address,
         askNumerator,
         askDenominator,
         bidNumerator,
@@ -391,13 +381,13 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     });
     // for (let i = 1; i < 10; i++) {
     //     it(`Spamming of executeStrategy iteration: ${i}`, async function () {
-    //         await bathPairInstance.executeStrategy(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator);
+    //         await bathPairInstance.executeStrategy( askNumerator, askDenominator, bidNumerator, bidDenominator);
     //         // TODO: log gas while looping through multiple bathScrub calls
     //         // See how it scales and if a solution is available to make it more gas efficient
     //         // --> why in the OVM is bathScrub failing? This is the goal...
 
     //         await rubiconMarketInstance.buy(8 + (i*2), web3.utils.toWei((0.4).toString()), { from: accounts[5] });
-    //         // console.log(await bathPairInstance.executeStrategy.estimateGas(strategyInstance.address, askNumerator, askDenominator, bidNumerator, bidDenominator));
+    //         // console.log(await bathPairInstance.executeStrategy.estimateGas( askNumerator, askDenominator, bidNumerator, bidDenominator));
     //         // console.log("IDs of new trades: ",  await bathPairInstance.getLastTradeIDs());
     //         let outstandingPairs = await bathPairInstance.getOutstandingPairCount();
     //         if (outstandingPairs > 5) {

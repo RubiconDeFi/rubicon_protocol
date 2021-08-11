@@ -3,7 +3,6 @@ var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
 var BathToken = artifacts.require("./contracts/rubiconPoolsv0/BathToken.sol");
-var BidAskUtil = artifacts.require("./contracts/BidAskUtil.sol");
 
 var WETH = artifacts.require("./contracts/WETH9.sol");
 var DAI = artifacts.require("./contracts/peripheral_contracts/USDCWithFaucet.sol");
@@ -33,8 +32,6 @@ module.exports = async function(deployer, network, accounts) {
 
             await deployer.deploy(BathHouse).then(async function() {
               await deployer.deploy(BathPair);
-              bau = await deployer.deploy(BidAskUtil);
-              await bau.initialize("Pairs Trade", BathHouse.address, RubiconMarket.address);
               return;
             }); 
         });

@@ -31,10 +31,6 @@ var { abi } = require("../build/contracts/BathHouse.json");
 var bathHouseKovanAddr = process.env.OP_KOVAN_4_BATHHOUSE;
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
-var { abi } = require("../build/contracts/BidAskUtil.json");
-var strategyKovanAddr = process.env.OP_KOVAN_4_BIDASKUTIL;
-var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
-
 //  ** Inputs **
 
 const assetsBT = [

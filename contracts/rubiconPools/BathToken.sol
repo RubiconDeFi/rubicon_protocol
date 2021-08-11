@@ -10,7 +10,6 @@ pragma solidity =0.7.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../RubiconMarket.sol";
-import "./BidAskUtil.sol";
 import "./BathHouse.sol";
 
 contract BathToken {
@@ -47,12 +46,6 @@ contract BathToken {
         uint256 value
     );
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event LogTrade(
-        uint256 pay_amt,
-        ERC20 pay_gem,
-        uint256 buy_amt,
-        ERC20 buy_gem
-    );
     event LogInit(uint256 timeOfInit);
     event Deposit(
         uint256 depositedAmt,
@@ -117,14 +110,6 @@ contract BathToken {
         _;
     }
 
-    modifier onlyApprovedStrategy() {
-        require(
-            BathHouse(bathHouse).isApprovedStrat(msg.sender) == true,
-            "not an approved strategy - bathToken"
-        );
-        _;
-    }
-
     function setMarket(address newRubiconMarket) external {
         require(msg.sender == bathHouse && initialized);
         RubiconMarketAddress = newRubiconMarket;
@@ -145,39 +130,6 @@ contract BathToken {
         feeTo = _feeTo;
     }
 
-    // Rubicon Market Functions:
-    // pass initAmt as zero if unsure
-    function cancel(uint256 id, uint256 Amt) external onlyPair {
-        outstandingAmount = outstandingAmount.sub(Amt);
-        RubiconMarket(RubiconMarketAddress).cancel(id);
-    }
-
-    function removeFilledTradeAmount(uint256 amt) external onlyPair {
-        outstandingAmount = outstandingAmount.sub(amt);
-    }
-
-    // function that places a bid/ask in the orderbook for a given pair
-    function placeOffer(
-        uint256 pay_amt,
-        ERC20 pay_gem,
-        uint256 buy_amt,
-        ERC20 buy_gem
-    ) external onlyApprovedStrategy returns (uint256) {
-        // Place an offer in RubiconMarket
-        // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
-        // while also ensuring that the order is placed in the sorted list
-        uint256 id = RubiconMarket(RubiconMarketAddress).offer(
-            pay_amt,
-            pay_gem,
-            buy_amt,
-            buy_gem,
-            0,
-            false
-        );
-        outstandingAmount = outstandingAmount.add(pay_amt);
-        return (id);
-    }
-
     function underlying() external view returns (address) {
         require(initialized);
         return address(underlyingToken);
@@ -192,6 +144,67 @@ contract BathToken {
         return _pool.add(outstandingAmount);
     }
 
+    // ** Rubicon Market Functions: **
+    function cancel(uint256 id, uint256 amt) external onlyPair {
+        outstandingAmount = outstandingAmount.sub(amt);
+        RubiconMarket(RubiconMarketAddress).cancel(id);
+    }
+
+    function removeFilledTradeAmount(uint256 amt) external onlyPair {
+        outstandingAmount = outstandingAmount.sub(amt);
+    }
+
+    // function that places a bid/ask in the orderbook for a given pair
+    function placeOffer(
+        uint256 pay_amt,
+        ERC20 pay_gem,
+        uint256 buy_amt,
+        ERC20 buy_gem
+    ) external onlyPair returns (uint256) {
+        // Place an offer in RubiconMarket
+        // If incomplete offer return 0
+        if (
+            pay_amt == 0 ||
+            pay_gem == ERC20(0) ||
+            buy_amt == 0 ||
+            buy_gem == ERC20(0)
+        ) {
+            return 0;
+        }
+
+        uint256 id = RubiconMarket(RubiconMarketAddress).offer(
+            pay_amt,
+            pay_gem,
+            buy_amt,
+            buy_gem,
+            0,
+            false
+        );
+        outstandingAmount = outstandingAmount.add(pay_amt);
+        return (id);
+    }
+
+    // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
+    function rebalance(
+        address sisterBath,
+        address underlyingAsset, /* sister asset */
+        uint256 stratProportion
+    ) external onlyPair {
+        require(stratProportion > 0 && stratProportion < 50 && initialized);
+        uint256 stratReward = (
+            stratProportion.mul(
+                IERC20(underlyingAsset).balanceOf(address(this))
+            )
+        )
+        .div(10000);
+        IERC20(underlyingAsset).transfer(
+            sisterBath,
+            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
+        );
+        IERC20(underlyingAsset).transfer(msg.sender, stratReward);
+    }
+
+    // ** User Entrypoints: **
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) external {
         uint256 _pool = underlyingBalance();
@@ -215,34 +228,12 @@ contract BathToken {
     function withdraw(uint256 _shares) external {
         uint256 r = (underlyingBalance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
-
         uint256 _fee = r.mul(feeBPS).div(10000);
         IERC20(underlyingToken).transfer(feeTo, _fee);
-
         underlyingToken.transfer(msg.sender, r.sub(_fee));
     }
 
-    // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
-    function rebalance(
-        address sisterBath,
-        address underlyingAsset, /* sister asset */
-        uint256 stratProportion
-    ) external onlyPair {
-        require(stratProportion > 0 && stratProportion < 50 && initialized);
-        uint256 stratReward = (
-            stratProportion.mul(
-                IERC20(underlyingAsset).balanceOf(address(this))
-            )
-        )
-        .div(10000);
-        IERC20(underlyingAsset).transfer(
-            sisterBath,
-            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
-        );
-        IERC20(underlyingAsset).transfer(msg.sender, stratReward);
-    }
-
-    // *** Internal Functions ***
+    // ** Internal Functions **
 
     function _mint(address to, uint256 value) internal {
         totalSupply = totalSupply.add(value);
