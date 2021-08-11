@@ -60,7 +60,6 @@ contract BathPair {
   );
 
   /// @dev Maps a trade ID to each of their strategists for rewards purposes
-//   mapping(uint256 => address) public IDs2strategist;
   mapping(address => uint256) public strategist2FillsAsset;
   mapping(address => uint256) public strategist2FillsQuote;
 
