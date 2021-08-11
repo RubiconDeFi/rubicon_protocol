@@ -425,7 +425,6 @@ async function marketMake(a, b, t, im, spread, tM) {
   // );
   var txData = contract.methods
     .executeStrategy(
-      process.env.OP_KOVAN_4_BIDASKUTIL,
       web3.utils.toBN(askNum.decimalPlaces(0)),
       web3.utils.toBN(askDen.decimalPlaces(0)),
       web3.utils.toBN(bidNum.decimalPlaces(0)),

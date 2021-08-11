@@ -208,10 +208,8 @@ contract BathPair {
 
         // If orders in the order book, adhere to more constraints
         if (
-            bestAsk.pay_amt > 0 &&
-            bestAsk.buy_amt > 0 &&
-            bestBid.pay_amt > 0 &&
-            bestBid.buy_amt > 0
+            (bestAsk.pay_amt > 0 && bestAsk.buy_amt > 0) &&
+            (bestBid.pay_amt > 0 && bestBid.buy_amt > 0)
         ) {
             if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
                 require(
