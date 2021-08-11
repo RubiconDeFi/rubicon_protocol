@@ -288,6 +288,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         // });
 
       }
+      // logIndented("cost to deploy bathPair", await BathPair.new().estimateGas())
       logIndented(
         "cost of executeStrategy:",
         await bathPairInstance
@@ -361,6 +362,10 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       await bathPairInstance.bathScrub();
     });
     it("Strategist can cancel an order they made", async function () {
+      logIndented(
+        "cost of remove liqudity:",
+        await bathPairInstance.removeLiquidity.estimateGas(7)
+      );
       await bathPairInstance.removeLiquidity(7);
       // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
     });

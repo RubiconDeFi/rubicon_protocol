@@ -60,7 +60,7 @@ contract BathPair {
   );
 
   /// @dev Maps a trade ID to each of their strategists for rewards purposes
-  mapping(uint256 => address) public IDs2strategist;
+//   mapping(uint256 => address) public IDs2strategist;
   mapping(address => uint256) public strategist2FillsAsset;
   mapping(address => uint256) public strategist2FillsQuote;
 
@@ -77,6 +77,7 @@ contract BathPair {
     uint bidId;
     uint bidAmt;
     uint timestamp;
+    address strategist;
   }
 
   /// @dev Proxy-safe initialization of storage
@@ -161,7 +162,7 @@ contract BathPair {
   function setSearchRadius(uint256 val) external onlyBathHouse {
     searchRadius = val;
   }
-
+  
   function getMidpointPrice() internal view returns (int128) {
     address _RubiconMarketAddress = RubiconMarketAddress;
     uint256 bestAskID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
@@ -172,11 +173,10 @@ contract BathPair {
       ERC20(underlyingQuote),
       ERC20(underlyingAsset)
     );
-    require(
-      bestAskID > 0 && bestBidID > 0,
-      "bids or asks are missing to get a Midpoint"
-    );
-
+    // Throw a zero if unable to determine midpoint from the book
+    if (bestAskID == 0 || bestBidID == 0) {
+        return 0;
+    }
     order memory bestAsk = getOfferInfo(bestAskID);
     order memory bestBid = getOfferInfo(bestBidID);
     int128 midpoint = ABDKMath64x64.divu(
@@ -314,25 +314,21 @@ contract BathPair {
     }
   }
 
-//   function addOutstandingPair(StrategistTrade input) internal {
-//     // require(IDPair.length == 5);
-//     outstandingPairIDs.push(input);
-//   }
-
   // orderID of the fill
   // only log fills for each strategist - needs to be asset specific
   // isAssetFill are *quotes* that result in asset yield
   function logFill(
     uint256 amt,
     uint256 orderID,
-    bool isAssetFill
+    bool isAssetFill,
+    address sender
   ) internal {
     // Goal is to map a fill to a strategist
     if (isAssetFill) {
-      strategist2FillsAsset[IDs2strategist[orderID]] += amt;
+      strategist2FillsAsset[sender] += amt;
       totalAssetFills += amt;
     } else {
-      strategist2FillsQuote[IDs2strategist[orderID]] += amt;
+      strategist2FillsQuote[sender] += amt;
       totalQuoteFills += amt;
     }
   }
@@ -362,10 +358,6 @@ contract BathPair {
 
     for (uint256 x = _start; x < _start + _searchRadius; x++) {
       if (outstandingPairIDs[x].timestamp < (block.timestamp - timeDelay)) {
-        // uint256 askId = outstandingPairIDs[x].askID;
-        // uint256 askAmt = outstandingPairIDs[x].askAmt;
-        // uint256 bidId = outstandingPairIDs[x].bidID;
-        // uint256 bidAmt = outstandingPairIDs[x].bidAmt;
         StrategistTrade memory info = outstandingPairIDs[x];
         order memory offer1 = getOfferInfo(info.askId); //ask
         order memory offer2 = getOfferInfo(info.bidId); //bid
@@ -376,7 +368,7 @@ contract BathPair {
         if (info.askId != 0) {
           // if delta > 0 - delta is fill => handle any amount of fill here
           if (askDelta > 0) {
-            logFill(askDelta, info.askId, true); //todo make this accept an amount
+            logFill(askDelta, info.askId, true, info.strategist); 
             BathToken(bathAssetAddress).removeFilledTradeAmount(askDelta);
             // not a full fill
             if (askDelta != info.askAmt) {
@@ -393,7 +385,7 @@ contract BathPair {
         if (info.bidId != 0) {
           // if delta > 0 - delta is fill => handle any amount of fill here
           if (bidDelta > 0) {
-            logFill(bidDelta, info.bidId, false); //todo make this accept an amount
+            logFill(bidDelta, info.bidId, false, info.strategist); 
             BathToken(bathQuoteAddress).removeFilledTradeAmount(bidDelta);
             // not a full fill
             if (bidDelta != info.bidAmt) {
@@ -455,13 +447,18 @@ contract BathPair {
       "no bathToken liquidity to calculate max orderSize permissable"
     );
 
+    // If no midpoint in book, allow **permissioned** strategist to maxOrderSize
+    int128 midpoint = getMidpointPrice();
+    if (midpoint == 0) {
+        return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
+    } 
     // if the asset/quote is overweighted: underlyingBalance / (Proportion of quote allocated to pair) * underlyingQuote balance
     if (asset == _underlyingAsset) {
       int128 ratio = ABDKMath64x64.divu(
         underlyingBalance,
         IERC20(_underlyingQuote).balanceOf(bathQuoteAddress)
       );
-      if (ABDKMath64x64.mul(ratio, getMidpointPrice()) > (2**64)) {
+      if (ABDKMath64x64.mul(ratio, midpoint) > (2**64)) {
         // bid at maxSize
         return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
       } else {
@@ -470,7 +467,7 @@ contract BathPair {
         int128 shapeFactor = ABDKMath64x64.exp(
           ABDKMath64x64.mul(
             shapeCoef,
-            ABDKMath64x64.inv(ABDKMath64x64.mul(ratio, getMidpointPrice()))
+            ABDKMath64x64.inv(ABDKMath64x64.mul(ratio, midpoint))
           )
         );
         uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
@@ -481,7 +478,7 @@ contract BathPair {
         underlyingBalance,
         IERC20(_underlyingAsset).balanceOf(bathAssetAddress)
       );
-      if (ABDKMath64x64.div(ratio, getMidpointPrice()) > (2**64)) {
+      if (ABDKMath64x64.div(ratio, midpoint) > (2**64)) {
         return maxOrderSizeBPS.mul(underlyingBalance).div(10000);
       } else {
         // return dynamic order size
@@ -489,26 +486,13 @@ contract BathPair {
         int128 shapeFactor = ABDKMath64x64.exp(
           ABDKMath64x64.mul(
             shapeCoef,
-            ABDKMath64x64.inv(ABDKMath64x64.div(ratio, getMidpointPrice()))
+            ABDKMath64x64.inv(ABDKMath64x64.div(ratio, midpoint))
           )
         );
         uint256 dynamicSize = ABDKMath64x64.mulu(shapeFactor, maxSize);
         return dynamicSize;
       }
     }
-  }
-
-  // Used to map a strategist to their orders
-  function newTradeIDs(address strategist) internal {
-    require(
-      outstandingPairIDs[outstandingPairIDs.length - 1].timestamp == block.timestamp
-    );
-    IDs2strategist[
-      outstandingPairIDs[outstandingPairIDs.length - 1].askId
-    ] = strategist;
-    IDs2strategist[
-      outstandingPairIDs[outstandingPairIDs.length - 1].bidId
-    ] = strategist;
   }
 
   // ** Below are the functions that can be called by Strategists **
@@ -578,13 +562,10 @@ contract BathPair {
       bid.buy_amt,
       bid.buy_gem
     );
-    outstandingPairIDs.push(
-      StrategistTrade(newAskID, ask.pay_amt, newBidID, bid.pay_amt, block.timestamp)
-    );
-
     // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
-    // Need a mapping of trade ID that filled => strategist, timestamp, their price, bid or ask, midpoint price at that time
-    newTradeIDs(msg.sender);
+    outstandingPairIDs.push(
+      StrategistTrade(newAskID, ask.pay_amt, newBidID, bid.pay_amt, block.timestamp, msg.sender)
+    );
   }
 
   // This function cleans outstanding orders and rebalances yield between bathTokens
@@ -598,15 +579,16 @@ contract BathPair {
 
   // This function allows a strategist to remove Pools liquidity from the order book
   function removeLiquidity(uint256 id) external {
-    require(
-      IDs2strategist[id] == msg.sender,
-      "only strategist can cancel their orders"
-    );
+    // require(
+    //   IDs2strategist[id] == msg.sender,
+    //   "only strategist can cancel their orders"
+    // );
     order memory ord = getOfferInfo(id);
     if (ord.pay_gem == ERC20(underlyingAsset)) {
       uint256 len = outstandingPairIDs.length;
       for (uint256 x = 0; x < len; x++) {
         if (outstandingPairIDs[x].askId == id) {
+          require(msg.sender == outstandingPairIDs[x].strategist, "only strategist can cancel their orders");
           BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x].askAmt);
           removeElement(x);
           break;
@@ -616,6 +598,7 @@ contract BathPair {
       uint256 len = outstandingPairIDs.length;
       for (uint256 x = 0; x < len; x++) {
         if (outstandingPairIDs[x].bidId == id) {
+          require(msg.sender == outstandingPairIDs[x].strategist, "only strategist can cancel their orders");
           BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x].bidAmt);
           removeElement(x);
           break;
