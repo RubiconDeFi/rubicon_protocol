@@ -493,7 +493,7 @@ const func = async (hre) => {
     return await deploy("TransparentUpgradeableProxy", {
       from: deployer,
       log: true,
-      gasLimit: 82410000,
+      gasLimit: 9000000,
       args: [address, process.env.OP_KOVAN_PROXY_ADMIN, "0x"],
       nonce: getNonce(),
     }).then(async function (d) {

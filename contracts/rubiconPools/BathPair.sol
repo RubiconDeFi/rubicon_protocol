@@ -40,9 +40,8 @@ contract BathPair {
   uint256 internal totalQuoteFills;
 
   /// @dev [askID, ask.pay_amt, bidID, bid.pay_amt, timestamp]
-  uint256[5][] public outstandingPairIDs;
+  StrategistTrade[] public outstandingPairIDs;
 
-  event LogNote(string, uint256, uint256);
   event LogStrategistTrades(
     uint256 idAsk,
     address askAsset,
@@ -70,6 +69,14 @@ contract BathPair {
     ERC20 pay_gem;
     uint256 buy_amt;
     ERC20 buy_gem;
+  }
+
+  struct StrategistTrade {
+    uint askId;
+    uint askAmt;
+    uint bidId;
+    uint bidAmt;
+    uint timestamp;
   }
 
   /// @dev Proxy-safe initialization of storage
@@ -307,12 +314,10 @@ contract BathPair {
     }
   }
 
-  function addOutstandingPair(uint256[5] memory IDPair)
-    internal
-  {
-    require(IDPair.length == 5);
-    outstandingPairIDs.push(IDPair);
-  }
+//   function addOutstandingPair(StrategistTrade input) internal {
+//     // require(IDPair.length == 5);
+//     outstandingPairIDs.push(input);
+//   }
 
   // orderID of the fill
   // only log fills for each strategist - needs to be asset specific
@@ -356,47 +361,48 @@ contract BathPair {
     }
 
     for (uint256 x = _start; x < _start + _searchRadius; x++) {
-      if (outstandingPairIDs[x][4] < (block.timestamp - timeDelay)) {
-        uint256 askId = outstandingPairIDs[x][0];
-        uint256 askAmt = outstandingPairIDs[x][1];
-        uint256 bidId = outstandingPairIDs[x][2];
-        uint256 bidAmt = outstandingPairIDs[x][3];
-        order memory offer1 = getOfferInfo(askId); //ask
-        order memory offer2 = getOfferInfo(bidId); //bid
-        uint256 askDelta = askAmt - offer1.pay_amt;
-        uint256 bidDelta = bidAmt - offer2.pay_amt;
+      if (outstandingPairIDs[x].timestamp < (block.timestamp - timeDelay)) {
+        // uint256 askId = outstandingPairIDs[x].askID;
+        // uint256 askAmt = outstandingPairIDs[x].askAmt;
+        // uint256 bidId = outstandingPairIDs[x].bidID;
+        // uint256 bidAmt = outstandingPairIDs[x].bidAmt;
+        StrategistTrade memory info = outstandingPairIDs[x];
+        order memory offer1 = getOfferInfo(info.askId); //ask
+        order memory offer2 = getOfferInfo(info.bidId); //bid
+        uint256 askDelta = info.askAmt - offer1.pay_amt;
+        uint256 bidDelta = info.bidAmt - offer2.pay_amt;
 
         // if real
-        if (askId != 0) {
+        if (info.askId != 0) {
           // if delta > 0 - delta is fill => handle any amount of fill here
           if (askDelta > 0) {
-            logFill(askDelta, askId, true); //todo make this accept an amount
+            logFill(askDelta, info.askId, true); //todo make this accept an amount
             BathToken(bathAssetAddress).removeFilledTradeAmount(askDelta);
             // not a full fill
-            if (askDelta != askAmt) {
-              BathToken(bathAssetAddress).cancel(askId, askAmt.sub(askDelta));
+            if (askDelta != info.askAmt) {
+              BathToken(bathAssetAddress).cancel(info.askId, info.askAmt.sub(askDelta));
             }
           }
           // otherwise didn't fill so cancel
           else {
-            BathToken(bathAssetAddress).cancel(askId, askAmt); // pas amount too
+            BathToken(bathAssetAddress).cancel(info.askId, info.askAmt); // pas amount too
           }
         }
 
         // if real
-        if (bidId != 0) {
+        if (info.bidId != 0) {
           // if delta > 0 - delta is fill => handle any amount of fill here
           if (bidDelta > 0) {
-            logFill(bidDelta, bidId, false); //todo make this accept an amount
+            logFill(bidDelta, info.bidId, false); //todo make this accept an amount
             BathToken(bathQuoteAddress).removeFilledTradeAmount(bidDelta);
             // not a full fill
-            if (bidDelta != bidAmt) {
-              BathToken(bathQuoteAddress).cancel(bidId, bidAmt.sub(bidDelta));
+            if (bidDelta != info.bidAmt) {
+              BathToken(bathQuoteAddress).cancel(info.bidId, info.bidAmt.sub(bidDelta));
             }
           }
           // otherwise didn't fill so cancel
           else {
-            BathToken(bathQuoteAddress).cancel(bidId, bidAmt); // pas amount too
+            BathToken(bathQuoteAddress).cancel(info.bidId, info.bidAmt); // pas amount too
           }
         }
 
@@ -495,18 +501,14 @@ contract BathPair {
   // Used to map a strategist to their orders
   function newTradeIDs(address strategist) internal {
     require(
-      outstandingPairIDs[outstandingPairIDs.length - 1][4] == block.timestamp
+      outstandingPairIDs[outstandingPairIDs.length - 1].timestamp == block.timestamp
     );
     IDs2strategist[
-      outstandingPairIDs[outstandingPairIDs.length - 1][0]
+      outstandingPairIDs[outstandingPairIDs.length - 1].askId
     ] = strategist;
     IDs2strategist[
-      outstandingPairIDs[outstandingPairIDs.length - 1][2]
+      outstandingPairIDs[outstandingPairIDs.length - 1].bidId
     ] = strategist;
-  }
-
-  function getLastTradeIDs() external view returns (uint256[5] memory) {
-    return outstandingPairIDs[outstandingPairIDs.length - 1];
   }
 
   // ** Below are the functions that can be called by Strategists **
@@ -516,11 +518,7 @@ contract BathPair {
     uint256 askDenominator, // Asset / Quote
     uint256 bidNumerator, // size in ASSET
     uint256 bidDenominator // size in QUOTES
-  )
-    external
-    enforceReserveRatio
-    onlyApprovedStrategist(msg.sender)
-  {
+  ) external enforceReserveRatio onlyApprovedStrategist(msg.sender) {
     // Require at least one order is non-zero
     require(
       (askNumerator > 0 && askDenominator > 0) ||
@@ -580,8 +578,8 @@ contract BathPair {
       bid.buy_amt,
       bid.buy_gem
     );
-    addOutstandingPair(
-      [newAskID, ask.pay_amt, newBidID, bid.pay_amt, block.timestamp]
+    outstandingPairIDs.push(
+      StrategistTrade(newAskID, ask.pay_amt, newBidID, bid.pay_amt, block.timestamp)
     );
 
     // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
@@ -608,8 +606,8 @@ contract BathPair {
     if (ord.pay_gem == ERC20(underlyingAsset)) {
       uint256 len = outstandingPairIDs.length;
       for (uint256 x = 0; x < len; x++) {
-        if (outstandingPairIDs[x][0] == id) {
-          BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][1]);
+        if (outstandingPairIDs[x].askId == id) {
+          BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x].askAmt);
           removeElement(x);
           break;
         }
@@ -617,8 +615,8 @@ contract BathPair {
     } else if (ord.pay_gem == ERC20(underlyingQuote)) {
       uint256 len = outstandingPairIDs.length;
       for (uint256 x = 0; x < len; x++) {
-        if (outstandingPairIDs[x][2] == id) {
-          BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x][3]);
+        if (outstandingPairIDs[x].bidId == id) {
+          BathToken(bathAssetAddress).cancel(id, outstandingPairIDs[x].bidAmt);
           removeElement(x);
           break;
         }
