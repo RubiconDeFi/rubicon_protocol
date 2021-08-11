@@ -17,7 +17,6 @@ contract BathHouse {
     address public RubiconMarketAddress;
 
     // List of approved strategies
-    mapping(address => bool) public approvedStrategies;
     mapping(address => bool) public approvedBathTokens;
     mapping(address => bool) public approvedPairs;
     mapping(address => bool) public approvedStrategists;
@@ -82,6 +81,7 @@ contract BathHouse {
 
         approvePair(address(pair));
         addQuote(quote, BathPair(pair).getThisBathQuote());
+        addAsset(asset, BathPair(pair).getThisBathAsset());
         return address(pair);
     }
 
@@ -166,7 +166,7 @@ contract BathHouse {
         RubiconMarketAddress = newMarket;
     }
 
-    // Getter Functions for parameters - onlyAdmin
+    // Getter Functions for parameters
     function getMarket() external view returns (address) {
         return RubiconMarketAddress;
     }
@@ -187,18 +187,35 @@ contract BathHouse {
         return getPair[asset][quote];
     }
 
-    function isApprovedBathToken(address bathToken)
-        external
-        view
-        returns (bool)
-    {
-        if (approvedBathTokens[bathToken] == true) {
-            return true;
-        } else {
-            return false;
-        }
+    function doesQuoteExist(address quote) external view returns (bool) {
+        return bathQuoteExists[quote];
     }
 
+    function doesAssetExist(address asset) external view returns (bool) {
+        return bathAssetExists[asset];
+    }
+
+    function getBathTokenfromQuote(address quote)
+        external
+        view
+        returns (address)
+    {
+        return quoteToBathQuote[quote];
+    }
+
+    function getBathTokenfromAsset(address asset)
+        external
+        view
+        returns (address)
+    {
+        return assetToBathAsset[asset];
+    }
+
+    function getBPSToStrats(address pair) external view returns (uint8) {
+        return propToStrategists[pair];
+    }
+
+    // ** Security Checks used throughout Pools **
     function isApprovedStrategist(address wouldBeStrategist)
         external
         view
@@ -214,20 +231,16 @@ contract BathHouse {
         }
     }
 
-    function approveStrategist(address strategist) public onlyAdmin {
-        approvedStrategists[strategist] = true;
-    }
-
-    function approveBathToken(address bathToken) external onlyAdmin {
-        approvedBathTokens[bathToken] = true;
-    }
-
     function isApprovedPair(address pair) public view returns (bool) {
         if (approvedPairs[pair] == true) {
             return true;
         } else {
             return false;
         }
+    }
+
+    function approveStrategist(address strategist) public onlyAdmin {
+        approvedStrategists[strategist] = true;
     }
 
     function approvePair(address pair) internal {
@@ -254,25 +267,5 @@ contract BathHouse {
             bathAssetExists[asset] = true;
             assetToBathAsset[asset] = bathAsset;
         }
-    }
-
-    function doesQuoteExist(address quote) external view returns (bool) {
-        return bathQuoteExists[quote];
-    }
-
-    function doesAssetExist(address asset) external view returns (bool) {
-        return bathAssetExists[asset];
-    }
-
-    function quoteToBathQuoteCheck(address quote)
-        public
-        view
-        returns (address)
-    {
-        return quoteToBathQuote[quote];
-    }
-
-    function getBPSToStrats(address pair) external view returns (uint8) {
-        return propToStrategists[pair];
     }
 }

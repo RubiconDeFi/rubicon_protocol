@@ -46,12 +46,6 @@ contract BathToken {
         uint256 value
     );
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event LogTrade(
-        uint256 pay_amt,
-        ERC20 pay_gem,
-        uint256 buy_amt,
-        ERC20 buy_gem
-    );
     event LogInit(uint256 timeOfInit);
     event Deposit(
         uint256 depositedAmt,
@@ -136,10 +130,23 @@ contract BathToken {
         feeTo = _feeTo;
     }
 
-    // Rubicon Market Functions:
-    // pass initAmt as zero if unsure
-    function cancel(uint256 id, uint256 Amt) external onlyPair {
-        outstandingAmount = outstandingAmount.sub(Amt);
+    function underlying() external view returns (address) {
+        require(initialized);
+        return address(underlyingToken);
+    }
+
+    /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to
+    ///         any tokens that may be outstanding in the Rubicon order book
+    function underlyingBalance() public view returns (uint256) {
+        require(initialized, "BathToken not initialized");
+
+        uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
+        return _pool.add(outstandingAmount);
+    }
+
+    // ** Rubicon Market Functions: **
+    function cancel(uint256 id, uint256 amt) external onlyPair {
+        outstandingAmount = outstandingAmount.sub(amt);
         RubiconMarket(RubiconMarketAddress).cancel(id);
     }
 
@@ -155,9 +162,6 @@ contract BathToken {
         ERC20 buy_gem
     ) external onlyPair returns (uint256) {
         // Place an offer in RubiconMarket
-        // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
-        // while also ensuring that the order is placed in the sorted list
-
         // If incomplete offer return 0
         if (
             pay_amt == 0 ||
@@ -180,20 +184,27 @@ contract BathToken {
         return (id);
     }
 
-    function underlying() external view returns (address) {
-        require(initialized);
-        return address(underlyingToken);
+    // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
+    function rebalance(
+        address sisterBath,
+        address underlyingAsset, /* sister asset */
+        uint256 stratProportion
+    ) external onlyPair {
+        require(stratProportion > 0 && stratProportion < 50 && initialized);
+        uint256 stratReward = (
+            stratProportion.mul(
+                IERC20(underlyingAsset).balanceOf(address(this))
+            )
+        )
+        .div(10000);
+        IERC20(underlyingAsset).transfer(
+            sisterBath,
+            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
+        );
+        IERC20(underlyingAsset).transfer(msg.sender, stratReward);
     }
 
-    /// @notice returns the amount of underlying ERC20 tokens in this pool in addition to
-    ///         any tokens that may be outstanding in the Rubicon order book
-    function underlyingBalance() public view returns (uint256) {
-        require(initialized, "BathToken not initialized");
-
-        uint256 _pool = IERC20(underlyingToken).balanceOf(address(this));
-        return _pool.add(outstandingAmount);
-    }
-
+    // ** User Entrypoints: **
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
     function deposit(uint256 _amount) external {
         uint256 _pool = underlyingBalance();
@@ -217,34 +228,12 @@ contract BathToken {
     function withdraw(uint256 _shares) external {
         uint256 r = (underlyingBalance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
-
         uint256 _fee = r.mul(feeBPS).div(10000);
         IERC20(underlyingToken).transfer(feeTo, _fee);
-
         underlyingToken.transfer(msg.sender, r.sub(_fee));
     }
 
-    // This function returns filled orders to the correct liquidity pool and sends strategist rewards to the Pair
-    function rebalance(
-        address sisterBath,
-        address underlyingAsset, /* sister asset */
-        uint256 stratProportion
-    ) external onlyPair {
-        require(stratProportion > 0 && stratProportion < 50 && initialized);
-        uint256 stratReward = (
-            stratProportion.mul(
-                IERC20(underlyingAsset).balanceOf(address(this))
-            )
-        )
-        .div(10000);
-        IERC20(underlyingAsset).transfer(
-            sisterBath,
-            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
-        );
-        IERC20(underlyingAsset).transfer(msg.sender, stratReward);
-    }
-
-    // *** Internal Functions ***
+    // ** Internal Functions **
 
     function _mint(address to, uint256 value) internal {
         totalSupply = totalSupply.add(value);
