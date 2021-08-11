@@ -157,9 +157,14 @@ contract BathToken {
         // Place an offer in RubiconMarket
         // The below ensures that the order does not automatically match/become a taker trade **enforceNoAutoFills**
         // while also ensuring that the order is placed in the sorted list
-        
+
         // If incomplete offer return 0
-        if (pay_amt == 0 || pay_gem == ERC20(0) || buy_amt == 0 || buy_gem == ERC20(0)) {
+        if (
+            pay_amt == 0 ||
+            pay_gem == ERC20(0) ||
+            buy_amt == 0 ||
+            buy_gem == ERC20(0)
+        ) {
             return 0;
         }
 
