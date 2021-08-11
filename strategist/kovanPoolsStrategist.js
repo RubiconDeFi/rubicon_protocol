@@ -439,28 +439,28 @@ async function marketMake(a, b, t, im, spread, tM) {
     to: process.env["OP_KOVAN_4_BATH" + (await ticker) + "USDC"],
     gasPrice: web3.utils.toWei("0", "Gwei"),
   };
-  console.log(
-    "ATTEMPTING " +
-      ticker +
-      " trades placed at [bid]: " +
-      newBidPrice.toString() +
-      "$ and [ask]: " +
-      newAskPrice.toString() +
-      "$" +
-      "\n"
-  );
-  // let result = await sendTx(
-  //   tx,
-  //   "New " +
-  //     (await ticker) +
+  // console.log(
+  //   "ATTEMPTING " +
+  //     ticker +
   //     " trades placed at [bid]: " +
   //     newBidPrice.toString() +
   //     "$ and [ask]: " +
   //     newAskPrice.toString() +
   //     "$" +
-  //     "\n",
-  //   ticker
+  //     "\n"
   // );
+  let result = await sendTx(
+    tx,
+    "New " +
+      (await ticker) +
+      " trades placed at [bid]: " +
+      newBidPrice.toString() +
+      "$ and [ask]: " +
+      newAskPrice.toString() +
+      "$" +
+      "\n",
+    ticker
+  );
 
   oldMidpoint[ticker] = midPoint[ticker];
 }
@@ -551,23 +551,4 @@ const assets = [
 
 initNonceManager().then(async () => {
   startBot("REP", 0.02, 5);
-  // startBot("COMP", 0.02, 5);
-  // startBot("RGT", 0.02, 5);
-  // for (let index = 0; index < assets.length; index++) {
-  //   startBot(await assets[index], 0.02, 5);
-  // }
-  // startBot("SNX", 0.02, 357);
-  // startBot("REP", 0.02, 5);
-  // startBot("WBTC", 0.02, 40290);
-  //   console.log("got a nonce", await getNonce());
 });
-
-// // Start bots
-// for (let index = 0; index < assets.length; index++) {
-//     const element = assets[index];
-//     startBot(element, 0.02);
-//     // startBot(element, 0.04);
-//     // startBot(element, 0.07);
-// }
-
-// startBot("WBTC", 0.02, 40000);
