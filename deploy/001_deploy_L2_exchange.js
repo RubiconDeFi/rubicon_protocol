@@ -29,12 +29,6 @@ const func = async (hre) => {
   //     console.log(r1);
   //   });
   // });
-
-  // Add to Whitelist
-  // await RMI.addToWhitelist("0x1147b3F6Eca313a5B3C2aA3Fb85928104a5787D3", {gasLimit: 8999999}).then((r ) => console.log(r));
-  // await RMI.addToWhitelist("0x48D324c92716dd6a465650A4295c3E30AC21BB62", {gasLimit: 8999999}).then((r ) => console.log(r));
-  // const rubiconMarketInstance = await deployments.get('RubiconMarket');
-  // console.log(rubiconMarketInstance);
 };
 
 func.tags = ["RubiconMarket"];

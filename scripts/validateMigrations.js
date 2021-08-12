@@ -19,8 +19,8 @@ let web3 = new Web3(
 
 // Load the RubiconMarket contract
 var { abi } = require("../build/contracts/RubiconMarket.json");
-// var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
-var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
+// var rubiconMarketKovanAddr = process.env.OP_KOVAN_5_MARKET;
+var rubiconMarketKovanAddr = process.env.OP_KOVAN_5_MARKET;
 var RubiconMarketContractKovan = new web3.eth.Contract(
   abi,
   rubiconMarketKovanAddr
@@ -28,12 +28,8 @@ var RubiconMarketContractKovan = new web3.eth.Contract(
 
 // Load in Pools contract addresses on Kovan
 var { abi } = require("../build/contracts/BathHouse.json");
-var bathHouseKovanAddr = process.env.OP_KOVAN_4_BATHHOUSE;
+var bathHouseKovanAddr = process.env.OP_KOVAN_5_BATHHOUSE;
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
-
-var { abi } = require("../build/contracts/BidAskUtil.json");
-var strategyKovanAddr = process.env.OP_KOVAN_4_BIDASKUTIL;
-var strategyContractKovan = new web3.eth.Contract(abi, strategyKovanAddr);
 
 //  ** Inputs **
 
@@ -62,10 +58,10 @@ const assetsBP = [
 ]; //assets with no quotes
 const quotes = ["USDC"];
 
-const contractAdmin = process.env.OP_KOVAN_4_CONTRACTADMIN;
-const proxyAdmin = process.env.OP_KOVAN_4_PROXYADMIN;
-const feeRecipient = process.env.OP_KOVAN_4_FEERECIPIENT;
-const strategist = process.env.OP_KOVAN_4_STRATEGIST;
+const contractAdmin = process.env.OP_KOVAN_5_CONTRACTADMIN;
+const proxyAdmin = process.env.OP_KOVAN_5_PROXYADMIN;
+const feeRecipient = process.env.OP_KOVAN_5_FEERECIPIENT;
+const strategist = process.env.OP_KOVAN_5_STRATEGIST;
 
 //  ** Helper Functions **
 
@@ -73,11 +69,11 @@ async function getContractFromToken(ticker, contract) {
   // Load in Dai Contract
   var { abi } = require("../build/contracts/" + contract + ".json");
   if (contract == "BathToken") {
-    var address = process.env["OP_KOVAN_4_BATH" + ticker];
+    var address = process.env["OP_KOVAN_5_BATH" + ticker];
   } else if (contract == "BathPair") {
-    var address = process.env["OP_KOVAN_4_BATH" + ticker + "USDC"];
+    var address = process.env["OP_KOVAN_5_BATH" + ticker + "USDC"];
   } else if (contract == "EquityToken") {
-    var address = process.env["OP_KOVAN_4_" + ticker];
+    var address = process.env["OP_KOVAN_5_" + ticker];
   } else {
     throw "unhandled contract type";
   }
@@ -91,7 +87,7 @@ async function validate() {
     .getMarket()
     .call()
     .then((r) => {
-      if (r == process.env.OP_KOVAN_4_MARKET) {
+      if (r == process.env.OP_KOVAN_5_MARKET) {
         console.log("BH getMarket CORRECT");
       } else {
         console.log("getMarket ** ERROR **");
@@ -118,11 +114,11 @@ async function validate() {
       }
     });
   bathHouseContractKovan.methods
-    .getBathPair(process.env.OP_KOVAN_4_WBTC, process.env.OP_KOVAN_4_USDC)
+    .getBathPair(process.env.OP_KOVAN_5_WBTC, process.env.OP_KOVAN_5_USDC)
     .call()
     .then((r) => {
       // console.log(r);
-      if (r == process.env.OP_KOVAN_4_BATHWBTCUSDC) {
+      if (r == process.env.OP_KOVAN_5_BATHWBTCUSDC) {
         console.log("BH getBathPair CORRECT");
       } else {
         console.log("BH getBathPair ** ERROR **");
@@ -157,7 +153,7 @@ async function validate() {
       .bathHouse()
       .call()
       .then((r) => {
-        if (r == process.env.OP_KOVAN_4_BATHHOUSE) {
+        if (r == process.env.OP_KOVAN_5_BATHHOUSE) {
           console.log("bath" + element + " bathHouse CORRECT");
         } else {
           console.log("bath" + element + " bathHouse ** ERROR **", r);
@@ -177,7 +173,7 @@ async function validate() {
       .RubiconMarketAddress()
       .call()
       .then((r) => {
-        if (r == process.env.OP_KOVAN_4_MARKET) {
+        if (r == process.env.OP_KOVAN_5_MARKET) {
           console.log("bath" + element + " market CORRECT");
         } else {
           console.log("bath" + element + " market ** ERROR **"), r;
@@ -187,7 +183,7 @@ async function validate() {
       .underlyingToken()
       .call()
       .then((r) => {
-        if (r == process.env["OP_KOVAN_4_" + element]) {
+        if (r == process.env["OP_KOVAN_5_" + element]) {
           console.log("bath" + element + " underlyingToken CORRECT");
         } else {
           console.log("bath" + element + " underlyingToken ** ERROR **");
@@ -195,31 +191,9 @@ async function validate() {
       });
   }
 
-  // BidAskUtil
-  strategyContractKovan.methods
-    .initialized()
-    .call()
-    .then((r) => {
-      if (r == true) {
-        console.log("BIDASKUTIL initialized CORRECT");
-      } else {
-        console.log("BIDASKUTIL initialized ** ERROR **");
-      }
-    });
-  bathHouseContractKovan.methods
-    .isApprovedStrat(process.env.OP_KOVAN_4_BIDASKUTIL)
-    .call()
-    .then((r) => {
-      if (r == true) {
-        console.log("BIDASKUTIL isApprovedStrat on BH CORRECT");
-      } else {
-        console.log("BIDASKUTIL isApprovedStrat on BH ** ERROR **");
-      }
-    });
-
   // Market
   RubiconMarketContractKovan.methods
-    .getMinSell(process.env.OP_KOVAN_4_WBTC)
+    .getMinSell(process.env.OP_KOVAN_5_WBTC)
     .call()
     .then((r) => {
       if (r == 0) {
@@ -242,7 +216,7 @@ async function validate() {
     .owner()
     .call()
     .then((r) => {
-      if (r == process.env.OP_KOVAN_ADMIN) {
+      if (r == contractAdmin) {
         console.log("MARKET owner CORRECT");
       } else {
         console.log("MARKET owner ** ERROR **");
@@ -291,7 +265,7 @@ async function validate() {
         .underlyingAsset()
         .call()
         .then((r) => {
-          if (r == process.env["OP_KOVAN_4_" + element]) {
+          if (r == process.env["OP_KOVAN_5_" + element]) {
             console.log("bath" + element + q + " underlyingAsset CORRECT");
           } else {
             console.log(
@@ -320,7 +294,7 @@ async function validate() {
         .underlyingQuote()
         .call()
         .then((r) => {
-          if (r == process.env.OP_KOVAN_4_USDC) {
+          if (r == process.env.OP_KOVAN_5_USDC) {
             console.log("bath" + element + q + " underlyingQuote CORRECT");
           } else {
             console.log(
@@ -343,7 +317,7 @@ async function validate() {
         .bathHouse()
         .call()
         .then((r) => {
-          if (r == process.env.OP_KOVAN_4_BATHHOUSE) {
+          if (r == process.env.OP_KOVAN_5_BATHHOUSE) {
             console.log("bath" + element + q + " bathHouse CORRECT");
           } else {
             console.log("bath" + element + q + " bathHouse ** ERROR **");
@@ -353,7 +327,7 @@ async function validate() {
         .bathAssetAddress()
         .call()
         .then((r) => {
-          if (r == process.env["OP_KOVAN_4_BATH" + element]) {
+          if (r == process.env["OP_KOVAN_5_BATH" + element]) {
             console.log("bath" + element + q + " bathAssetAddress CORRECT");
           } else {
             console.log("bath" + element + q + " bathAssetAddress ** ERROR **");
@@ -363,14 +337,14 @@ async function validate() {
         .bathQuoteAddress()
         .call()
         .then((r) => {
-          if (r == process.env["OP_KOVAN_4_BATH" + q]) {
+          if (r == process.env["OP_KOVAN_5_BATH" + q]) {
             console.log("bath" + element + q + " bathQuoteAddress CORRECT");
           } else {
             console.log("bath" + element + q + " bathQuoteAddress ** ERROR **");
           }
         });
       bathHouseContractKovan.methods
-        .isApprovedPair(process.env["OP_KOVAN_4_BATH" + element + q])
+        .isApprovedPair(process.env["OP_KOVAN_5_BATH" + element + q])
         .call()
         .then((r) => {
           if (r == true) {
