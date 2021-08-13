@@ -104,9 +104,23 @@ async function validate() {
       .totalSupply()
       .call()
       .then(async (r) => {
-        let und = await getContractFromToken(element, "EquityToken");
-        und.methods
-          .balanceOf(process.env["OP_KOVAN_5_BATH" + element])
+        // let und = await getContractFromToken(element, "EquityToken");
+        // und.methods
+        //   .balanceOf(process.env["OP_KOVAN_5_BATH" + element])
+        //   .call()
+        //   .then((b) => {
+        //     console.log(
+        //       "**" + element + "**",
+        //       "Total Supply:",
+        //       r,
+        //       "On Pool:",
+        //       b,
+        //       "Gross ROA",
+        //       b / r
+        //     );
+        //   });
+        contract.methods
+          .underlyingBalance()
           .call()
           .then((b) => {
             console.log(
@@ -115,7 +129,7 @@ async function validate() {
               r,
               "Underlying Balance:",
               b,
-              "Gross ROA",
+              "Advertised ROA",
               b / r
             );
           });

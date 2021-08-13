@@ -20,7 +20,7 @@ const func = async (hre) => {
   // const deployResultBH = await deploy("RubiconMarket", {
   //   from: deployer,
   //   log: true,
-  //   gasLimit: 337220000,
+  //   // gasLimit: 337220000,
   //   nonce: getNonce(),
   // }).then(async function (d) {
   //   const newBHAddr = await d.address;
@@ -41,7 +41,7 @@ const func = async (hre) => {
   //             await BHI.initialize(
   //               false,
   //               process.env.OP_KOVAN_4_FEE_RECIPIENT,
-  //               { gasLimit: g._hex, nonce: getNonce() }
+  //               {  nonce: getNonce() }
   //             ).then((r) => console.log("Market Init Call sent!\n"));
   //             return newBHAddr;
   //           }); //.then(async (addr) => {await deployProxy(addr, "bathHouse")});
@@ -313,6 +313,17 @@ const func = async (hre) => {
   // Deploy USDC
   // const USDCFactory = await hre.ethers.getContractFactory("USDCWithFaucet");
   // await USDCFactory.deploy(69, process.env.OP_KOVAN_ADMIN, "USDC", "USDC", {gasLimit: 13360000, nonce: getNonce()}).then((r) => {console.log("deployed new USDC at ", r.address)})
+  // await USDCFactory
+
+    // // Mint Testnet USDC
+    // for (let index = 0; index < 80; index++) {
+    //   const USDCFactory = await hre.ethers.getContractFactory("USDCWithFaucet");
+    //   await USDCFactory.attach(process.env.OP_KOVAN_5_USDC)
+    //     .adminMint({gasLimit: 900000, nonce: getNonce()})
+    //     .then((r) => {
+    //       console.log("minted USDC to admin");
+    //     });
+    // }
 
   // Deploy assets
   // const assetsToDeploy = [

@@ -31,9 +31,9 @@ const func = async (hre) => {
   const type = "hid";
   const path_0 = `m/44'/60'/0'/0/0`;
 
-  // **Key inputs** 
+  // **Key inputs**
   const feeRecipient = process.env.OP_KOVAN_5_FEERECIPIENT;
-  const deployerAddress = process.env.OP_KOVAN_5_CONTRACTADMIN;
+  const deployerAddress = process.env.LIVE_CONTRACTADMIN;
   const proxyAddress = process.env.OP_KOVAN_5_PROXYADMIN;
 
   // const HD_proxyAdmin = new LedgerSigner(provider, type, path_1);
@@ -43,10 +43,9 @@ const func = async (hre) => {
   // const HD_deployer = new LedgerSigner(provider, type, path_0);
   // const HD_deployer_Addr = await HD_deployer.getAddress();
   // console.log("HD Deployer Address Script 5:", HD_deployer_Addr);
-
-  // if (HD_proxyAdmin_Addr == proxyAddress) {
-  // console.log(HD_proxyAdmin_Addr);
-  // nothing
+  // if (HD_deployer_Addr == deployerAddress) {
+  //   console.log("HD Admin is correct: ", HD_deployer_Addr);
+  //   // nothing
   // } else {
   //   console.log("HD Deployer, Contract deployer address is incorrect**");
   // }
@@ -391,14 +390,21 @@ const func = async (hre) => {
 
   // }
 
-  // // set BathHouse Variable - Set time delay
+  // // set BathHouse Variables - Set time delay or MOPC
+  // const newTimedelay = 3600; // 1 hour
+  // const newMOPC = 20;
   // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
-  // await bh.estimateGas.setCancelTimeDelay(1200).then(async function (g) {
-  //   await bh
-  //     .setCancelTimeDelay(1200, { gasLimit: g._hex, nonce: getNonce() })
-  //     .then((r) => console.log("set time delay on BH", r));
-  // });
+  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_5_BATHHOUSE);
+  // // await bh.estimateGas.setCancelTimeDelay(newTimedelay).then(async function (g) {
+  // // await bh
+  // //   .connect(HD_deployer)
+  // //   .setCancelTimeDelay(newTimedelay, { nonce: getNonce() })
+  // //   .then((r) => console.log("set time delay on BH", r));
+  // await bh
+  //   .connect(HD_deployer)
+  //   .setMaxOutstandingPairCount(newMOPC, { nonce: getNonce() })
+  //   .then((r) => console.log("set MOPC", r));
+  // // });
 
   // // set BathHouse Variable - Set search radius
   //   const assetsToDeploy = [
@@ -434,13 +440,13 @@ const func = async (hre) => {
   //     .then((r) => console.log("set time delay on BH", r));
   // });
 
-  // // Whitelist a strategist
+  // // Approve a strategist!
   // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
-  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_3_BATHHOUSE);
-  // let newStrategist = process.env.OP_KOVAN_ADMIN;
-  // await bh.estimateGas.approveStrategist(newStrategist).then(async function(g) {
-  //           await bh.approveStrategist(newStrategist).then((r) => console.log("approved this strategist ", newStrategist));
-  // });
+  // const bh = await bathHouseFactory.attach(process.env.OP_KOVAN_5_BATHHOUSE);
+  // let newStrategist = "0xceeE3a416e612b8F25406AB436445d8cf7A91304";
+  // // await bh.estimateGas.approveStrategist(newStrategist).then(async function(g) {
+  //           await bh.connect(HD_deployer).approveStrategist(newStrategist).then((r) => console.log("approved this strategist ", newStrategist));
+  // // });
 
   // // // set market Variable
   //   const bathHouseFactory = await hre.ethers.getContractFactory("RubiconMarket");
@@ -452,6 +458,14 @@ const func = async (hre) => {
   // const bathHouseFactory = await hre.ethers.getContractFactory("BathHouse");
   // const bh = await bathHouseFactory.attach("0x61435E59B6840c7B3f4efbDc07b0f57c1D9f71Ac");
   // console.log(await bh.RubiconMarketAddress());
+
+  // // Mint Testnet USDC
+  // const USDCFactory = await hre.ethers.getContractFactory("USDCWithFaucet");
+  // await USDCFactory.attach(process.env.OP_KOVAN_5_USDC).connect(HD_deployer)
+  //   .adminMint({gasLimit: 900000})
+  //   .then((r) => {
+  //     console.log("minted USDC to admin");
+  //   });
 
   // ************** Proxies ***********************
 
