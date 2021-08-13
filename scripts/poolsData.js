@@ -19,8 +19,8 @@ let web3 = new Web3(
 
 // Load the RubiconMarket contract
 var { abi } = require("../build/contracts/RubiconMarket.json");
-// var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
-var rubiconMarketKovanAddr = process.env.OP_KOVAN_4_MARKET;
+// var rubiconMarketKovanAddr = process.env.OP_KOVAN_5_MARKET;
+var rubiconMarketKovanAddr = process.env.OP_KOVAN_5_MARKET;
 var RubiconMarketContractKovan = new web3.eth.Contract(
   abi,
   rubiconMarketKovanAddr
@@ -28,7 +28,7 @@ var RubiconMarketContractKovan = new web3.eth.Contract(
 
 // Load in Pools contract addresses on Kovan
 var { abi } = require("../build/contracts/BathHouse.json");
-var bathHouseKovanAddr = process.env.OP_KOVAN_4_BATHHOUSE;
+var bathHouseKovanAddr = process.env.OP_KOVAN_5_BATHHOUSE;
 var bathHouseContractKovan = new web3.eth.Contract(abi, bathHouseKovanAddr);
 
 //  ** Inputs **
@@ -69,11 +69,11 @@ async function getContractFromToken(ticker, contract) {
   // Load in Dai Contract
   var { abi } = require("../build/contracts/" + contract + ".json");
   if (contract == "BathToken") {
-    var address = process.env["OP_KOVAN_4_BATH" + ticker];
+    var address = process.env["OP_KOVAN_5_BATH" + ticker];
   } else if (contract == "BathPair") {
-    var address = process.env["OP_KOVAN_4_BATH" + ticker + "USDC"];
+    var address = process.env["OP_KOVAN_5_BATH" + ticker + "USDC"];
   } else if (contract == "EquityToken") {
-    var address = process.env["OP_KOVAN_4_" + ticker];
+    var address = process.env["OP_KOVAN_5_" + ticker];
   } else {
     throw "unhandled contract type";
   }
@@ -106,7 +106,7 @@ async function validate() {
       .then(async (r) => {
         let und = await getContractFromToken(element, "EquityToken");
         und.methods
-          .balanceOf(process.env["OP_KOVAN_4_BATH" + element])
+          .balanceOf(process.env["OP_KOVAN_5_BATH" + element])
           .call()
           .then((b) => {
             console.log(
