@@ -184,6 +184,7 @@ contract BathPair {
     // Takes the proposed bid and ask as a parameter - that the offers placed won't match and are maker orders
     // bid price > best ask
     function enforceSpread(
+        address _bathHouse,
         uint256 askN,
         uint256 askD,
         uint256 bidN,
@@ -193,49 +194,49 @@ contract BathPair {
             (askN > 0 && askD > 0) || (bidN > 0 && bidD > 0),
             "one order must be non-zero"
         );
-        address _RubiconMarketAddress = RubiconMarketAddress;
-        uint256 bestAskID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
-            ERC20(underlyingAsset),
-            ERC20(underlyingQuote)
-        );
-        uint256 bestBidID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
-            ERC20(underlyingQuote),
-            ERC20(underlyingAsset)
-        );
+        if (!BathHouse(_bathHouse).permissionedStrategists()) {
+            address _RubiconMarketAddress = RubiconMarketAddress;
+            uint256 bestAskID = RubiconMarket(_RubiconMarketAddress)
+            .getBestOffer(ERC20(underlyingAsset), ERC20(underlyingQuote));
+            uint256 bestBidID = RubiconMarket(_RubiconMarketAddress)
+            .getBestOffer(ERC20(underlyingQuote), ERC20(underlyingAsset));
 
-        order memory bestAsk = getOfferInfo(bestAskID);
-        order memory bestBid = getOfferInfo(bestBidID);
+            order memory bestAsk = getOfferInfo(bestAskID);
+            order memory bestBid = getOfferInfo(bestBidID);
 
-        // If orders in the order book, adhere to more constraints
-        if (
-            (bestAsk.pay_amt > 0 && bestAsk.buy_amt > 0) &&
-            (bestBid.pay_amt > 0 && bestBid.buy_amt > 0)
-        ) {
-            if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-                require(
-                    ((bestAsk.buy_amt.mul(bidD)) >
-                        (bestAsk.pay_amt.mul(bidN))) &&
-                        ((askD.mul(bestBid.buy_amt)) >
-                            (bestBid.pay_amt.mul(askN))),
-                    "bid must be < bestAsk && ask must be > best Bid in Price"
-                );
-            } else if (bidN > 0 && bidD > 0) {
-                // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
-                require(
-                    (bestAsk.buy_amt.mul(bidD)) > (bestAsk.pay_amt.mul(bidN)),
-                    "bid price is not less than the best ask"
-                );
-            } else if (askN > 0 && askD > 0) {
-                // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
-                require(
-                    (askD.mul(bestBid.buy_amt)) > (bestBid.pay_amt.mul(askN)),
-                    "ask price not greater than best bid"
-                );
+            // If orders in the order book, adhere to more constraints
+            if (
+                (bestAsk.pay_amt > 0 && bestAsk.buy_amt > 0) &&
+                (bestBid.pay_amt > 0 && bestBid.buy_amt > 0)
+            ) {
+                if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
+                    require(
+                        ((bestAsk.buy_amt.mul(bidD)) >
+                            (bestAsk.pay_amt.mul(bidN))) &&
+                            ((askD.mul(bestBid.buy_amt)) >
+                                (bestBid.pay_amt.mul(askN))),
+                        "bid must be < bestAsk && ask must be > best Bid in Price"
+                    );
+                } else if (bidN > 0 && bidD > 0) {
+                    // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
+                    require(
+                        (bestAsk.buy_amt.mul(bidD)) >
+                            (bestAsk.pay_amt.mul(bidN)),
+                        "bid price is not less than the best ask"
+                    );
+                } else if (askN > 0 && askD > 0) {
+                    // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
+                    require(
+                        (askD.mul(bestBid.buy_amt)) >
+                            (bestBid.pay_amt.mul(askN)),
+                        "ask price not greater than best bid"
+                    );
+                }
             }
-        }
-        // check that ask price > bid price if two offers given
-        if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-            require((askD.mul(bidD)) > (bidN.mul(askN)));
+            // check that ask price > bid price if two offers given
+            if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
+                require((askD.mul(bidD)) > (bidN.mul(askN)));
+            }
         }
     }
 
@@ -267,20 +268,20 @@ contract BathPair {
     }
 
     // Returns filled liquidity to the correct bath pool
-    function rebalancePair() internal {
+    function rebalancePair(address _bathHouse, address _underlyingAsset, address _underlyingQuote) internal {
         address _bathAssetAddress = bathAssetAddress;
         address _bathQuoteAddress = bathQuoteAddress;
-        uint256 bathAssetYield = ERC20(underlyingQuote).balanceOf(
+        uint256 bathAssetYield = ERC20(_underlyingQuote).balanceOf(
             _bathAssetAddress
         );
-        uint256 bathQuoteYield = ERC20(underlyingAsset).balanceOf(
+        uint256 bathQuoteYield = ERC20(_underlyingAsset).balanceOf(
             _bathQuoteAddress
         );
-        uint16 stratReward = BathHouse(bathHouse).getBPSToStrats(address(this));
+        uint16 stratReward = BathHouse(_bathHouse).getBPSToStrats(address(this));
         if (bathAssetYield > 0) {
             BathToken(_bathAssetAddress).rebalance(
                 _bathQuoteAddress,
-                underlyingQuote,
+                _underlyingQuote,
                 stratReward
             );
         }
@@ -288,7 +289,7 @@ contract BathPair {
         if (bathQuoteYield > 0) {
             BathToken(_bathQuoteAddress).rebalance(
                 _bathAssetAddress,
-                underlyingAsset,
+                _underlyingAsset,
                 stratReward
             );
         }
@@ -435,6 +436,7 @@ contract BathPair {
         address _underlyingQuote = underlyingQuote;
         address _bathAssetAddress = bathAssetAddress;
         address _bathQuoteAddress = bathQuoteAddress;
+        address _bathHouse = bathHouse;
 
         // Enforce dynamic ordersizing and inventory management
         require(
@@ -451,12 +453,13 @@ contract BathPair {
         // Enforce that the bath is scrubbed for outstanding pairs
         require(
             outstandingPairIDs.length <
-                BathHouse(bathHouse).maxOutstandingPairCount(),
+                BathHouse(_bathHouse).maxOutstandingPairCount(),
             "too many outstanding pairs, please call bathScrub() first"
         );
 
         // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
         enforceSpread(
+            _bathHouse,
             askNumerator,
             askDenominator,
             bidNumerator,
@@ -505,7 +508,7 @@ contract BathPair {
         );
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool
-        rebalancePair();
+        rebalancePair(_bathHouse, _underlyingAsset, _underlyingQuote);
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens

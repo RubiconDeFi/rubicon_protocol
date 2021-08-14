@@ -87,7 +87,7 @@ async function validate() {
     .timeDelay()
     .call()
     .then((r) => {
-      console.log("Current Pools Time Delay in Days:", r / 86400);
+      console.log("Current Pools Time Delay in Hours:", r / 86400 * 24);
     });
   bathHouseContractKovan.methods
     .maxOutstandingPairCount()
