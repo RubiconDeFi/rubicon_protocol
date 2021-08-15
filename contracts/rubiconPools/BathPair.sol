@@ -410,8 +410,7 @@ contract BathPair {
             "one order must be non-zero"
         );
 
-        // Trying:
-        // 1. Calculate new bid and ask
+        // Calculate new bid and/or ask
         order memory ask = order(
             askNumerator,
             ERC20(_underlyingAsset),
@@ -425,7 +424,7 @@ contract BathPair {
             ERC20(underlyingAsset)
         );
 
-        // 2. place new bid and ask
+        // Place new bid and/or ask
         uint256 newAskID = BathToken(bathAssetAddress).placeOffer(
             ask.pay_amt,
             ask.pay_gem,
@@ -439,7 +438,8 @@ contract BathPair {
             bid.buy_amt,
             bid.buy_gem
         );
-        // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
+
+        // Strategist trade is recorded so they can get paid and the trade is logged for time
         StrategistTrade memory outgoing = StrategistTrade(
             newAskID,
             ask.pay_amt,
@@ -459,17 +459,17 @@ contract BathPair {
             outgoing.strategist
         );
 
-        // 5. Return any filled yield to the appropriate bathToken/liquidity pool
+        // Return any filled yield to the appropriate bathToken/liquidity pool
         rebalancePair(_bathHouse, _underlyingAsset, _underlyingQuote);
     }
 
     // This function cleans outstanding orders and rebalances yield between bathTokens
     function bathScrub() external {
-        // 4. Cancel Outstanding Orders that need to be cleared or logged for yield
+        // Cancel Outstanding Orders that need to be cleared or logged for yield
         cancelPartialFills();
     }
 
-    // Return the largest order size that can be places as a strategist for given asset and liquidity pool
+    // Return the largest order size that can be placed as a strategist for given asset and liquidity pool
     function getMaxOrderSize(address asset, address bathTokenAddress)
         public
         view

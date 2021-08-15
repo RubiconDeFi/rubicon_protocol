@@ -64,10 +64,10 @@ const func = async (hre) => {
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
 
-  // Upgrade BathTokens
+  // // Upgrade BathTokens
   // await upgradeProxy(
   //   await proxyFactory.attach(process.env.OP_KOVAN_5_BATHCOMPUSDC),
-  //   "0xE1bC50Ccb21eF296a711D3C2d78ff88CeffF8F9e",
+  //   "0x3c06e01A88108b73fFEaD52d87aa3B2e4d01eb37",
   //   "bath pair Comp"
   // );
   // await upgradeProxy(

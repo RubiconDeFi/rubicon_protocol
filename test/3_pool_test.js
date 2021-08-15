@@ -469,6 +469,13 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         web3.utils.toWei((1).toString())
       );
 
+      await bathPairInstance.executeStrategy(
+        web3.utils.toWei((0.2).toString()),
+        web3.utils.toWei((0.4).toString()),
+        web3.utils.toWei((1).toString()),
+        web3.utils.toWei((1).toString())
+      );
+
       //try $5-$3
       await bathPairInstance.executeStrategy(
         web3.utils.toWei((0.1).toString()),
