@@ -66,9 +66,9 @@ const func = async (hre) => {
 
   // Upgrade BathTokens
   // await upgradeProxy(
-  //   await proxyFactory.attach(process.env.OP_KOVAN_4_BATHUSDC),
-  //   process.env.OP_KOVAN_4_BATHUSDC_NEWIMP,
-  //   "bathUSDC"
+  //   await proxyFactory.attach(process.env.OP_KOVAN_5_BATHCOMPUSDC),
+  //   "0xE1bC50Ccb21eF296a711D3C2d78ff88CeffF8F9e",
+  //   "bath pair Comp"
   // );
   // await upgradeProxy(
   //   await proxyFactory.attach(process.env.OP_KOVAN_4_BATHREP),
@@ -97,7 +97,7 @@ const func = async (hre) => {
           .upgradeTo(await newImp, {
             from: HD_proxyAdmin_Addr,
             gasLimit: g._hex,
-            nonce: getNonce(),
+            // nonce: getNonce(),
           })
           .then(async (g) => {
             console.log(

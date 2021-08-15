@@ -4,6 +4,7 @@ const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("USDCWithFaucet");
 const WETH = artifacts.require("WETH9");
+const WAYNE = artifacts.require("EquityToken");
 
 const helper = require("./testHelpers/timeHelper.js");
 
@@ -285,22 +286,22 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         // await rubiconMarketInstance.buy(4 + (2 * (index + 1)), web3.utils.toWei((0.4).toString()), {
         //   from: accounts[5],
         // });
-
       }
       // logIndented("cost to deploy bathPair", await BathPair.new().estimateGas())
       logIndented(
         "cost of executeStrategy:",
-        await bathPairInstance
-          .executeStrategy
-          .estimateGas(
-            askNumerator,
-            askDenominator,
-            bidNumerator,
-            bidDenominator
-          )
+        await bathPairInstance.executeStrategy.estimateGas(
+          askNumerator,
+          askDenominator,
+          bidNumerator,
+          bidDenominator
+        )
       );
       helper.advanceTimeAndBlock(20);
-      logIndented("cost of bathScrub:", await bathPairInstance.bathScrub.estimateGas());
+      logIndented(
+        "cost of bathScrub:",
+        await bathPairInstance.bathScrub.estimateGas()
+      );
       await bathPairInstance.bathScrub();
       await bathPairInstance.bathScrub();
       await bathPairInstance.bathScrub();
@@ -413,6 +414,75 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       assert.equal(
         (await WETHInstance.balanceOf(accounts[0])).toString(),
         "20000000000000"
+      );
+    });
+    it("Edge Case: Strategist can take out their own orders to make a new midpoint", async function () {
+      // const askNumerator = web3.utils.toWei((0.01).toString());
+      // const askDenominator = web3.utils.toWei((0.5).toString());
+      // const bidNumerator = web3.utils.toWei((0.4).toString());
+      // const bidDenominator = web3.utils.toWei((0.01).toString());
+      // const assetInstance = await WAYNE.new(
+      //   accounts[8],
+      //   web3.utils.toWei((10000).toString()),
+      //   "WAYNE",
+      //   "WAYNE"
+      // );
+
+      await DAIInstance.faucet({ from: accounts[7] });
+      await DAIInstance.approve(
+        rubiconMarketInstance.address,
+        web3.utils.toWei((1000).toString()),
+        { from: accounts[7] }
+      );
+      await WETHInstance.deposit({
+        from: accounts[8],
+        value: web3.utils.toWei((2).toString()),
+      });
+      await WETHInstance.approve(
+        rubiconMarketInstance.address,
+        web3.utils.toWei((1000).toString()),
+        { from: accounts[8] }
+      );
+
+      await rubiconMarketInstance.offer(
+        web3.utils.toWei((1).toString()),
+        DAIInstance.address,
+        web3.utils.toWei((1).toString()),
+        WETHInstance.address,
+        0,
+        { from: accounts[7] }
+      );
+      await rubiconMarketInstance.offer(
+        web3.utils.toWei((1).toString()),
+        WETHInstance.address,
+        web3.utils.toWei((2).toString()),
+        DAIInstance.address,
+        0,
+        { from: accounts[8] }
+      );
+
+      // midpoint around $2 - $1
+      await bathPairInstance.executeStrategy(
+        web3.utils.toWei((0.2).toString()),
+        web3.utils.toWei((0.4).toString()),
+        web3.utils.toWei((1).toString()),
+        web3.utils.toWei((1).toString())
+      );
+
+      //try $5-$3
+      await bathPairInstance.executeStrategy(
+        web3.utils.toWei((0.1).toString()),
+        web3.utils.toWei((0.5).toString()),
+        web3.utils.toWei((3).toString()),
+        web3.utils.toWei((1).toString())
+      );
+
+      //try $0.5 - 0.2
+      await bathPairInstance.executeStrategy(
+        web3.utils.toWei((0.1).toString()),
+        web3.utils.toWei((0.05).toString()),
+        web3.utils.toWei((0.2).toString()),
+        web3.utils.toWei((1).toString())
       );
     });
   });

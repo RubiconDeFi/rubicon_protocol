@@ -190,7 +190,7 @@ contract BathToken {
         address underlyingAsset, /* sister asset */
         uint256 stratProportion
     ) external onlyPair {
-        require(stratProportion > 0 && stratProportion < 50 && initialized);
+        require(initialized);
         uint256 stratReward = (
             stratProportion.mul(
                 IERC20(underlyingAsset).balanceOf(address(this))

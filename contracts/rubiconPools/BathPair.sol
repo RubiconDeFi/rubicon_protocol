@@ -46,23 +46,6 @@ contract BathPair {
     mapping(address => uint256) public strategist2FillsAsset;
     mapping(address => uint256) public strategist2FillsQuote;
 
-    event LogStrategistTrades(
-        uint256 idAsk,
-        address askAsset,
-        uint256 askAmt,
-        uint256 idBid,
-        address bidAsset,
-        uint256 bidAmt,
-        address strategist,
-        uint256 timestamp
-    );
-    event StrategistRewardClaim(
-        address strategist,
-        address asset,
-        uint256 amountOfReward,
-        uint256 timestamp
-    );
-
     struct order {
         uint256 pay_amt;
         ERC20 pay_gem;
@@ -78,6 +61,22 @@ contract BathPair {
         uint256 timestamp;
         address strategist;
     }
+
+    event LogStrategistTrade(
+        uint256 askId,
+        uint256 askAmt,
+        uint256 bidId,
+        uint256 bidAmt,
+        uint256 timestamp,
+        address strategist
+    );
+
+    event StrategistRewardClaim(
+        address strategist,
+        address asset,
+        uint256 amountOfReward,
+        uint256 timestamp
+    );
 
     /// @dev Proxy-safe initialization of storage
     function initialize(
@@ -182,63 +181,6 @@ contract BathPair {
 
     // ** Internal Functions **
     // Takes the proposed bid and ask as a parameter - that the offers placed won't match and are maker orders
-    // bid price > best ask
-    function enforceSpread(
-        address _bathHouse,
-        uint256 askN,
-        uint256 askD,
-        uint256 bidN,
-        uint256 bidD
-    ) internal view {
-        require(
-            (askN > 0 && askD > 0) || (bidN > 0 && bidD > 0),
-            "one order must be non-zero"
-        );
-        if (!BathHouse(_bathHouse).permissionedStrategists()) {
-            address _RubiconMarketAddress = RubiconMarketAddress;
-            uint256 bestAskID = RubiconMarket(_RubiconMarketAddress)
-            .getBestOffer(ERC20(underlyingAsset), ERC20(underlyingQuote));
-            uint256 bestBidID = RubiconMarket(_RubiconMarketAddress)
-            .getBestOffer(ERC20(underlyingQuote), ERC20(underlyingAsset));
-
-            order memory bestAsk = getOfferInfo(bestAskID);
-            order memory bestBid = getOfferInfo(bestBidID);
-
-            // If orders in the order book, adhere to more constraints
-            if (
-                (bestAsk.pay_amt > 0 && bestAsk.buy_amt > 0) &&
-                (bestBid.pay_amt > 0 && bestBid.buy_amt > 0)
-            ) {
-                if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-                    require(
-                        ((bestAsk.buy_amt.mul(bidD)) >
-                            (bestAsk.pay_amt.mul(bidN))) &&
-                            ((askD.mul(bestBid.buy_amt)) >
-                                (bestBid.pay_amt.mul(askN))),
-                        "bid must be < bestAsk && ask must be > best Bid in Price"
-                    );
-                } else if (bidN > 0 && bidD > 0) {
-                    // Goal is for (bestAsk.buy_amt / bestAsk.pay_amt) > (bidNumerator / bidDenominator)
-                    require(
-                        (bestAsk.buy_amt.mul(bidD)) >
-                            (bestAsk.pay_amt.mul(bidN)),
-                        "bid price is not less than the best ask"
-                    );
-                } else if (askN > 0 && askD > 0) {
-                    // Goal is for (askDenominator / askNumerator) > (bestBid.pay_amt / bestBid.buy_amt)
-                    require(
-                        (askD.mul(bestBid.buy_amt)) >
-                            (bestBid.pay_amt.mul(askN)),
-                        "ask price not greater than best bid"
-                    );
-                }
-            }
-            // check that ask price > bid price if two offers given
-            if (askN > 0 && askD > 0 && bidN > 0 && bidD > 0) {
-                require((askD.mul(bidD)) > (bidN.mul(askN)));
-            }
-        }
-    }
 
     function getMidpointPrice() internal view returns (int128) {
         address _RubiconMarketAddress = RubiconMarketAddress;
@@ -268,7 +210,11 @@ contract BathPair {
     }
 
     // Returns filled liquidity to the correct bath pool
-    function rebalancePair(address _bathHouse, address _underlyingAsset, address _underlyingQuote) internal {
+    function rebalancePair(
+        address _bathHouse,
+        address _underlyingAsset,
+        address _underlyingQuote
+    ) internal {
         address _bathAssetAddress = bathAssetAddress;
         address _bathQuoteAddress = bathQuoteAddress;
         uint256 bathAssetYield = ERC20(_underlyingQuote).balanceOf(
@@ -277,7 +223,9 @@ contract BathPair {
         uint256 bathQuoteYield = ERC20(_underlyingAsset).balanceOf(
             _bathQuoteAddress
         );
-        uint16 stratReward = BathHouse(_bathHouse).getBPSToStrats(address(this));
+        uint16 stratReward = BathHouse(_bathHouse).getBPSToStrats(
+            address(this)
+        );
         if (bathAssetYield > 0) {
             BathToken(_bathAssetAddress).rebalance(
                 _bathQuoteAddress,
@@ -456,14 +404,10 @@ contract BathPair {
                 BathHouse(_bathHouse).maxOutstandingPairCount(),
             "too many outstanding pairs, please call bathScrub() first"
         );
-
-        // 1. Enforce that a spread exists and that the ask price > best bid price && bid price < best ask price
-        enforceSpread(
-            _bathHouse,
-            askNumerator,
-            askDenominator,
-            bidNumerator,
-            bidDenominator
+        require(
+            (askNumerator > 0 && askDenominator > 0) ||
+                (bidNumerator > 0 && bidDenominator > 0),
+            "one order must be non-zero"
         );
 
         // Trying:
@@ -496,15 +440,23 @@ contract BathPair {
             bid.buy_gem
         );
         // 3. Strategist trade is recorded so they can get paid and the trade is logged for time
-        outstandingPairIDs.push(
-            StrategistTrade(
-                newAskID,
-                ask.pay_amt,
-                newBidID,
-                bid.pay_amt,
-                block.timestamp,
-                msg.sender
-            )
+        StrategistTrade memory outgoing = StrategistTrade(
+            newAskID,
+            ask.pay_amt,
+            newBidID,
+            bid.pay_amt,
+            block.timestamp,
+            msg.sender
+        );
+        outstandingPairIDs.push(outgoing);
+
+        emit LogStrategistTrade(
+            outgoing.askId,
+            outgoing.askAmt,
+            outgoing.bidId,
+            outgoing.bidAmt,
+            outgoing.timestamp,
+            outgoing.strategist
         );
 
         // 5. Return any filled yield to the appropriate bathToken/liquidity pool

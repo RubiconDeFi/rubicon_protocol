@@ -305,8 +305,8 @@ const func = async (hre) => {
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   // const asset = assetsToDeploy[index];
 
-  // Single Deploy
-  // const asset = "REP";
+  // // Single Deploy
+  // const asset = "COMP";
   // const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
   // const newBathPair = await bathPairFactory
   //   .connect(HD_deployer)
@@ -318,8 +318,6 @@ const func = async (hre) => {
   //     //     await btUInst.initialize(process.env['OP_KOVAN_5_BATH'+asset], process.env.OP_KOVAN_5_BATHUSDC, process.env.OP_KOVAN_5_BATHHOUSE, 500, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
   //     // });
   //   });
-
-  // }
 
   // // Approve BathPairs on BathHouse
   //   for (let index = 0; index < assetsToDeploy.length; index++) {
