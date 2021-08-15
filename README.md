@@ -7,9 +7,9 @@ For detailed documentation of the Rubicon protocol please visit our [docs](https
 
 # Rubicon Protocol
 
-Rubicon is a Layer 2, open-orderbook DEX built on the EVM and [Optimism](https://optimism.io/). Rubicon is also a blockchain-based protocol that is aimed at developing and ushering in the emergence of digital asset markets on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/)
+Rubicon is a Layer 2, open-orderbook DEX built on the EVM and [Optimism](https://optimism.io/). Rubicon is a protocol that is aimed at developing and ushering in the decentralized finance on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/).
 
-The Rubicon protocol aims to launch on the Optimism Layer 2 mainnet soon!
+The Rubicon protocol aims to launch on Optimism Layer 2 mainnet soon!
 
 ### Protocol Overview
 
@@ -22,12 +22,6 @@ At a high level, Rubicon revolves around a core smart contract [RubiconMarket.so
 ```bash
 $ git clone https://www.github.com/RubiconDeFi/rubicon_protocol.git   
 $ cd rubicon_protocol && npm i
-$ (in a separate instance) ganache-cli
-```
-
-## Developers: Local Testing - EVM
-
-The command below will run all of the protocol tests located in the test folder which make sure that everything from trading functionality to the community distribution of RBCN are working correctly in the EVM.
-```bash
-$ truffle test
+$ (in a separate instance) npm run ganache
+$ npm run test
 ```

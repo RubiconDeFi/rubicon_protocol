@@ -64,12 +64,18 @@ const func = async (hre) => {
   // await getCurrentImplementation(targetProxy, "WBTC");
   // console.log(await current);
 
-  // // Upgrade BathTokens
+  // // // Upgrade BathTokens
   // await upgradeProxy(
-  //   await proxyFactory.attach(process.env.OP_KOVAN_5_BATHCOMPUSDC),
-  //   "0x3c06e01A88108b73fFEaD52d87aa3B2e4d01eb37",
-  //   "bath pair Comp"
+  //   await proxyFactory.attach(process.env.OP_KOVAN_5_BATHOHM),
+  //   "0xA0C51a69217154994b1509129CCed2D60b862fd6",
+  //   "bathToken OHM"
   // );
+  // await upgradeProxy(
+  //   await proxyFactory.attach(process.env.OP_KOVAN_5_BATHUSDC),
+  //   "0xC82EC7b5b02C909f9e1Cf92E00D46bb2850576e2",
+  //   "bathToken USDC"
+  // );
+  // await getCurrentImplementation(await proxyFactory.attach("0xf5174a26e8fADA8BF14C0d35e97d26b17bF4B909"));
   // await upgradeProxy(
   //   await proxyFactory.attach(process.env.OP_KOVAN_4_BATHREP),
   //   process.env.OP_KOVAN_4_BATHREP_NEWIMP,
@@ -110,14 +116,11 @@ const func = async (hre) => {
       });
   }
 
-  // TODO: make this work
-  async function getCurrentImplementation(contract, msg) {
-    await contract
-      .connect(signers[1])
-      .implementation({ from: HD_proxyAdmin_Addr })
-      .then((r) => {
-        console.log(r);
-      });
+  async function getCurrentImplementation(contract) {
+    let outcome = (await contract
+      .connect(HD_proxyAdmin)
+      .implementation());
+      console.log("check the logs of: ", outcome.hash);
   }
   // return the address of the proxy that wraps `address`
   async function deployProxy(address, msg) {

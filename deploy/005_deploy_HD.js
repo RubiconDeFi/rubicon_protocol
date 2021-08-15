@@ -305,8 +305,8 @@ const func = async (hre) => {
   // for (let index = 0; index < assetsToDeploy.length; index++) {
   // const asset = assetsToDeploy[index];
 
-  // // Single Deploy
-  // const asset = "COMP";
+  // // Single Deploy Bath pair
+  // const asset = "OHM";
   // const bathPairFactory = await hre.ethers.getContractFactory("BathPair");
   // const newBathPair = await bathPairFactory
   //   .connect(HD_deployer)
@@ -317,6 +317,16 @@ const func = async (hre) => {
   //     //   await btUInst.estimateGas.initialize(process.env['OP_KOVAN_5_BATH'+asset], process.env.OP_KOVAN_5_BATHUSDC, process.env.OP_KOVAN_5_BATHHOUSE, 500, -5, {gasLimit: 8999999}) .then(async function (g) {
   //     //     await btUInst.initialize(process.env['OP_KOVAN_5_BATH'+asset], process.env.OP_KOVAN_5_BATHUSDC, process.env.OP_KOVAN_5_BATHHOUSE, 500, -5, {gasLimit: g._hex, nonce: getNonce()}).then((r) => console.log("init of bath" + asset+ "-USDC success"));
   //     // });
+  //   });
+
+  // // Single Deploy Bath Token
+  // const asset = "OHM";
+  // const bathPairFactory = await hre.ethers.getContractFactory("BathToken");
+  // const newBathPair = await bathPairFactory
+  //   .connect(HD_deployer)
+  //   .deploy({ nonce: getNonce() })
+  //   .then(async function (r) {
+  //     console.log("bath" + asset + " deployed at " + (await r.address));
   //   });
 
   // // Approve BathPairs on BathHouse

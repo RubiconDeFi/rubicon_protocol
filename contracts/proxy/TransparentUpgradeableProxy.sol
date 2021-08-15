@@ -48,6 +48,11 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
     event AdminChanged(address previousAdmin, address newAdmin);
 
     /**
+     * @dev Emitted when the admin calls implementation()
+     */
+    event Implementation(address currentImplementation);
+
+    /**
      * @dev Storage slot with the admin of the contract.
      * This is the keccak-256 hash of "eip1967.proxy.admin" subtracted by 1, and is
      * validated in the constructor.
@@ -94,6 +99,7 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
         returns (address implementation_)
     {
         implementation_ = _implementation();
+        emit Implementation(implementation_);
     }
 
     /**

@@ -15,10 +15,6 @@ module.exports = {
       network_id: "*", // Match any network id
       gas: 10000000,  
     },
-    // OPKovan: {
-    //   host: "",
-    //   network_id: 69
-    // },
     kovan: {
       networkCheckTimeout: 10000,
       provider: function() {
