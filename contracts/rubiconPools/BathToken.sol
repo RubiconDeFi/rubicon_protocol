@@ -53,6 +53,14 @@ contract BathToken {
         uint256 sharesReceived,
         address depositor
     );
+    event Withdraw(
+        uint256 amountWithdrawn,
+        IERC20 asset,
+        uint256 sharesWithdrawn,
+        address withdrawer,
+        uint256 fee,
+        address feeTo
+    );
 
     /// @dev Proxy-safe initialization of storage
     function initialize(
@@ -231,6 +239,7 @@ contract BathToken {
         uint256 _fee = r.mul(feeBPS).div(10000);
         IERC20(underlyingToken).transfer(feeTo, _fee);
         underlyingToken.transfer(msg.sender, r.sub(_fee));
+        emit Withdraw(r.sub(_fee), underlyingToken, _shares, msg.sender, _fee, feeTo);
     }
 
     // ** Internal Functions **
