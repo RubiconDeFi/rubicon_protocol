@@ -12,6 +12,7 @@ function logIndented(...args) {
   console.log("       ", ...args);
 }
 
+// Onwards and upwards
 // ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
 // ganache-cli --gasLimit=9000000 --gasPrice=0x1 --defaultBalanceEther 9000 --allowUnlimitedContractSize
 
