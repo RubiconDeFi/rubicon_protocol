@@ -1,0 +1,1 @@
+Please see our docs for details on Rubicon Pools and the role of the strategist. An example strategist bot will be provided here soon! If you're reading this and are interested in becoming a strategist, send an email to contact@rubicon.finance.

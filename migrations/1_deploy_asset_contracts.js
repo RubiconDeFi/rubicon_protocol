@@ -12,17 +12,8 @@ var COIN = artifacts.require("./contracts/peripheral_contracts/EquityToken.sol")
 const BigNumber = require('bignumber.js');
 
 module.exports = function(deployer, network, accounts) {
-
-  var admin = "0xC96495C314879586761d991a2B68ebeab12C03FE";
-  // Core Assets (Asset / Quote) used in protocol testing
+  var admin = accounts[0];
   deployer.deploy(WETH);
   deployer.deploy(DAI, 42, admin, "USDC", "USDC");
-  // deployer.deploy(STARK, admin, new BigNumber(1000e18));
 
-  // deployer.deploy(GME, admin, new BigNumber(1000e18));
-  // deployer.deploy(OPT, admin, new BigNumber(1000e18));
-  // deployer.deploy(SPXE, admin, new BigNumber(1000e18));
-  // deployer.deploy(WBTC, admin, new BigNumber(1000e18));
-  // deployer.deploy(COIN, admin, new BigNumber(1000e18));
-  // deployer.deploy(RBCN, admin, admin);
 };
