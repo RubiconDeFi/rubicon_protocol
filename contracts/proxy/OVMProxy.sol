@@ -3,7 +3,7 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
- * @dev This abstract contract provides a fallback function that delegates all calls to another contract using the EVM
+ * @dev This abstract contract provides an OVM-safe fallback function that delegates all calls to another contract using the EVM
  * instruction `delegatecall`. We refer to the second contract as the _implementation_ behind the proxy, and it has to
  * be specified by overriding the virtual {_implementation} function.
  *
@@ -14,12 +14,11 @@ pragma solidity >=0.6.0 <0.8.0;
  */
 abstract contract OVMProxy {
     /**
-     * @dev Delegates the current call to `implementation`.
+     * @dev Delegates the current call to `implementation` with OVM-safe logic.
      *
      * This function does not return to its internall call site, it will return directly to the external caller.
      */
     function _delegate(address implementation) internal virtual {
-        // solhint-disable-next-line no-inline-assembly
         (bool success, bytes memory returndata) = implementation.delegatecall(
             msg.data
         );

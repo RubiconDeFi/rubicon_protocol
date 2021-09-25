@@ -136,14 +136,16 @@ contract BathPair {
                 BathToken(bathAssetAddress).totalSupply().mul(
                     BathHouse(bathHouse).reserveRatio()
                 )
-            ).div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
+            )
+            .div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
         );
         require(
             (
                 BathToken(bathQuoteAddress).totalSupply().mul(
                     BathHouse(bathHouse).reserveRatio()
                 )
-            ).div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
+            )
+            .div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
         );
     }
 
@@ -178,7 +180,7 @@ contract BathPair {
     }
 
     // *** Internal Functions ***
-    
+
     function getMidpointPrice() internal view returns (int128) {
         address _RubiconMarketAddress = RubiconMarketAddress;
         uint256 bestAskID = RubiconMarket(_RubiconMarketAddress).getBestOffer(
@@ -587,7 +589,8 @@ contract BathPair {
         if (fillCountA > 0) {
             uint256 booty = (
                 fillCountA.mul(ERC20(underlyingAsset).balanceOf(address(this)))
-            ).div(totalAssetFills);
+            )
+            .div(totalAssetFills);
             IERC20(underlyingAsset).transfer(msg.sender, booty);
             emit StrategistRewardClaim(
                 msg.sender,
@@ -601,7 +604,8 @@ contract BathPair {
         if (fillCountQ > 0) {
             uint256 booty = (
                 fillCountQ.mul(ERC20(underlyingQuote).balanceOf(address(this)))
-            ).div(totalQuoteFills);
+            )
+            .div(totalQuoteFills);
             IERC20(underlyingQuote).transfer(msg.sender, booty);
             emit StrategistRewardClaim(
                 msg.sender,
