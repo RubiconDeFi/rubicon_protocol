@@ -239,7 +239,14 @@ contract BathToken {
         uint256 _fee = r.mul(feeBPS).div(10000);
         IERC20(underlyingToken).transfer(feeTo, _fee);
         underlyingToken.transfer(msg.sender, r.sub(_fee));
-        emit Withdraw(r.sub(_fee), underlyingToken, _shares, msg.sender, _fee, feeTo);
+        emit Withdraw(
+            r.sub(_fee),
+            underlyingToken,
+            _shares,
+            msg.sender,
+            _fee,
+            feeTo
+        );
     }
 
     // ** Internal Functions **

@@ -48,7 +48,7 @@ contract TransparentUpgradeableProxy is UpgradeableProxy {
     event AdminChanged(address previousAdmin, address newAdmin);
 
     /**
-     * @dev Emitted when the admin calls implementation()
+     * @dev Emitted when the admin calls implementation() and provides a way to publicly call the implementation's address
      */
     event Implementation(address currentImplementation);
 

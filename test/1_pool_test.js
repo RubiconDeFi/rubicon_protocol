@@ -4,7 +4,6 @@ const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
 const DAI = artifacts.require("USDCWithFaucet");
 const WETH = artifacts.require("WETH9");
-const WAYNE = artifacts.require("EquityToken");
 
 const helper = require("./testHelpers/timeHelper.js");
 
@@ -309,6 +308,31 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       // Idea here is that the start of the local search rolls over after indexs 4-6 are checked in seconds call
       // assert.equal(await bathPairInstance.start().toString(), "0");
     });
+    it("index scrub can be used by approved strategists", async function () {
+      let target = 2;
+      // let goalScrub = target + outCount.toNumber();
+      for (let index = 0; index < target; index++) {
+        await bathPairInstance.executeStrategy(
+          askNumerator,
+          askDenominator,
+          bidNumerator,
+          bidDenominator
+        );
+        // await rubiconMarketInstance.buy(4 + (2 * (index + 1)), web3.utils.toWei((0.4).toString()), {
+        //   from: accounts[5],
+        // });
+      }
+      const outCount = (await bathPairInstance.getOutstandingPairCount());
+      logIndented(
+        "cost of indexScrub:",
+        await bathPairInstance.indexScrub.estimateGas(0, 2)
+      );
+      await bathPairInstance.indexScrub(0,outCount - 1);
+      helper.advanceTimeAndBlock(100);
+
+      assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), '0');
+
+    });
     it("bathTokens are correctly logging outstandingAmount", async function () {
       let target = 6;
       for (let index = 0; index < target; index++) {
@@ -398,7 +422,8 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     //     });
     // }
     it("Funds are correctly returned to bathTokens", async function () {
-      await bathPairInstance.bathScrub();
+      logIndented("cost of rebalance: ", await bathPairInstance.rebalancePair.estimateGas());
+      await bathPairInstance.rebalancePair();
       assert.equal(
         (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),
         "0"
