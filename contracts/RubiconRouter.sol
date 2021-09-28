@@ -43,14 +43,16 @@ contract RubiconRouter {
         return (offer, pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
-    /// @dev route - should represent the addresses throught which pay_amt moves
-    /// @dev buy_amt_min - should represent the addresses throught which pay_amt moves
+    /// @dev This function lets a user swap from route[0] -> route[last] at some minimum expected rate
+    /// @dev pay_amt - amount to be swapped away from msg.sender of *first address in path*
+    /// @dev buy_amt_min - target minimum received of *last address in path*
     function swapv0(
         uint256 pay_amt,
         uint256 buy_amt_min,
-        address[] calldata route,
-        uint256 expectedMarketFeeBPS
+        address[] calldata route, // First address is what is being payed, Last address is what is being bought
+        uint256 expectedMarketFeeBPS //20
     ) public {
+        //User must approve this contract first
         //transfer needed amount here first
         ERC20(route[0]).transferFrom(
             msg.sender,
