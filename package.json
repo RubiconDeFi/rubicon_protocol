@@ -45,6 +45,7 @@
     "test:pools": "truffle test ./test/3_pool_test.js --network pools",
     "test:poolsE": "truffle test ./test/3_pool_test.js --network pools --show-events",
     "test": "truffle test",
+    "test-swap": "truffle test ./test/2_router_test.js",
     "clean": "npx prettier --write 'contracts/**/*.sol'",
     "poolsBot": "node ./strategist/kovanPoolsStrategist.js",
     "validate": "node ./scripts/validateMigrations.js",

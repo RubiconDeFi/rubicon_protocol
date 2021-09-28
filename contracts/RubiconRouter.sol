@@ -10,6 +10,8 @@ import "./peripheral_contracts/ABDKMath64x64.sol";
 
 contract RubiconRouter {
     address public RubiconMarketAddress;
+    //uint256 MAX_INT = 2**256 - 1
+    event LogNote(string, uint256);
 
     constructor(address _rM) {
         RubiconMarketAddress = _rM;
@@ -43,33 +45,42 @@ contract RubiconRouter {
 
     /// @dev route - should represent the addresses throught which pay_amt moves
     /// @dev buy_amt_min - should represent the addresses throught which pay_amt moves
-    function swap(
+    function swapv0(
         uint256 pay_amt,
-        address pay_gem,
         uint256 buy_amt_min,
-        address buy_gem,
-        address[] calldata route
+        address[] calldata route,
+        uint256 expectedMarketFeeBPS
     ) public {
-        // TODO: length requirement?
-        // TODO: ensure the route is valid...
-        require(
-            route[route.length - 1] == buy_gem,
-            "last step in the route is not buy_gem"
+        //transfer needed amount here first
+        ERC20(route[0]).transferFrom(
+            msg.sender,
+            address(this),
+            pay_amt + (pay_amt * expectedMarketFeeBPS) / 10000
         );
-        address _market = RubiconMarketAddress;
+
         uint256 currentAmount = 0;
         for (uint256 i = 0; i < route.length - 1; i++) {
             (address input, address output) = (route[i], route[i + 1]);
-            // uint _pay = pay_amt;
-            uint256 _pay = i == 0 ? pay_amt : currentAmount;
-            uint256 fillAmount = RubiconMarket(_market).sellAllAmount(
-                ERC20(input),
-                _pay,
-                ERC20(output),
-                0 //naively assume no fill_amt here for loop purposes?
-            );
+            uint256 _pay = i == 0
+                ? pay_amt
+                : (currentAmount -
+                    (currentAmount * expectedMarketFeeBPS) /
+                    10000);
+
+            // Approve exchange
+            ERC20(input).approve(RubiconMarketAddress, 2**256 - 1);
+            uint256 fillAmount = RubiconMarket(RubiconMarketAddress)
+                .sellAllAmount(
+                    ERC20(input),
+                    _pay,
+                    ERC20(output),
+                    0 //naively assume no fill_amt here for loop purposes?
+                );
             currentAmount = fillAmount;
         }
-        require(currentAmount >= buy_amt_min);
+        require(currentAmount >= buy_amt_min, "didnt clear buy_amt_min");
+
+        // send tokens back to sender
+        ERC20(route[route.length - 1]).transfer(msg.sender, currentAmount);
     }
 }

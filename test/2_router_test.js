@@ -46,7 +46,7 @@ contract("Rubicon Router Test", async function (accounts) {
         "1000000000000000000000000"
       );
     });
-    it("Router is deployed", async function () {
+    it("Router is deployed with correct exchange address", async function () {
       router = await Router.deployed();
       let g = await router.RubiconMarketAddress();
       assert.equal(g, (await RubiconMarket.deployed()).address);
@@ -137,6 +137,7 @@ contract("Rubicon Router Test", async function (accounts) {
     });
 
     it("Try Asset_1 -> Asset_2 swap", async function () {
+      let rubiconMarketInstance = await RubiconMarket.deployed();
       await asset1.faucet({ from: accounts[1] });
 
       (await asset1).approve(
@@ -144,13 +145,25 @@ contract("Rubicon Router Test", async function (accounts) {
         web3.utils.toWei((1000).toString()),
         { from: accounts[1] }
       );
+
+      (await asset1).approve(
+        rubiconMarketInstance.address,
+        web3.utils.toWei((1000).toString()),
+        { from: accounts[1] }
+      );
+      // logIndented(web3.utils.fromWei(await (await asset1).balanceOf(accounts[1])));
       // Expected swap rate is 1 asset1 -> 0.1 asset2
-      await router.swap(
-        web3.utils.toWei((1).toString()),
-        asset1.address,
-        web3.utils.toWei((0.1).toString()),
-        asset2.address,
-        [asset1.address, DAIInstance.address, asset2.address]
+      await router.swapv0(
+        web3.utils.toWei((0.5).toString()),
+        web3.utils.toWei((0.0499).toString()), // after fees, simply * 1 - 0.2%
+        [(await asset1).address, DAIInstance.address, (await asset2).address],
+        20,
+        { from: accounts[1] }
+      );
+
+      assert.equal(
+        (await (await asset2).balanceOf(accounts[1])).toString(),
+        web3.utils.toWei((0.0499).toString())
       );
     });
   });
