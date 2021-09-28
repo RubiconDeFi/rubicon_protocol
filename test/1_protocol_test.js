@@ -2,8 +2,9 @@ const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
 const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
-const DAI = artifacts.require("USDCWithFaucet");
+const DAI = artifacts.require("TokenWithFaucet");
 const WETH = artifacts.require("WETH9");
+const TokenWithFaucet = artifacts.require("TokenWithFaucet");
 
 const helper = require("./testHelpers/timeHelper.js");
 
@@ -19,6 +20,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
   let bathPairInstance;
   let bathAssetInstance;
   let bathQuoteInstance;
+  let bathHouseInstance;
 
   describe("Deployment", async function () {
     it("is deployed", async function () {
@@ -40,6 +42,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         20
       );
     });
+
     it("Bath Token for asset is deployed and initialized", async function () {
       return await BathToken.new().then(async function (instance) {
         await instance.initialize(
@@ -322,16 +325,18 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         //   from: accounts[5],
         // });
       }
-      const outCount = (await bathPairInstance.getOutstandingPairCount());
+      const outCount = await bathPairInstance.getOutstandingPairCount();
       logIndented(
         "cost of indexScrub:",
         await bathPairInstance.indexScrub.estimateGas(0, 2)
       );
-      await bathPairInstance.indexScrub(0,outCount - 1);
+      await bathPairInstance.indexScrub(0, outCount - 1);
       helper.advanceTimeAndBlock(100);
 
-      assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), '0');
-
+      assert.equal(
+        (await bathPairInstance.getOutstandingPairCount()).toString(),
+        "0"
+      );
     });
     it("bathTokens are correctly logging outstandingAmount", async function () {
       let target = 6;
@@ -422,7 +427,10 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     //     });
     // }
     it("Funds are correctly returned to bathTokens", async function () {
-      logIndented("cost of rebalance: ", await bathPairInstance.rebalancePair.estimateGas());
+      logIndented(
+        "cost of rebalance: ",
+        await bathPairInstance.rebalancePair.estimateGas()
+      );
       await bathPairInstance.rebalancePair();
       assert.equal(
         (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),

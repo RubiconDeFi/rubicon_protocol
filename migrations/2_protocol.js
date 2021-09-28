@@ -1,5 +1,6 @@
 require('dotenv').config();
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
+var RubiconRouter = artifacts.require("./contracts/RubiconRouter.sol");
 var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
 var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
 
@@ -18,7 +19,10 @@ module.exports = async function(deployer, network, accounts) {
             await deployer.deploy(BathHouse).then(async function() {
               await deployer.deploy(BathPair);
               return;
-            }); 
+            });
+            
+            // Deploy Router
+            await deployer.deploy(RubiconRouter, rubiconMarketInstance.address);
         });
       }
 };
