@@ -145,12 +145,6 @@ contract("Rubicon Router Test", async function (accounts) {
         web3.utils.toWei((1000).toString()),
         { from: accounts[1] }
       );
-
-      (await asset1).approve(
-        rubiconMarketInstance.address,
-        web3.utils.toWei((1000).toString()),
-        { from: accounts[1] }
-      );
       // logIndented(web3.utils.fromWei(await (await asset1).balanceOf(accounts[1])));
       // Expected swap rate is 1 asset1 -> 0.1 asset2
       await router.swapv0(
