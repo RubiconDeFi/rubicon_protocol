@@ -147,7 +147,7 @@ contract("Rubicon Router Test", async function (accounts) {
       );
       // logIndented(web3.utils.fromWei(await (await asset1).balanceOf(accounts[1])));
       // Expected swap rate is 1 asset1 -> 0.1 asset2
-      await router.swapv0(
+      await router.swap(
         web3.utils.toWei((0.5).toString()),
         web3.utils.toWei((0.0499).toString()), // after fees, simply * 1 - 0.2%
         [(await asset1).address, DAIInstance.address, (await asset2).address],

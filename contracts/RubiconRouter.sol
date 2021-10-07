@@ -6,11 +6,13 @@ pragma solidity =0.7.6;
 
 import "./RubiconMarket.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./peripheral_contracts/ABDKMath64x64.sol";
 
 contract RubiconRouter {
     address public RubiconMarketAddress;
     //uint256 MAX_INT = 2**256 - 1
+    using SafeMath for uint256;
     event LogNote(string, uint256);
 
     constructor(address _rM) {
@@ -43,10 +45,17 @@ contract RubiconRouter {
         return (offer, pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
+    function approveAssetOnMarket(address toApprove) public {
+        // Approve exchange
+        ERC20(toApprove).approve(RubiconMarketAddress, 2**256 - 1);
+    }
+
+    // function getSwapRate()
+
     /// @dev This function lets a user swap from route[0] -> route[last] at some minimum expected rate
     /// @dev pay_amt - amount to be swapped away from msg.sender of *first address in path*
     /// @dev buy_amt_min - target minimum received of *last address in path*
-    function swapv0(
+    function swap(
         uint256 pay_amt,
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
@@ -57,7 +66,7 @@ contract RubiconRouter {
         ERC20(route[0]).transferFrom(
             msg.sender,
             address(this),
-            pay_amt + (pay_amt * expectedMarketFeeBPS) / 10000
+            pay_amt.add(pay_amt.mul(expectedMarketFeeBPS).div(10000))
         );
 
         uint256 currentAmount = 0;
@@ -65,12 +74,16 @@ contract RubiconRouter {
             (address input, address output) = (route[i], route[i + 1]);
             uint256 _pay = i == 0
                 ? pay_amt
-                : (currentAmount -
-                    (currentAmount * expectedMarketFeeBPS) /
-                    10000);
-
-            // Approve exchange
-            ERC20(input).approve(RubiconMarketAddress, 2**256 - 1);
+                : (
+                    currentAmount.sub(
+                        currentAmount.mul(expectedMarketFeeBPS).div(10000)
+                    )
+                );
+            if (
+                ERC20(input).allowance(address(this), RubiconMarketAddress) == 0
+            ) {
+                approveAssetOnMarket(input);
+            }
             uint256 fillAmount = RubiconMarket(RubiconMarketAddress)
                 .sellAllAmount(
                     ERC20(input),
