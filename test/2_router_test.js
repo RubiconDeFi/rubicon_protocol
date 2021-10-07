@@ -176,7 +176,7 @@ contract("Rubicon Router Test", async function (accounts) {
         20,
         { from: accounts[2] });
 
-        logIndented("got this expect", web3.utils.fromWei(expect))
+        // logIndented("got this expect", web3.utils.fromWei(expect))
       // await router.swap(
       //   web3.utils.toWei((0.25).toString()),
       //   web3.utils.toWei((0.02495).toString()), // after fees, simply * 1 - 0.2%

@@ -12,13 +12,18 @@ import "./peripheral_contracts/ABDKMath64x64.sol";
 ///@dev this contract is a high-level router that utilizes Rubicon smart contracts to provide
 /// added convenience when interacting with the Rubicon protocol
 contract RubiconRouter {
-    address public RubiconMarketAddress;
-    //uint256 MAX_INT = 2**256 - 1
     using SafeMath for uint256;
+
+    address public RubiconMarketAddress;
+    bool public initialized;
+    //uint256 MAX_INT = 2**256 - 1
+
     event LogNote(string, uint256);
 
-    constructor(address _rM) {
+    function initialize(address _rM) external {
+        require(!initialized);
         RubiconMarketAddress = _rM;
+        initialized = true;
     }
 
     /// @dev this function returns the best offer for a pair's id and info
@@ -53,11 +58,12 @@ contract RubiconRouter {
         ERC20(toApprove).approve(RubiconMarketAddress, 2**256 - 1);
     }
 
+    /// @dev this function takes the same parameters of swap and returns the expected amount
     function getExpectedSwapFill(
         uint256 pay_amt,
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
-        uint256 expectedMarketFeeBPS
+        uint256 expectedMarketFeeBPS //20
     ) public view returns (uint256 fill_amt) {
         address _market = RubiconMarketAddress;
         uint256 currentAmount = 0;
