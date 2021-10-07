@@ -22,9 +22,9 @@ module.exports = async function(deployer, network, accounts) {
             });
             
             // Deploy Router
-            await deployer.deploy(RubiconRouter);
-            let routerI = await RubiconRouter.deployed();
-            await routerI.initialize(rubiconMarketInstance.address);
+            await deployer.deploy(RubiconRouter, rubiconMarketInstance.address);
+            // let routerI = await RubiconRouter.deployed();
+            // await routerI.initialize(rubiconMarketInstance.address);
         });
       }
 };

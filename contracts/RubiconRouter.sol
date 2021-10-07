@@ -15,15 +15,12 @@ contract RubiconRouter {
     using SafeMath for uint256;
 
     address public RubiconMarketAddress;
-    bool public initialized;
     //uint256 MAX_INT = 2**256 - 1
 
     event LogNote(string, uint256);
 
-    function initialize(address _rM) external {
-        require(!initialized);
+    constructor(address _rM) {
         RubiconMarketAddress = _rM;
-        initialized = true;
     }
 
     /// @dev this function returns the best offer for a pair's id and info
