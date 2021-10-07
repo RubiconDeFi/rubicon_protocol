@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./peripheral_contracts/ABDKMath64x64.sol";
 
+///@dev this contract is a high-level router that utilizes Rubicon smart contracts to provide
+/// added convenience when interacting with the Rubicon protocol
 contract RubiconRouter {
     address public RubiconMarketAddress;
     //uint256 MAX_INT = 2**256 - 1
@@ -45,12 +47,41 @@ contract RubiconRouter {
         return (offer, pay_amt, pay_gem, buy_amt, buy_gem);
     }
 
+    // function for infinite approvals of Rubicon Market
     function approveAssetOnMarket(address toApprove) public {
         // Approve exchange
         ERC20(toApprove).approve(RubiconMarketAddress, 2**256 - 1);
     }
 
-    // function getSwapRate()
+    function getExpectedSwapFill(
+        uint256 pay_amt,
+        uint256 buy_amt_min,
+        address[] calldata route, // First address is what is being payed, Last address is what is being bought
+        uint256 expectedMarketFeeBPS
+    ) public view returns (uint256 fill_amt) {
+        address _market = RubiconMarketAddress;
+        uint256 currentAmount = 0;
+        for (uint256 i = 0; i < route.length - 1; i++) {
+            (address input, address output) = (route[i], route[i + 1]);
+            uint256 _pay = i == 0
+                ? pay_amt
+                : (
+                    currentAmount.sub(
+                        currentAmount.mul(expectedMarketFeeBPS).div(10000)
+                    )
+                );
+            uint256 wouldBeFillAmount = RubiconMarket(_market).getBuyAmount(
+                ERC20(output),
+                ERC20(input),
+                _pay
+            );
+            currentAmount = wouldBeFillAmount;
+        }
+        require(currentAmount >= buy_amt_min, "didnt clear buy_amt_min");
+
+        // Return the wouldbe resulting swap amount
+        return (currentAmount);
+    }
 
     /// @dev This function lets a user swap from route[0] -> route[last] at some minimum expected rate
     /// @dev pay_amt - amount to be swapped away from msg.sender of *first address in path*
@@ -69,6 +100,7 @@ contract RubiconRouter {
             pay_amt.add(pay_amt.mul(expectedMarketFeeBPS).div(10000))
         );
 
+        address _market = RubiconMarketAddress;
         uint256 currentAmount = 0;
         for (uint256 i = 0; i < route.length - 1; i++) {
             (address input, address output) = (route[i], route[i + 1]);
@@ -79,18 +111,15 @@ contract RubiconRouter {
                         currentAmount.mul(expectedMarketFeeBPS).div(10000)
                     )
                 );
-            if (
-                ERC20(input).allowance(address(this), RubiconMarketAddress) == 0
-            ) {
+            if (ERC20(input).allowance(address(this), _market) == 0) {
                 approveAssetOnMarket(input);
             }
-            uint256 fillAmount = RubiconMarket(RubiconMarketAddress)
-                .sellAllAmount(
-                    ERC20(input),
-                    _pay,
-                    ERC20(output),
-                    0 //naively assume no fill_amt here for loop purposes?
-                );
+            uint256 fillAmount = RubiconMarket(_market).sellAllAmount(
+                ERC20(input),
+                _pay,
+                ERC20(output),
+                0 //naively assume no fill_amt here for loop purposes?
+            );
             currentAmount = fillAmount;
         }
         require(currentAmount >= buy_amt_min, "didnt clear buy_amt_min");
