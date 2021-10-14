@@ -6,6 +6,7 @@ pragma solidity =0.7.6;
 // import "./IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+
 contract TokenWithFaucet is ERC20 {
     // --- Auth ---
     mapping(address => uint256) public wards;
