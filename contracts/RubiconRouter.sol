@@ -10,12 +10,11 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./peripheral_contracts/ABDKMath64x64.sol";
 
 ///@dev this contract is a high-level router that utilizes Rubicon smart contracts to provide
-/// added convenience when interacting with the Rubicon protocol
+///@dev added convenience and functionality when interacting with the Rubicon protocol
 contract RubiconRouter {
     using SafeMath for uint256;
 
     address public RubiconMarketAddress;
-    //uint256 MAX_INT = 2**256 - 1
 
     event LogNote(string, uint256);
 
