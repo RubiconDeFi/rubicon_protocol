@@ -4,7 +4,7 @@
 pragma solidity =0.7.6;
 
 // import "./IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./ERC20.sol";
 
 
 contract TokenWithFaucet is ERC20 {
