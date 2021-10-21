@@ -129,4 +129,44 @@ contract RubiconRouter {
         // send tokens back to sender
         ERC20(route[route.length - 1]).transfer(msg.sender, currentAmount);
     }
+
+    /// @dev this function takes a user's entire balance for the trade in case they want to do a max trade so there's no leftover dust
+    function swapEntireBalance(
+        uint256 buy_amt_min,
+        address[] calldata route, // First address is what is being payed, Last address is what is being bought
+        uint256 expectedMarketFeeBPS
+    ) public {
+        //swaps msg.sender entire balance in the trade
+        swap(
+            ERC20(route[0]).balanceOf(msg.sender),
+            buy_amt_min,
+            route,
+            expectedMarketFeeBPS
+        );
+    }
+
+    /// @dev this function takes a user's entire balance for the trade in case they want to do a max trade so there's no leftover dust
+    function maxBuyAllAmount(
+        ERC20 buy_gem,
+        ERC20 pay_gem,
+        uint256 max_fill_amount
+    ) public {
+        //swaps msg.sender's entire balance in the trade
+        RubiconMarket(RubiconMarketAddress).buyAllAmount(
+            buy_gem,
+            ERC20(buy_gem).balanceOf(msg.sender),
+            pay_gem,
+            max_fill_amount
+        );
+    }
+
+    /// @dev this function takes a user's entire balance for the trade in case they want to do a max trade so there's no leftover dust
+    function maxSellAllAmount(
+        ERC20 pay_gem,
+        ERC20 buy_gem,
+        uint256 min_fill_amount
+    ) public {
+        //swaps msg.sender entire balance in the trade
+        RubiconMarket(RubiconMarketAddress).sellAllAmount(pay_gem, ERC20(pay_gem).balanceOf(msg.sender), buy_gem, min_fill_amount);
+    }
 }
