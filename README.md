@@ -7,15 +7,19 @@ For detailed documentation of the Rubicon protocol please visit our [docs](https
 
 # Rubicon Protocol
 
-Rubicon is a Layer 2, open-orderbook DEX built on the EVM and [Optimism](https://optimism.io/). Rubicon is a protocol that is aimed at developing and ushering in the decentralized finance on the Ethereum blockchain. Read more about our mission and Rubicon [here](https://www.rubicon.finance/).
+Rubicon is an open order book protocol for Ethereum. The protocol is Layer 2-native and will launch across multiple L2 networks such as [Optimism](https://optimism.io/), [Arbitrum](https://arbitrum.io/), [zkSync](https://zksync.io/), and [StarkNet](https://starkware.co/starknet/).
 
-The Rubicon protocol aims to launch on Optimism Layer 2 mainnet soon!
+The Rubicon protocol is currently live on the Optimistic Ethereum network. You can use it today on the [Rubicon App](https://app.rubicon.finance).
 
 ### Protocol Overview
 
-There are a number of key smart contracts that facilitate the governance and operation of Rubicon. Please see below for an overview of our current smart contract infrastructure.
+A number of key smart contracts house the primary operations of the Rubicon protocol. Please see below for an overview of our current smart contract infrastructure.
 
-At a high level, Rubicon revolves around a core smart contract [RubiconMarket.sol](https://github.com/RubiconDeFi/rubicon_protocol/blob/master/contracts/RubiconMarket.sol) that facilitates the peer-to-peer transfer of tokens, digital assets, and any ERC-20 compliant token.
+At a high level, Rubicon revolves around a core smart contract [RubiconMarket.sol](https://github.com/RubiconDeFi/rubicon_protocol/blob/master/contracts/RubiconMarket.sol) that facilitates peer-to-peer trades of ERC-20 tokens using an open order book.
+
+[Rubicon Pools](https://docs.rubicon.finance/contracts/rubicon-pools) is a separate system of smart contracts that enables passive liquidity providing on the Rubicon order books.
+
+![image](https://user-images.githubusercontent.com/60487118/142698674-4b21a487-72b8-4c1b-9d7c-f340d00352fc.png)
 
 ## Start Rubicon Protocol Locally
 
