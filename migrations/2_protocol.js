@@ -1,7 +1,9 @@
 require('dotenv').config();
 var RubiconMarket = artifacts.require("./contracts/RubiconMarket.sol");
-var BathHouse = artifacts.require("./contracts/rubiconPoolsv0/BathHouse.sol");
-var BathPair = artifacts.require("./contracts/rubiconPoolsv0/BathPair.sol");
+var RubiconRouter = artifacts.require("./contracts/RubiconRouter.sol");
+// var StrategistUtility = artifacts.require("./contracts/StrategistUtility.sol");
+var BathHouse = artifacts.require("./contracts/rubiconPools/BathHouse.sol");
+var BathPair = artifacts.require("./contracts/rubiconPools/BathPair.sol");
 
 // @dev - use: ganache-cli --gasLimit=0x1fffffffffffff --gasPrice=0x1 --allowUnlimitedContractSize --defaultBalanceEther 9000
 module.exports = async function(deployer, network, accounts) {
@@ -18,7 +20,14 @@ module.exports = async function(deployer, network, accounts) {
             await deployer.deploy(BathHouse).then(async function() {
               await deployer.deploy(BathPair);
               return;
-            }); 
+            });
+            
+            // Deploy Router
+            // await deployer.deploy(RubiconRouter, rubiconMarketInstance.address);
+            // await deployer.deploy(StrategistUtility);
+
+            // let routerI = await RubiconRouter.deployed();
+            // await routerI.initialize(rubiconMarketInstance.address);
         });
       }
 };

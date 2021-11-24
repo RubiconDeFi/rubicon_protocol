@@ -110,7 +110,7 @@ contract BathToken {
         initialized = true;
     }
 
-    modifier onlyPair {
+    modifier onlyPair() {
         require(
             BathHouse(bathHouse).isApprovedPair(msg.sender) == true,
             "not an approved pair - bathToken"
@@ -196,25 +196,18 @@ contract BathToken {
     function rebalance(
         address sisterBath,
         address underlyingAsset, /* sister asset */
-        uint256 stratProportion
+        uint256 stratProportion,
+        uint256 rebalAmt
     ) external onlyPair {
         require(initialized);
-        uint256 stratReward = (
-            stratProportion.mul(
-                IERC20(underlyingAsset).balanceOf(address(this))
-            )
-        )
-        .div(10000);
-        IERC20(underlyingAsset).transfer(
-            sisterBath,
-            IERC20(underlyingAsset).balanceOf(address(this)).sub(stratReward)
-        );
+        uint256 stratReward = (stratProportion.mul(rebalAmt)).div(10000);
+        IERC20(underlyingAsset).transfer(sisterBath, rebalAmt.sub(stratReward));
         IERC20(underlyingAsset).transfer(msg.sender, stratReward);
     }
 
     // ** User Entrypoints: **
     // https://github.com/yearn/yearn-protocol/blob/develop/contracts/vaults/yVault.sol - shoutout yEarn homies
-    function deposit(uint256 _amount) external {
+    function deposit(uint256 _amount) external returns (uint256 shares) {
         uint256 _pool = underlyingBalance();
         uint256 _before = underlyingToken.balanceOf(address(this));
 
@@ -222,31 +215,49 @@ contract BathToken {
         uint256 _after = underlyingToken.balanceOf(address(this));
         _amount = _after.sub(_before); // Additional check for deflationary tokens
 
-        uint256 shares = 0;
-        if (totalSupply == 0) {
-            shares = _amount;
-        } else {
-            shares = (_amount.mul(totalSupply)).div(_pool);
-        }
+        shares = 0;
+        (totalSupply == 0) ? shares = _amount : shares = (
+            _amount.mul(totalSupply)
+        ).div(_pool);
+
         _mint(msg.sender, shares);
         emit Deposit(_amount, underlyingToken, shares, msg.sender);
     }
 
     // No rebalance implementation for lower fees and faster swaps
-    function withdraw(uint256 _shares) external {
+    function withdraw(uint256 _shares)
+        external
+        returns (uint256 amountWithdrawn)
+    {
         uint256 r = (underlyingBalance().mul(_shares)).div(totalSupply);
         _burn(msg.sender, _shares);
         uint256 _fee = r.mul(feeBPS).div(10000);
-        IERC20(underlyingToken).transfer(feeTo, _fee);
-        underlyingToken.transfer(msg.sender, r.sub(_fee));
+        underlyingToken.transfer(feeTo, _fee);
+        amountWithdrawn = r.sub(_fee);
+        underlyingToken.transfer(msg.sender, amountWithdrawn);
         emit Withdraw(
-            r.sub(_fee),
+            amountWithdrawn,
             underlyingToken,
             _shares,
             msg.sender,
             _fee,
             feeTo
         );
+    }
+
+    function approveMarket() external {
+        require(initialized);
+        if (
+            IERC20(underlyingToken).allowance(
+                address(this),
+                RubiconMarketAddress
+            ) == 0
+        ) {
+            IERC20(address(underlyingToken)).approve(
+                RubiconMarketAddress,
+                2**256 - 1
+            );
+        }
     }
 
     // ** Internal Functions **

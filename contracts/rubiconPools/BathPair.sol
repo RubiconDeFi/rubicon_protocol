@@ -14,6 +14,7 @@ import "./BathToken.sol";
 import "./BathHouse.sol";
 import "../RubiconMarket.sol";
 import "../peripheral_contracts/ABDKMath64x64.sol";
+// import "./StrategistUtility.sol";
 
 contract BathPair {
     using SafeMath for uint256;
@@ -129,25 +130,23 @@ contract BathPair {
         _;
     }
 
-    modifier enforceReserveRatio() {
-        _;
-        require(
-            (
-                BathToken(bathAssetAddress).totalSupply().mul(
-                    BathHouse(bathHouse).reserveRatio()
-                )
-            )
-            .div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress)
-        );
-        require(
-            (
-                BathToken(bathQuoteAddress).totalSupply().mul(
-                    BathHouse(bathHouse).reserveRatio()
-                )
-            )
-            .div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress)
-        );
-    }
+    // modifier enforceReserveRatio() {
+    //     _;
+    //     require(
+    //         (
+    //             BathToken(bathAssetAddress).totalSupply().mul(
+    //                 BathHouse(bathHouse).reserveRatio()
+    //             )
+    //         ).div(100) <= IERC20(underlyingAsset).balanceOf(bathAssetAddress), "Failed to meet asset reserve ratio"
+    //     );
+    //     require(
+    //         (
+    //             BathToken(bathQuoteAddress).totalSupply().mul(
+    //                 BathHouse(bathHouse).reserveRatio()
+    //             )
+    //         ).div(100) <= IERC20(underlyingQuote).balanceOf(bathQuoteAddress), "Failed to meet quote reserve ratio"
+    //     );
+    // }
 
     function setMaxOrderSizeBPS(uint16 val) external onlyBathHouse {
         maxOrderSizeBPS = val;
@@ -300,7 +299,7 @@ contract BathPair {
         uint256 askDenominator, // Asset / Quote
         uint256 bidNumerator, // size in ASSET
         uint256 bidDenominator // size in QUOTES
-    ) external enforceReserveRatio onlyApprovedStrategist(msg.sender) {
+    ) external onlyApprovedStrategist(msg.sender) {
         // Require at least one order is non-zero
         require(
             (askNumerator > 0 && askDenominator > 0) ||
@@ -345,9 +344,9 @@ contract BathPair {
         );
         order memory bid = order(
             bidNumerator,
-            ERC20(underlyingQuote),
+            ERC20(_underlyingQuote),
             bidDenominator,
-            ERC20(underlyingAsset)
+            ERC20(_underlyingAsset)
         );
 
         // Place new bid and/or ask
@@ -386,34 +385,72 @@ contract BathPair {
         );
     }
 
-    // Returns filled liquidity to the correct bath pool - enforce this on permissionless
-    function rebalancePair() public {
+    function rebalancePair(
+        uint256 assetRebalAmt, //amount of ASSET in the quote buffer
+        uint256 quoteRebalAmt //amount of QUOTE in the asset buffer
+    ) external onlyApprovedStrategist(msg.sender) {
         address _bathAssetAddress = bathAssetAddress;
         address _bathQuoteAddress = bathQuoteAddress;
         address _underlyingAsset = underlyingAsset;
         address _underlyingQuote = underlyingQuote;
-        uint256 bathAssetYield = ERC20(_underlyingQuote).balanceOf(
-            _bathAssetAddress
-        );
-        uint256 bathQuoteYield = ERC20(_underlyingAsset).balanceOf(
-            _bathQuoteAddress
-        );
         uint16 stratReward = BathHouse(bathHouse).getBPSToStrats(address(this));
-        if (bathAssetYield > 0) {
-            BathToken(_bathAssetAddress).rebalance(
-                _bathQuoteAddress,
-                _underlyingQuote,
-                stratReward
-            );
-        }
 
-        if (bathQuoteYield > 0) {
+        // Simply rebalance given amounts
+        if (assetRebalAmt > 0) {
             BathToken(_bathQuoteAddress).rebalance(
                 _bathAssetAddress,
                 _underlyingAsset,
-                stratReward
+                stratReward,
+                assetRebalAmt
             );
         }
+        if (quoteRebalAmt > 0) {
+            BathToken(_bathAssetAddress).rebalance(
+                _bathQuoteAddress,
+                _underlyingQuote,
+                stratReward,
+                quoteRebalAmt
+            );
+        }
+    }
+
+    //Function to attempt AMM inventory risk tail off
+    function attemptTailOff(
+        address targetPool,
+        address tokenToHandle,
+        address targetToken,
+        address _stratUtil, // delegatecall target
+        uint256 amount, //fill amount to handle
+        uint256 hurdle, //must clear this on tail off
+        uint24 _poolFee
+    ) external onlyApprovedStrategist(msg.sender) {
+        // transfer here
+        uint16 stratReward = BathHouse(bathHouse).getBPSToStrats(address(this));
+
+        BathToken(targetPool).rebalance(
+            address(this),
+            tokenToHandle,
+            stratReward,
+            amount
+        );
+        (
+            bool success, bytes memory data
+        ) = _stratUtil.delegatecall(
+                abi.encodeWithSignature(
+                    "UNItrade(uint256,address,address,uint256,uint256)",
+                    amount,
+                    tokenToHandle,
+                    targetToken,
+                    hurdle,
+                    _poolFee
+                )
+            );
+        // Try to derisk on UNI, if fail handle normally
+        // if (success) {
+        require(success, "Uni tail off failed");
+        uint256 outcome = abi.decode(data, (uint256));
+        //then return to proper pool
+        ERC20(tokenToHandle).transfer(targetPool, outcome);
     }
 
     // This function cleans outstanding orders on a time basis and rebalances yield between bathTokens
@@ -550,37 +587,37 @@ contract BathPair {
     }
 
     // This function allows a strategist to remove Pools liquidity from the order book from a trade id
-    function removeLiquidity(uint256 id) external {
-        require(id != 0, "cant remove a zero order");
-        order memory ord = getOfferInfo(id);
-        if (ord.pay_gem == ERC20(underlyingAsset)) {
-            uint256 len = outstandingPairIDs.length;
-            for (uint256 x = 0; x < len; x++) {
-                if (outstandingPairIDs[x].askId == id) {
-                    require(
-                        msg.sender == outstandingPairIDs[x].strategist,
-                        "only strategist can cancel their orders"
-                    );
-                    handleStratOrderAtIndex(x);
-                    removeElement(x);
-                    break;
-                }
-            }
-        } else if (ord.pay_gem == ERC20(underlyingQuote)) {
-            uint256 len = outstandingPairIDs.length;
-            for (uint256 x = 0; x < len; x++) {
-                if (outstandingPairIDs[x].bidId == id) {
-                    require(
-                        msg.sender == outstandingPairIDs[x].strategist,
-                        "only strategist can cancel their orders"
-                    );
-                    handleStratOrderAtIndex(x);
-                    removeElement(x);
-                    break;
-                }
-            }
-        }
-    }
+    // function removeLiquidity(uint256 id) external {
+    //     require(id != 0, "cant remove a zero order");
+    //     order memory ord = getOfferInfo(id);
+    //     if (ord.pay_gem == ERC20(underlyingAsset)) {
+    //         uint256 len = outstandingPairIDs.length;
+    //         for (uint256 x = 0; x < len; x++) {
+    //             if (outstandingPairIDs[x].askId == id) {
+    //                 require(
+    //                     msg.sender == outstandingPairIDs[x].strategist,
+    //                     "only strategist can cancel their orders"
+    //                 );
+    //                 handleStratOrderAtIndex(x);
+    //                 removeElement(x);
+    //                 break;
+    //             }
+    //         }
+    //     } else if (ord.pay_gem == ERC20(underlyingQuote)) {
+    //         uint256 len = outstandingPairIDs.length;
+    //         for (uint256 x = 0; x < len; x++) {
+    //             if (outstandingPairIDs[x].bidId == id) {
+    //                 require(
+    //                     msg.sender == outstandingPairIDs[x].strategist,
+    //                     "only strategist can cancel their orders"
+    //                 );
+    //                 handleStratOrderAtIndex(x);
+    //                 removeElement(x);
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
     // function where strategists claim rewards proportional to their quantity of fills
     function strategistBootyClaim() external {
@@ -589,8 +626,7 @@ contract BathPair {
         if (fillCountA > 0) {
             uint256 booty = (
                 fillCountA.mul(ERC20(underlyingAsset).balanceOf(address(this)))
-            )
-            .div(totalAssetFills);
+            ).div(totalAssetFills);
             IERC20(underlyingAsset).transfer(msg.sender, booty);
             emit StrategistRewardClaim(
                 msg.sender,
@@ -604,8 +640,7 @@ contract BathPair {
         if (fillCountQ > 0) {
             uint256 booty = (
                 fillCountQ.mul(ERC20(underlyingQuote).balanceOf(address(this)))
-            )
-            .div(totalQuoteFills);
+            ).div(totalQuoteFills);
             IERC20(underlyingQuote).transfer(msg.sender, booty);
             emit StrategistRewardClaim(
                 msg.sender,

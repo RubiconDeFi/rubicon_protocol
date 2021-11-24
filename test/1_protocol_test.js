@@ -2,8 +2,9 @@ const BathHouse = artifacts.require("BathHouse");
 const BathPair = artifacts.require("BathPair");
 const BathToken = artifacts.require("BathToken");
 const RubiconMarket = artifacts.require("RubiconMarket");
-const DAI = artifacts.require("USDCWithFaucet");
+const DAI = artifacts.require("TokenWithFaucet");
 const WETH = artifacts.require("WETH9");
+const TokenWithFaucet = artifacts.require("TokenWithFaucet");
 
 const helper = require("./testHelpers/timeHelper.js");
 
@@ -19,6 +20,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
   let bathPairInstance;
   let bathAssetInstance;
   let bathQuoteInstance;
+  let bathHouseInstance;
 
   describe("Deployment", async function () {
     it("is deployed", async function () {
@@ -40,6 +42,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         20
       );
     });
+
     it("Bath Token for asset is deployed and initialized", async function () {
       return await BathToken.new().then(async function (instance) {
         await instance.initialize(
@@ -244,7 +247,7 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         { from: accounts[4], gas: 0x1ffffff }
       );
     });
-    it("Any user can call executeStrategy() on bath Pairs", async function () {
+    it("Strategist can call executeStrategy() on bath Pairs", async function () {
       await bathPairInstance.executeStrategy(
         askNumerator,
         askDenominator,
@@ -322,16 +325,18 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         //   from: accounts[5],
         // });
       }
-      const outCount = (await bathPairInstance.getOutstandingPairCount());
+      const outCount = await bathPairInstance.getOutstandingPairCount();
       logIndented(
         "cost of indexScrub:",
         await bathPairInstance.indexScrub.estimateGas(0, 2)
       );
-      await bathPairInstance.indexScrub(0,outCount - 1);
+      await bathPairInstance.indexScrub(0, outCount - 1);
       helper.advanceTimeAndBlock(100);
 
-      assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), '0');
-
+      assert.equal(
+        (await bathPairInstance.getOutstandingPairCount()).toString(),
+        "0"
+      );
     });
     it("bathTokens are correctly logging outstandingAmount", async function () {
       let target = 6;
@@ -385,14 +390,15 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
       );
       await bathPairInstance.bathScrub();
     });
-    it("Strategist can cancel an order they made", async function () {
-      logIndented(
-        "cost of remove liqudity:",
-        await bathPairInstance.removeLiquidity.estimateGas(7)
-      );
-      await bathPairInstance.removeLiquidity(7);
-      // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
-    });
+    // Works just not needed in current strategist flow
+    // it("Strategist can cancel an order they made", async function () {
+    //   logIndented(
+    //     "cost of remove liqudity:",
+    //     await bathPairInstance.removeLiquidity.estimateGas(7)
+    //   );
+    //   await bathPairInstance.removeLiquidity(7);
+    //   // assert.equal((await bathPairInstance.getOutstandingPairCount()).toString(), "2");
+    // });
     it("New strategist can be added to pools ", async function () {
       await bathHouseInstance.approveStrategist(accounts[6]);
       await bathPairInstance.executeStrategy(
@@ -421,9 +427,41 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
     //         // console.log("outstanding pairs: ", await bathPairInstance.getOutstandingPairCount());
     //     });
     // }
+
     it("Funds are correctly returned to bathTokens", async function () {
-      logIndented("cost of rebalance: ", await bathPairInstance.rebalancePair.estimateGas());
-      await bathPairInstance.rebalancePair();
+      await WETHInstance.transfer(
+        bathQuoteInstance.address,
+        web3.utils.toWei("0.001"),
+        { from: accounts[1] }
+      );
+      await DAIInstance.transfer(
+        bathAssetInstance.address,
+        web3.utils.toWei("0.001"),
+        { from: accounts[2] }
+      );
+
+      // rebal Pair always tailing risk now if possible...
+      // stratUtilInstance = await StrategistUtility.deployed();
+      logIndented(
+        "cost of rebalance: ",
+        await bathPairInstance.rebalancePair.estimateGas(
+          await WETHInstance.balanceOf(bathQuoteInstance.address),
+          await DAIInstance.balanceOf(bathAssetInstance.address),
+          // stratUtilInstance.address,
+          // "0x0000000000000000000000000000000000000000",
+          // 0,
+          // 0
+        )
+      );
+      await bathPairInstance.rebalancePair(
+        await WETHInstance.balanceOf(bathQuoteInstance.address),
+        await DAIInstance.balanceOf(bathAssetInstance.address),
+        // stratUtilInstance.address,
+        // "0x0000000000000000000000000000000000000000",
+        // 0,
+        // 0
+      );
+
       assert.equal(
         (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),
         "0"
@@ -551,6 +589,66 @@ contract("Rubicon Exchange and Pools Test", async function (accounts) {
         web3.utils.toWei((0.2).toString()),
         web3.utils.toWei((1).toString())
       );
+    });
+
+    describe("Strategist Utility Test", async function () {
+      // let stratUtilInstance;
+      let rubiconMarketInstance;
+      let bathPairInstance;
+
+      it("is deployed and initialized", async function () {
+        //init
+        // stratUtilInstance = await StrategistUtility.deployed();
+        rubiconMarketInstance = await RubiconMarket.deployed();
+        // await stratUtilInstance.initialize(
+        //   rubiconMarketInstance.address,
+        //   "0xE592427A0AEce92De3Edee1F18E0157C05861564"
+        // ); //2nd param is UNI router on this network
+        // logIndented(stratUtilInstance.address);
+        assert.equal(await rubiconMarketInstance.initialized(), true);
+      });
+      it("rebalRisk behaves normally on no tail off opportunity", async function () {
+        bathPairInstance = await BathPair.deployed();
+
+        await WETHInstance.transfer(
+          bathQuoteInstance.address,
+          web3.utils.toWei("0.001"),
+          { from: accounts[1] }
+        );
+        await DAIInstance.transfer(
+          bathAssetInstance.address,
+          web3.utils.toWei("0.001"),
+          { from: accounts[2] }
+        );
+
+        //get amount to handle
+        let bathAssetAddr = await bathPairInstance.getThisBathAsset();
+        let bathQuoteAddr = await bathPairInstance.getThisBathQuote();
+        let targetQuoteAmt = await DAIInstance.balanceOf(bathAssetAddr);
+        let targetAssetAmt = await WETHInstance.balanceOf(bathQuoteAddr);
+
+        // Initial amounts
+        // logIndented(web3.utils.fromWei(targetAssetAmt.toString()), web3.utils.fromWei(targetQuoteAmt.toString()));
+
+        // Verify normal behavior on pool fail (should fail in this environment due to now UNI pool)
+        await bathPairInstance.rebalancePair(
+          targetAssetAmt,
+          targetQuoteAmt,
+          // stratUtilInstance.address,
+          // "0x0000000000000000000000000000000000000000",
+          // 0,
+          // 0
+        );
+
+        assert.equal(
+          (await WETHInstance.balanceOf(bathQuoteInstance.address)).toString(),
+          "0"
+        );
+        assert.equal(
+          (await DAIInstance.balanceOf(bathAssetInstance.address)).toString(),
+          "0"
+        );
+      });
     });
   });
 });

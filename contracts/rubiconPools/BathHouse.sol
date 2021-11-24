@@ -39,6 +39,16 @@ contract BathHouse {
     // Constraint variable for the max amount of outstanding market making pairs at a time
     uint256 public maxOutstandingPairCount;
 
+    // Event to log new BathPairs and their bathTokens
+    event LogNewBathPair(
+        address newPair,
+        address newPairBathAsset,
+        address newPairBathQuote,
+        address newPairAsset,
+        address newPairQuote,
+        uint8 newPairStratRewardRate
+    );
+
     /// @dev Proxy-safe initialization of storage
     function initialize(
         address market,
@@ -80,8 +90,14 @@ contract BathHouse {
         getPair[asset][quote] = address(pair);
 
         approvePair(address(pair));
-        addQuote(quote, BathPair(pair).getThisBathQuote());
-        addAsset(asset, BathPair(pair).getThisBathAsset());
+        address newPairBathAsset = BathPair(pair).getThisBathAsset();
+        address newPairBathQuote =BathPair(pair).getThisBathQuote();
+
+        addQuote(quote, newPairBathQuote);
+        addAsset(asset, newPairBathAsset);
+        
+        emit LogNewBathPair(address(pair), newPairBathAsset, newPairBathQuote, asset, quote, _propToStrategists);
+
         return address(pair);
     }
 
