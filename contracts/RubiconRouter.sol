@@ -24,6 +24,15 @@ contract RubiconRouter {
 
     event LogNote(string, uint256);
 
+    event Swap(
+        uint256 inputAmount,
+        address inputERC20,
+        uint256 hurdleBuyAmtMin,
+        address targetERC20,
+        uint256 realizedFill,
+        address recipient
+    );
+
     function startErUp(address _theTrap, address payable _weth) external {
         require(!started);
         RubiconMarketAddress = _theTrap;
@@ -102,7 +111,7 @@ contract RubiconRouter {
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
         uint256 expectedMarketFeeBPS //20
-    ) public {
+    ) public returns (uint256) {
         //**User must approve this contract first**
         //transfer needed amount here first
         ERC20(route[0]).transferFrom(
@@ -110,7 +119,14 @@ contract RubiconRouter {
             address(this),
             pay_amt.add(pay_amt.mul(expectedMarketFeeBPS).div(10000)) // Account for expected fee
         );
-        _swap(pay_amt, buy_amt_min, route, expectedMarketFeeBPS, msg.sender);
+        return
+            _swap(
+                pay_amt,
+                buy_amt_min,
+                route,
+                expectedMarketFeeBPS,
+                msg.sender
+            );
     }
 
     // Internal function requires that ERC20s are here before execution
@@ -148,6 +164,14 @@ contract RubiconRouter {
         // send tokens back to sender
         ERC20(route[route.length - 1]).transfer(to, currentAmount);
 
+        emit Swap(
+            pay_amt,
+            route[0],
+            buy_amt_min,
+            route[route.length - 1],
+            currentAmount,
+            to
+        );
         return currentAmount;
     }
 
@@ -156,7 +180,7 @@ contract RubiconRouter {
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
         uint256 expectedMarketFeeBPS
-    ) public {
+    ) external returns (uint256) {
         //swaps msg.sender entire balance in the trade
         uint256 maxAmount = ERC20(route[0]).balanceOf(msg.sender);
         ERC20(route[0]).transferFrom(
@@ -164,7 +188,14 @@ contract RubiconRouter {
             address(this),
             maxAmount // Account for expected fee
         );
-        _swap(maxAmount, buy_amt_min, route, expectedMarketFeeBPS, msg.sender);
+        return
+            _swap(
+                maxAmount,
+                buy_amt_min,
+                route,
+                expectedMarketFeeBPS,
+                msg.sender
+            );
     }
 
     /// @dev this function takes a user's entire balance for the trade in case they want to do a max trade so there's no leftover dust
@@ -172,9 +203,9 @@ contract RubiconRouter {
         ERC20 buy_gem,
         ERC20 pay_gem,
         uint256 max_fill_amount
-    ) public returns (uint256 fill) {
+    ) external returns (uint256 fill) {
         //swaps msg.sender's entire balance in the trade
-        uint maxAmount = ERC20(buy_gem).balanceOf(msg.sender);
+        uint256 maxAmount = ERC20(buy_gem).balanceOf(msg.sender);
         fill = RubiconMarket(RubiconMarketAddress).buyAllAmount(
             buy_gem,
             maxAmount,
@@ -189,9 +220,9 @@ contract RubiconRouter {
         ERC20 pay_gem,
         ERC20 buy_gem,
         uint256 min_fill_amount
-    ) public returns (uint256 fill) {
+    ) external returns (uint256 fill) {
         //swaps msg.sender entire balance in the trade
-        uint maxAmount = ERC20(buy_gem).balanceOf(msg.sender);
+        uint256 maxAmount = ERC20(buy_gem).balanceOf(msg.sender);
         fill = RubiconMarket(RubiconMarketAddress).sellAllAmount(
             pay_gem,
             maxAmount,
@@ -203,7 +234,7 @@ contract RubiconRouter {
 
     // ** Native ETH Wrapper Functions **
     /// @dev WETH wrapper functions to obfuscate WETH complexities from ETH holders
-    function WETHbuyAllAmountP(
+    function ETHbuyAllAmountP(
         ERC20 buy_gem,
         uint256 buy_amt,
         // ERC20 nativeETH,
@@ -225,12 +256,13 @@ contract RubiconRouter {
     }
 
     // Paying ERC20 to buy native ETH
-    function WETHbuyAllAmountB(
+    function ETHbuyAllAmountB(
         // ERC20 nativeETH,
         uint256 buy_amt,
         ERC20 pay_gem,
         uint256 max_fill_amount
     ) external returns (uint256 fill) {
+        ERC20(pay_gem).transferFrom(msg.sender, address(this), max_fill_amount); //transfer pay here
         fill = RubiconMarket(RubiconMarketAddress).buyAllAmount(
             ERC20(wethAddress),
             buy_amt,
@@ -239,6 +271,10 @@ contract RubiconRouter {
         );
         WETH9(wethAddress).withdraw(fill); // Fill in WETH
         msg.sender.transfer(fill); // Return native ETH
+        // Return unspent coins to sender
+        if (max_fill_amount > fill) {
+            ERC20(pay_gem).transfer(msg.sender, max_fill_amount - fill);
+        }
         return fill;
     }
 
@@ -254,6 +290,7 @@ contract RubiconRouter {
             msg.value >= pay_amt,
             "didnt send enough native ETH for WETH offer"
         );
+        uint256 _before = ERC20(buy_gem).balanceOf(address(this));
         WETH9(wethAddress).deposit{value: pay_amt}();
         uint256 id = RubiconMarket(RubiconMarketAddress).offer(
             pay_amt,
@@ -262,7 +299,11 @@ contract RubiconRouter {
             buy_gem,
             pos
         );
-        //TODO: handle potential fill
+        uint256 _after = ERC20(buy_gem).balanceOf(address(this));
+        if (_after > _before) {
+            //return any potential fill amount on the offer
+            ERC20(buy_gem).transfer(msg.sender, _after - _before);
+        }
         return id;
     }
 
@@ -274,6 +315,9 @@ contract RubiconRouter {
         // ERC20 nativeETH, //maker (ask) buy which token
         uint256 pos //position to insert offer, 0 should be used if unknown
     ) external returns (uint256) {
+        ERC20(pay_gem).transferFrom(msg.sender, address(this), pay_amt);
+
+        uint256 _before = ERC20(wethAddress).balanceOf(address(this));
         uint256 id = RubiconMarket(RubiconMarketAddress).offer(
             pay_amt,
             pay_gem,
@@ -281,53 +325,59 @@ contract RubiconRouter {
             ERC20(wethAddress),
             pos
         );
-        // TODO: If it happens to fill, send back the native ETH
-        uint256 currentBal = ERC20(wethAddress).balanceOf(address(this));
-        if (currentBal > 0) {
-            WETH9(wethAddress).withdraw(currentBal);
-            msg.sender.transfer(currentBal);
+        uint256 _after = ERC20(wethAddress).balanceOf(address(this));
+        if (_after > _before) {
+            //return any potential fill amount on the offer as native ETH
+            uint256 delta = _after - _before;
+            WETH9(wethAddress).withdraw(delta);
+            msg.sender.transfer(delta);
         }
         return id;
     }
 
     // Cancel an offer made in WETH
-    function WETHcancel(uint256 id) public returns (bool outcome) {
-        // REQUIRE that order is WETH order
+    function ETHcancel(uint256 id) external returns (bool outcome) {
+        (uint256 pay_amt, ERC20 pay_gem, , ) = RubiconMarket(
+            RubiconMarketAddress
+        ).getOffer(id);
+        require(
+            address(pay_gem) == wethAddress,
+            "trying to cancel a non WETH order"
+        );
+        // Cancel order and receive WETH here in amount of pay_amt
         outcome = RubiconMarket(RubiconMarketAddress).cancel(id);
-
-        // Get current WETH amount and send back to sender
-        // //Transfer WEtH balance back to msg.sender in nativeETH
-        // uint256 currentBal = ERC20(wethAddress).balanceOf(address(this));
-        // if (currentBal > 0) {
-        //     WETH9(wethAddress).withdraw(currentBal);
-        //     msg.sender.transfer(currentBal);
-        // }
-        return outcome;
+        WETH9(wethAddress).withdraw(pay_amt);
+        msg.sender.transfer(pay_amt);
     }
 
     // Deposit native ETH -> WETH pool
-    function ETHdeposit(uint256 amount, address targetPool) public payable {
+    function ETHdeposit(uint256 amount, address targetPool)
+        external
+        payable
+        returns (uint256 newShares)
+    {
         IERC20 target = BathToken(targetPool).underlyingToken();
         require(target == ERC20(wethAddress), "target pool not weth pool");
         require(msg.value >= amount, "didnt send enough eth");
         WETH9(wethAddress).deposit{value: amount}();
-        uint newShares = BathToken(targetPool).deposit(amount);
+        newShares = BathToken(targetPool).deposit(amount);
         //Send back bathTokens to sender
-        ERC20(targetPool).transfer(
-            msg.sender,
-            newShares
-        );
+        ERC20(targetPool).transfer(msg.sender, newShares);
     }
 
     // Withdraw native ETH <- WETH pool
-    function ETHwithdraw(uint256 shares, address targetPool) public payable {
+    function ETHwithdraw(uint256 shares, address targetPool)
+        external
+        payable
+        returns (uint256 withdrawnWETH)
+    {
         IERC20 target = BathToken(targetPool).underlyingToken();
         require(target == ERC20(wethAddress), "target pool not weth pool");
         require(
             BathToken(targetPool).balanceOf(msg.sender) >= shares,
             "didnt send enough shares"
         );
-        uint withdrawnWETH = BathToken(targetPool).withdraw(shares);
+        withdrawnWETH = BathToken(targetPool).withdraw(shares);
         WETH9(wethAddress).withdraw(withdrawnWETH);
         //Send back withdrawn native eth to sender
         msg.sender.transfer(withdrawnWETH);
@@ -338,11 +388,18 @@ contract RubiconRouter {
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
         uint256 expectedMarketFeeBPS
-    ) public payable {
+    ) external payable returns (uint256) {
         require(route[0] == wethAddress);
         require(msg.value >= pay_amt, "must send native ETH to pay as weth");
         WETH9(wethAddress).deposit{value: pay_amt}();
-        _swap(pay_amt, buy_amt_min, route, expectedMarketFeeBPS, msg.sender);
+        return
+            _swap(
+                pay_amt,
+                buy_amt_min,
+                route,
+                expectedMarketFeeBPS,
+                msg.sender
+            );
     }
 
     function swapForETH(
@@ -350,12 +407,12 @@ contract RubiconRouter {
         uint256 buy_amt_min,
         address[] calldata route, // First address is what is being payed, Last address is what is being bought
         uint256 expectedMarketFeeBPS
-    ) public {
+    ) external returns (uint256 fill) {
         require(
             route[route.length - 1] == wethAddress,
             "target of swap is not WETH"
         );
-        uint256 fill = _swap(
+        fill = _swap(
             pay_amt,
             buy_amt_min,
             route,
